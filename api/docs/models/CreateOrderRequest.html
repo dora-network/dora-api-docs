@@ -1,0 +1,42 @@
+
+<h2>CreateOrderRequest</h2>
+<ul class="parameter">
+  <li class="param-required-false">quantity : String
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">inverse_leverage : BigDecimal
+    <br/>Required: Inverse leverage for the order, must be between 0 and 1 (inclusive)
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">price : String
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">kind : String
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">side : String
+    <br/>Required: Must be either &#x27;BUY&#x27; or &#x27;SELL&#x27;
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">order_book_id : UUID
+    <br/>Required: the order book to submit the order to
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">user_text : String
+    <br/>Optional: User-defined text for the order, e.g., &#x27;buying dips&#x27;
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">order_modifiers : List
+    <br/>
+  </li>
+</ul>
