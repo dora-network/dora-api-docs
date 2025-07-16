@@ -2,16 +2,20 @@
     "openapi": "3.0.3",
     "info": {
         "title": "DORA",
-        "version": "0.1.0"
+        "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "https://localhost:8080/v1",
+            "url": "https://localhost:8084/v1",
             "description": "local DORA server"
+        },
+        {
+            "url": "https://dora-polished-pond-6585.fly.dev/",
+            "description": "DORA staging server"
         }
     ],
     "paths": {
-        "/assets": {
+        "/v1/assets": {
             "get": {
                 "summary": "List assets",
                 "operationId": "listAssets",
@@ -140,7 +144,7 @@
                 }
             }
         },
-        "/assets/{id}": {
+        "/v1/assets/{id}": {
             "get": {
                 "summary": "Get asset by ID",
                 "operationId": "getAssetById",
@@ -200,7 +204,7 @@
                 }
             }
         },
-        "/assets/{id}/coupons": {
+        "/v1/assets/{id}/coupons": {
             "get": {
                 "summary": "Get coupons for a bond asset",
                 "operationId": "getCouponsByAssetId",
@@ -295,7 +299,7 @@
                 }
             }
         },
-        "/user/{id}": {
+        "/v1/user/{user_id}": {
             "get": {
                 "summary": "Get user by ID",
                 "operationId": "getUserById",
@@ -434,7 +438,77 @@
                 }
             }
         },
-        "/user/{id}/config": {
+        "/v1/user/self": {
+            "get": {
+                "summary": "Get user details for the authenticated user",
+                "operationId": "getUserSelf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/{user_id}/config": {
             "put": {
                 "summary": "Update user configuration by ID",
                 "operationId": "updateUserConfig",
@@ -514,7 +588,87 @@
                 }
             }
         },
-        "/user/{id}/verify": {
+        "/v1/user/config/self": {
+            "put": {
+                "summary": "Update user configuration for the authenticated user",
+                "operationId": "updateUserConfigSelf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserConfigRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User configuration updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/CreateOrUpdateUserResponse"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/{user_id}/verify": {
             "put": {
                 "summary": "Verify a user by ID",
                 "operationId": "verifyUser",
@@ -584,7 +738,108 @@
                 }
             }
         },
-        "/user/{id}/orders/stream": {
+        "/v1/user/{user_id}/orders/{orderbook_id}/stream": {
+            "get": {
+                "summary": "Get a snapshot of user's order updates for the given order book since a specific time, and opens a stream for further updates",
+                "operationId": "getUserOrdersStream",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "orderbook_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User's orders stream",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Order"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found or no orders available",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/user/{user_id}/orders/all/stream": {
             "get": {
                 "summary": "Get a snapshot of user's order updates since a specific time, and opens a stream for further updates",
                 "operationId": "getUserOrdersStream",
@@ -688,7 +943,7 @@
                 }
             }
         },
-        "/user/{id}/ledger/stream": {
+        "/v1/user/{user_id}/ledger/stream": {
             "get": {
                 "summary": "Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates",
                 "operationId": "getUserLedgerStream",
@@ -780,7 +1035,7 @@
                 }
             }
         },
-        "/user/{id}/transactions/stream": {
+        "/v1/user/{user_id}/transactions/stream": {
             "get": {
                 "summary": "Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates",
                 "operationId": "getUserTransactionsStream",
@@ -872,25 +1127,37 @@
                 }
             }
         },
-        "/orderbooks": {
+        "/v1/orderbooks": {
             "get": {
                 "summary": "List order books",
                 "operationId": "listOrderBooks",
                 "parameters": [
                     {
-                        "name": "created_after",
+                        "name": "status",
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "format": "date-time"
+                            "enum": [
+                                "OPEN",
+                                "CLOSED",
+                                "SUSPENDED"
+                            ]
                         }
                     },
                     {
-                        "name": "created_before",
+                        "name": "base_asset_id",
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "format": "date-time"
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "quote_asset_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
                         }
                     },
                     {
@@ -968,7 +1235,7 @@
                 }
             }
         },
-        "/orderbooks/{id}": {
+        "/v1/orderbooks/{orderbook_id}": {
             "get": {
                 "summary": "Get orderbook by ID",
                 "operationId": "getOrderbookById",
@@ -1028,7 +1295,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/orders": {
+        "/v1/orderbooks/{orderbook_id}/orders": {
             "get": {
                 "summary": "Get all open orders for a specific orderbook (L3 market depth)",
                 "operationId": "getL3Depth",
@@ -1111,7 +1378,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/depth": {
+        "/v1/orderbooks/{orderbook_id}/depth": {
             "get": {
                 "summary": "Get the aggregated price levels for a specific orderbook (L2 market depth)",
                 "operationId": "getOrderbookDepth",
@@ -1181,7 +1448,77 @@
                 }
             }
         },
-        "/orderbooks/{id}/top": {
+        "/v1/orderbooks/{orderbook_id}/bbo": {
+            "get": {
+                "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
+                "operationId": "getOrderbookBBO",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Top price levels data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/OrderBookTop"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. invalid query parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Orderbook not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/orderbooks/{orderbook_id}/top": {
             "get": {
                 "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
                 "operationId": "getOrderbookTop",
@@ -1251,7 +1588,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/L3": {
+        "/v1/orderbooks/{orderbook_id}/L3": {
             "get": {
                 "summary": "Get all open orders for a specific orderbook (L3 market depth)",
                 "operationId": "getL3Depth",
@@ -1334,7 +1671,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/L2": {
+        "/v1/orderbooks/{orderbook_id}/L2": {
             "get": {
                 "summary": "Get the aggregated price levels for a specific orderbook (L2 market depth)",
                 "operationId": "getOrderbookDepth",
@@ -1404,7 +1741,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/L1": {
+        "/v1/orderbooks/{orderbook_id}/L1": {
             "get": {
                 "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
                 "operationId": "getOrderbookTop",
@@ -1474,7 +1811,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/summary": {
+        "/v1/orderbooks/{orderbook_id}/summary": {
             "get": {
                 "summary": "Get summary of an orderbook",
                 "operationId": "getOrderbookSummary",
@@ -1544,7 +1881,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/stream/open": {
+        "/v1/orderbooks/{orderbook_id}/stream/open": {
             "get": {
                 "summary": "Get a snapshot of open orders in an order book and open a stream for real-time updates",
                 "operationId": "streamOrderbookOpenOrders",
@@ -1626,7 +1963,7 @@
                 }
             }
         },
-        "/orderbooks/{id}/stream/balances": {
+        "/v1/orderbooks/{orderbook_id}/stream/balances": {
             "get": {
                 "summary": "Get a snapshot of base and quote balances for an order book and open a stream for real-time updates",
                 "operationId": "streamOrderBookBalances",
@@ -1705,7 +2042,7 @@
                 }
             }
         },
-        "/orders": {
+        "/v1/orders": {
             "post": {
                 "summary": "Create a new order",
                 "operationId": "createOrder",
@@ -1968,7 +2305,7 @@
                 }
             }
         },
-        "/orders/{order_id}": {
+        "/v1/orders/{order_id}": {
             "get": {
                 "summary": "Get order by ID",
                 "operationId": "getOrderById",
@@ -2126,7 +2463,7 @@
                 }
             }
         },
-        "/charts/candle/{orderbook}": {
+        "/v1/charts/candle/{orderbook}": {
             "get": {
                 "summary": "Get candlestick data for an orderbook",
                 "operationId": "getCandleData",
@@ -2229,7 +2566,7 @@
                 }
             }
         },
-        "/charts/candle/stream/{orderbook}": {
+        "/v1/charts/candle/stream/{orderbook}": {
             "get": {
                 "summary": "Get a snapshot of candlestick data from date provided, and open a stream for real-time updates",
                 "operationId": "streamCandleData",
@@ -2318,7 +2655,7 @@
                 }
             }
         },
-        "/ledger/module": {
+        "/v1/ledger/module": {
             "get": {
                 "summary": "Get the entire module object, including unborrowed leverage assets and total leverage trackers",
                 "operationId": "getLedgerModule",
@@ -2370,7 +2707,7 @@
                 }
             }
         },
-        "/ledger/module/{asset_id}": {
+        "/v1/ledger/module/{asset_id}": {
             "get": {
                 "summary": "Get the module object for a single asset ID",
                 "operationId": "getLedgerModuleByAsset",
@@ -2440,7 +2777,7 @@
                 }
             }
         },
-        "/ledger/positions/self": {
+        "/v1/ledger/positions/self": {
             "get": {
                 "summary": "Get your own positions",
                 "operationId": "getLedgerPositionsSelf",
@@ -2500,7 +2837,7 @@
                 }
             }
         },
-        "/ledger/balances/self": {
+        "/v1/ledger/balances/self": {
             "get": {
                 "summary": "Get your own available, locked, and borrowed assets",
                 "operationId": "getLedgerBalancesSelf",
@@ -2559,7 +2896,7 @@
                 }
             }
         },
-        "/ledger/value/self": {
+        "/v1/ledger/value/self": {
             "get": {
                 "summary": "Get your own available, locked, and borrowed USD value; and realized and unrealized PnL",
                 "operationId": "getLedgerValueSelf",
@@ -2618,7 +2955,7 @@
                 }
             }
         },
-        "/ledger/interest/self": {
+        "/v1/ledger/interest/self": {
             "get": {
                 "summary": "Get your own interest",
                 "operationId": "getLedgerInterestSelf",
@@ -2677,7 +3014,7 @@
                 }
             }
         },
-        "/ledger/deposit": {
+        "/v1/ledger/deposit": {
             "post": {
                 "summary": "Deposit assets into your account from the outside world",
                 "operationId": "ledgerDeposit",
@@ -2737,7 +3074,7 @@
                 }
             }
         },
-        "/ledger/withdraw": {
+        "/v1/ledger/withdraw": {
             "post": {
                 "summary": "Withdraw assets from your account to the outside world",
                 "operationId": "ledgerWithdraw",
@@ -2797,7 +3134,145 @@
                 }
             }
         },
-        "/leverage/supply": {
+        "/v1/leverage/collateralize": {
+            "post": {
+                "summary": "Move supplied and available to supplied_collateral and collateral, for a specified position",
+                "operationId": "leverageCollateralize",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CollateralizeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Collateralize successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/CollateralizeResponse"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. insufficient available or invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/leverage/de-collateralize": {
+            "post": {
+                "summary": "Move collateral and supplied_collateral to available and supplied, for a specified position.",
+                "operationId": "leverageDeCollateralize",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DeCollateralizeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Collateralize successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/ResponseEnvelope"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/DeCollateralizeResponse"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request, e.g. insufficient collateral or invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/leverage/supply": {
             "post": {
                 "summary": "Supply leverage for a specific asset",
                 "operationId": "leverageSupply",
@@ -2866,7 +3341,7 @@
                 }
             }
         },
-        "/leverage/withdraw": {
+        "/v1/leverage/withdraw": {
             "post": {
                 "summary": "Withdraw leverage for a specific asset",
                 "operationId": "leverageWithdraw",
@@ -2935,7 +3410,7 @@
                 }
             }
         },
-        "/leverage/borrow": {
+        "/v1/leverage/borrow": {
             "post": {
                 "summary": "Directly borrow assets",
                 "operationId": "leverageBorrow",
@@ -3005,7 +3480,7 @@
                 }
             }
         },
-        "/leverage/repay": {
+        "/v1/leverage/repay": {
             "post": {
                 "summary": "Repay borrowed assets",
                 "operationId": "leverageRepay",
@@ -3075,7 +3550,7 @@
                 }
             }
         },
-        "/leverage/isolate_collateral": {
+        "/v1/leverage/isolate_collateral": {
             "post": {
                 "summary": "Create an isolated position by transferring collateral to the position from the user's global collateral",
                 "operationId": "leverageIsolateCollateral",
@@ -3154,7 +3629,7 @@
                 }
             }
         },
-        "/leverage/isolate_position": {
+        "/v1/leverage/isolate_position": {
             "post": {
                 "summary": "Create an isolated position using all collateral, supplied_collateral, and borrows from the user's global position",
                 "operationId": "leverageIsolatePosition",
@@ -3233,7 +3708,7 @@
                 }
             }
         },
-        "/leverage/unite": {
+        "/v1/leverage/unite": {
             "post": {
                 "summary": "Combines all isolated positions into a single global position",
                 "operationId": "leverageUnite",
@@ -3335,7 +3810,7 @@
                 }
             }
         },
-        "/liquidity/pool/{pool_id}/add": {
+        "/v1/liquidity/pool/{pool_id}/add": {
             "post": {
                 "summary": "Add liquidity to a pool",
                 "operationId": "liquidityAdd",
@@ -3425,7 +3900,7 @@
                 }
             }
         },
-        "/liquidity/pool/{pool_id}/subtract": {
+        "/v1/liquidity/pool/{pool_id}/subtract": {
             "post": {
                 "summary": "Subtract liquidity from a pool",
                 "operationId": "liquiditySubtract",
@@ -3515,7 +3990,7 @@
                 }
             }
         },
-        "/transactions": {
+        "/v1/transactions": {
             "get": {
                 "summary": "Get a filtered, paginated list of transactions",
                 "operationId": "getTransactions",
@@ -3547,7 +4022,29 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": [
+                                    "ACCRUE_INTEREST",
+                                    "ADD_LIQUIDITY",
+                                    "BOND_MATURE",
+                                    "CLAIM_INTEREST",
+                                    "CREDIT",
+                                    "DEBIT",
+                                    "EXTERNAL_DEPOSIT",
+                                    "EXTERNAL_WITHDRAW",
+                                    "FILL",
+                                    "LENDING_INTEREST_ACCRUAL",
+                                    "LIQUIDATE",
+                                    "MATCH_ORDER",
+                                    "PAY_INTEREST",
+                                    "SUBTRACT_LIQUIDITY",
+                                    "REPAY",
+                                    "SUPPLY",
+                                    "WITHDRAW",
+                                    "ISOLATE_COLLATERAL",
+                                    "ISOLATE_POSITION",
+                                    "UNITE_POSITION"
+                                ]
                             }
                         }
                     },
@@ -3632,7 +4129,7 @@
                 }
             }
         },
-        "/transactions/{id}": {
+        "/v1/transactions/{id}": {
             "get": {
                 "summary": "Get a transaction by ID",
                 "operationId": "getTransactionById",
@@ -3713,7 +4210,7 @@
                 }
             }
         },
-        "/trade": {
+        "/v1/trade": {
             "get": {
                 "summary": "Get a filtered, paginated list of trades",
                 "operationId": "getTrades",
@@ -3841,7 +4338,7 @@
                 }
             }
         },
-        "/trade/{id}": {
+        "/v1/trade/{id}": {
             "get": {
                 "summary": "Get a trade by ID",
                 "operationId": "getTradeById",
@@ -3922,7 +4419,7 @@
                 }
             }
         },
-        "/trade/stream": {
+        "/v1/trade/stream": {
             "get": {
                 "summary": "Get a snapshot of trades from a specific date and open a stream for real-time updates",
                 "operationId": "streamTrades",
@@ -3983,7 +4480,7 @@
                 }
             }
         },
-        "/price": {
+        "/v1/price": {
             "get": {
                 "summary": "Get the current price of all assets",
                 "operationId": "getAllAssetPrices",
@@ -4025,7 +4522,7 @@
                 }
             }
         },
-        "/price/asset/{asset_id}": {
+        "/v1/price/asset/{asset_id}": {
             "get": {
                 "summary": "Get the current price of an asset",
                 "operationId": "getAssetPrice",
@@ -4106,7 +4603,7 @@
                 }
             }
         },
-        "/price/pool/{pool_id}": {
+        "/v1/price/pool/{pool_id}": {
             "get": {
                 "summary": "Get the current price of a pool",
                 "operationId": "getPoolPrice",
@@ -4187,7 +4684,7 @@
                 }
             }
         },
-        "/price/stream": {
+        "/v1/price/stream": {
             "get": {
                 "summary": "Get a snapshot of asset prices from a specific date and open a stream for real-time updates",
                 "operationId": "streamAssetPrices",
@@ -5039,7 +5536,11 @@
                         "format": "decimal"
                     },
                     "kind": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "MARKET",
+                            "LIMIT"
+                        ]
                     },
                     "side": {
                         "type": "string",
@@ -5058,7 +5559,10 @@
                     "order_modifiers": {
                         "type": "array",
                         "items": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "MAX_BUY"
+                            ]
                         }
                     }
                 }
@@ -5210,6 +5714,42 @@
                         }
                     },
                     "borrowed": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "notional_long": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "notional_short": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "portfolio_value": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "net_liquidation_value": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "unrealized_pnl": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "realized_pnl": {
                         "type": "object",
                         "additionalProperties": {
                             "type": "string"
@@ -5476,6 +6016,82 @@
                 }
             },
             "WithdrawResponse": {
+                "type": "object",
+                "properties": {
+                    "position_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal"
+                    }
+                }
+            },
+            "CollateralizeRequest": {
+                "type": "object",
+                "properties": {
+                    "position_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal"
+                    }
+                }
+            },
+            "CollateralizeResponse": {
+                "type": "object",
+                "properties": {
+                    "position_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "transaction_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal"
+                    }
+                }
+            },
+            "DeCollateralizeRequest": {
+                "type": "object",
+                "properties": {
+                    "position_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "asset_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "quantity": {
+                        "type": "string",
+                        "format": "decimal"
+                    }
+                }
+            },
+            "DeCollateralizeResponse": {
                 "type": "object",
                 "properties": {
                     "position_id": {
@@ -5774,21 +6390,9 @@
                         "type": "string",
                         "format": "decimal"
                     },
-                    "best_bid_quantity": {
-                        "type": "string",
-                        "format": "decimal"
-                    },
                     "best_ask": {
                         "type": "string",
                         "format": "decimal"
-                    },
-                    "best_ask_quantity": {
-                        "type": "string",
-                        "format": "decimal"
-                    },
-                    "timestamp": {
-                        "type": "string",
-                        "format": "date-time"
                     }
                 }
             }
