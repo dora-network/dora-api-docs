@@ -81,7 +81,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -273,16 +273,16 @@
       <p class="param-description"></p>
 	  </li>
   </ul>
-  <h2><a name="getL3Depth"></a>getL3Depth</h2>
+  <h2><a name="getL1Depth"></a>getL1Depth</h2>
   <hr>
   <p></p>
   
   <h3 class="section">URL</h3>
-  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/orders</code>
+  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/L1</code>
   <h3 class="section">HTTP Method</h3>
   <code>GET</code>
   <h3 class="section">Response Type</h3>
-  <div class="model" data-model="inline_response_200_6"><a href="">inline_response_200_6</a></div>
+  <div class="model" data-model="inline_response_200_12"><a href="">inline_response_200_12</a></div>
   <h3 class="section">Parameters</h3>
   <ul>
 	  <li class="parameter">
@@ -291,13 +291,37 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
 	  </li>
   </ul>
-  <h2><a name="getL3Depth_1"></a>getL3Depth_1</h2>
+  <h2><a name="getL2Depth"></a>getL2Depth</h2>
+  <hr>
+  <p></p>
+  
+  <h3 class="section">URL</h3>
+  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/L2</code>
+  <h3 class="section">HTTP Method</h3>
+  <code>GET</code>
+  <h3 class="section">Response Type</h3>
+  <div class="model" data-model="inline_response_200_11"><a href="">inline_response_200_11</a></div>
+  <h3 class="section">Parameters</h3>
+  <ul>
+	  <li class="parameter">
+      
+      
+      <span class="param-in">Path: </span>
+      
+      
+      <span class="param-name">orderbook_id</span>
+      <span class="param-type">UUID</span>
+      
+      <p class="param-description"></p>
+	  </li>
+  </ul>
+  <h2><a name="getL3Depth"></a>getL3Depth</h2>
   <hr>
   <p></p>
   
@@ -315,7 +339,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -452,7 +476,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -476,7 +500,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -500,22 +524,22 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
 	  </li>
   </ul>
-  <h2><a name="getOrderbookDepth_2"></a>getOrderbookDepth_2</h2>
+  <h2><a name="getOrderbookOrders"></a>getOrderbookOrders</h2>
   <hr>
   <p></p>
   
   <h3 class="section">URL</h3>
-  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/L2</code>
+  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/orders</code>
   <h3 class="section">HTTP Method</h3>
   <code>GET</code>
   <h3 class="section">Response Type</h3>
-  <div class="model" data-model="inline_response_200_11"><a href="">inline_response_200_11</a></div>
+  <div class="model" data-model="inline_response_200_6"><a href="">inline_response_200_6</a></div>
   <h3 class="section">Parameters</h3>
   <ul>
 	  <li class="parameter">
@@ -524,7 +548,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -548,7 +572,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -572,31 +596,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
-      <span class="param-type">UUID</span>
-      
-      <p class="param-description"></p>
-	  </li>
-  </ul>
-  <h2><a name="getOrderbookTop_3"></a>getOrderbookTop_3</h2>
-  <hr>
-  <p></p>
-  
-  <h3 class="section">URL</h3>
-  <code>https://localhost:8084/v1/v1/orderbooks/{orderbook_id}/L1</code>
-  <h3 class="section">HTTP Method</h3>
-  <code>GET</code>
-  <h3 class="section">Response Type</h3>
-  <div class="model" data-model="inline_response_200_12"><a href="">inline_response_200_12</a></div>
-  <h3 class="section">Parameters</h3>
-  <ul>
-	  <li class="parameter">
-      
-      
-      <span class="param-in">Path: </span>
-      
-      
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -631,7 +631,7 @@
   <p></p>
   
   <h3 class="section">URL</h3>
-  <code>https://localhost:8084/v1/v1/trade/{id}</code>
+  <code>https://localhost:8084/v1/v1/trade/{trade_id}</code>
   <h3 class="section">HTTP Method</h3>
   <code>GET</code>
   <h3 class="section">Response Type</h3>
@@ -644,7 +644,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">trade_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -861,7 +861,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -885,7 +885,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -920,7 +920,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -948,7 +948,7 @@
       <p class="param-description"></p>
 	  </li>
   </ul>
-  <h2><a name="getUserOrdersStream_4"></a>getUserOrdersStream_4</h2>
+  <h2><a name="getUserOrdersStreamAll"></a>getUserOrdersStreamAll</h2>
   <hr>
   <p></p>
   
@@ -966,7 +966,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -1006,17 +1006,6 @@
   <div class="model" data-model="inline_response_200_3"><a href="">inline_response_200_3</a></div>
   <h3 class="section">Parameters</h3>
   <ul>
-	  <li class="parameter">
-      
-      
-      <span class="param-in">Path: </span>
-      
-      
-      <span class="param-name">id</span>
-      <span class="param-type">UUID</span>
-      
-      <p class="param-description"></p>
-	  </li>
   </ul>
   <h2><a name="getUserTransactionsStream"></a>getUserTransactionsStream</h2>
   <hr>
@@ -1036,7 +1025,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -1717,6 +1706,17 @@
   <ul>
 	  <li class="parameter">
       
+      
+      <span class="param-in">Path: </span>
+      
+      
+      <span class="param-name">orderbook</span>
+      <span class="param-type">String</span>
+      
+      <p class="param-description"></p>
+	  </li>
+	  <li class="parameter">
+      
       <span class="param-in">Query: </span>
       
       
@@ -1756,7 +1756,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -1791,7 +1791,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">orderbook_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -1813,7 +1813,7 @@
   <p></p>
   
   <h3 class="section">URL</h3>
-  <code>https://localhost:8084/v1/v1/trade/stream</code>
+  <code>https://localhost:8084/v1/v1/trade/{orderbook_id}/stream</code>
   <h3 class="section">HTTP Method</h3>
   <code>GET</code>
   <h3 class="section">Response Type</h3>
@@ -1822,12 +1822,12 @@
   <ul>
 	  <li class="parameter">
       
-      <span class="param-in">Query: </span>
+      
+      <span class="param-in">Path: </span>
       
       
-      
-      <span class="param-name">since</span>
-      <span class="param-type">Date</span>
+      <span class="param-name">orderbookId</span>
+      <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
 	  </li>
@@ -1837,8 +1837,8 @@
       
       
       
-      <span class="param-name">orderbookIds</span>
-      <span class="param-type">List(UUID)</span>
+      <span class="param-name">since</span>
+      <span class="param-type">Date</span>
       
       <p class="param-description"></p>
 	  </li>
@@ -1872,7 +1872,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>
@@ -1901,17 +1901,6 @@
       
       <p class="param-description"></p>
 	  </li>
-	  <li class="parameter">
-      
-      
-      <span class="param-in">Path: </span>
-      
-      
-      <span class="param-name">id</span>
-      <span class="param-type">UUID</span>
-      
-      <p class="param-description"></p>
-	  </li>
   </ul>
   <h2><a name="verifyUser"></a>verifyUser</h2>
   <hr>
@@ -1931,7 +1920,7 @@
       <span class="param-in">Path: </span>
       
       
-      <span class="param-name">id</span>
+      <span class="param-name">user_id</span>
       <span class="param-type">UUID</span>
       
       <p class="param-description"></p>

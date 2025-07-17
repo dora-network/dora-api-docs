@@ -305,7 +305,7 @@
                 "operationId": "getUserById",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -373,7 +373,7 @@
                 "operationId": "deleteUser",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -442,17 +442,7 @@
             "get": {
                 "summary": "Get user details for the authenticated user",
                 "operationId": "getUserSelf",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
+                "parameters": [],
                 "responses": {
                     "200": {
                         "description": "User details",
@@ -514,7 +504,7 @@
                 "operationId": "updateUserConfig",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -592,17 +582,7 @@
             "put": {
                 "summary": "Update user configuration for the authenticated user",
                 "operationId": "updateUserConfigSelf",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
+                "parameters": [],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -674,7 +654,7 @@
                 "operationId": "verifyUser",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -744,7 +724,7 @@
                 "operationId": "getUserOrdersStream",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -842,10 +822,10 @@
         "/v1/user/{user_id}/orders/all/stream": {
             "get": {
                 "summary": "Get a snapshot of user's order updates since a specific time, and opens a stream for further updates",
-                "operationId": "getUserOrdersStream",
+                "operationId": "getUserOrdersStreamAll",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -949,7 +929,7 @@
                 "operationId": "getUserLedgerStream",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1041,7 +1021,7 @@
                 "operationId": "getUserTransactionsStream",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "user_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1241,7 +1221,7 @@
                 "operationId": "getOrderbookById",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1298,10 +1278,10 @@
         "/v1/orderbooks/{orderbook_id}/orders": {
             "get": {
                 "summary": "Get all open orders for a specific orderbook (L3 market depth)",
-                "operationId": "getL3Depth",
+                "operationId": "getOrderbookOrders",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1384,7 +1364,7 @@
                 "operationId": "getOrderbookDepth",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1454,7 +1434,7 @@
                 "operationId": "getOrderbookBBO",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1524,7 +1504,7 @@
                 "operationId": "getOrderbookTop",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1594,7 +1574,7 @@
                 "operationId": "getL3Depth",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1674,10 +1654,10 @@
         "/v1/orderbooks/{orderbook_id}/L2": {
             "get": {
                 "summary": "Get the aggregated price levels for a specific orderbook (L2 market depth)",
-                "operationId": "getOrderbookDepth",
+                "operationId": "getL2Depth",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1744,10 +1724,10 @@
         "/v1/orderbooks/{orderbook_id}/L1": {
             "get": {
                 "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
-                "operationId": "getOrderbookTop",
+                "operationId": "getL1Depth",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1817,7 +1797,7 @@
                 "operationId": "getOrderbookSummary",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1887,7 +1867,7 @@
                 "operationId": "streamOrderbookOpenOrders",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1969,7 +1949,7 @@
                 "operationId": "streamOrderBookBalances",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "orderbook_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -2571,6 +2551,14 @@
                 "summary": "Get a snapshot of candlestick data from date provided, and open a stream for real-time updates",
                 "operationId": "streamCandleData",
                 "parameters": [
+                    {
+                        "name": "orderbook",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "since",
                         "in": "query",
@@ -4338,13 +4326,13 @@
                 }
             }
         },
-        "/v1/trade/{id}": {
+        "/v1/trade/{trade_id}": {
             "get": {
                 "summary": "Get a trade by ID",
                 "operationId": "getTradeById",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "trade_id",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -4419,11 +4407,20 @@
                 }
             }
         },
-        "/v1/trade/stream": {
+        "/v1/trade/{orderbook_id}/stream": {
             "get": {
                 "summary": "Get a snapshot of trades from a specific date and open a stream for real-time updates",
                 "operationId": "streamTrades",
                 "parameters": [
+                    {
+                        "name": "orderbookId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
                     {
                         "name": "since",
                         "in": "query",
@@ -4431,18 +4428,6 @@
                         "schema": {
                             "type": "string",
                             "format": "date-time"
-                        }
-                    },
-                    {
-                        "name": "orderbookIds",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "format": "uuid"
-                            }
                         }
                     }
                 ],
