@@ -6,11 +6,11 @@
     },
     "servers": [
         {
-            "url": "https://localhost:8084/v1",
+            "url": "https://localhost:8084",
             "description": "local DORA server"
         },
         {
-            "url": "https://dora-polished-pond-6585.fly.dev/",
+            "url": "https://dora-polished-pond-6585.fly.dev",
             "description": "DORA staging server"
         }
     ],
