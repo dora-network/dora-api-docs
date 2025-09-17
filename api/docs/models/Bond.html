@@ -6,7 +6,7 @@
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">kind : String
+  <li class="param-required-false">kind : BondKind
     <br/>
   </li>
 </ul>
@@ -46,7 +46,17 @@
   </li>
 </ul>
 <ul class="parameter">
+  <li class="param-required-false">principal_value : String
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
   <li class="param-required-false">payments_per_year : Integer
     <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">payments_every : Integer
+    <br/>Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond)
   </li>
 </ul>

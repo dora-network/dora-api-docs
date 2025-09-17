@@ -1,22 +1,17 @@
 
 <h2>DeCollateralizeResponse</h2>
 <ul class="parameter">
-  <li class="param-required-false">position_id : UUID
+  <li class="param-required-false">data : Collateral
     <br/>
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">transaction_id : UUID
-    <br/>
+  <li class="param-required-false">error : String
+    <br/>The error message. Present for error (non-2xx) responses.
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">asset_id : UUID
-    <br/>
-  </li>
-</ul>
-<ul class="parameter">
-  <li class="param-required-false">quantity : String
+  <li class="param-required-false">metadata : Metadata
     <br/>
   </li>
 </ul>

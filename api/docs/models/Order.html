@@ -1,7 +1,7 @@
 
 <h2>Order</h2>
 <ul class="parameter">
-  <li class="param-required-false">id : UUID
+  <li class="param-required-false">order_id : UUID
     <br/>
   </li>
 </ul>
@@ -11,22 +11,62 @@
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">quantity : String
+  <li class="param-required-false">kind : OrderKind
     <br/>
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">kind : String
+  <li class="param-required-false">original_price : String
+    <br/>If Kind is LIMIT, this is the original limit price. If Kind is MARKET, this may be 0 or omitted.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">avg_fill_price : String
     <br/>
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">price : String
+  <li class="param-required-false">cancelled_quantity : String
+    <br/>Quantity that was cancelled, if any.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">open_quantity : String
+    <br/>Quantity that is still open, i.e., not filled or cancelled.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">original_quantity : String
+    <br/>The original quantity of the order when it was created.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">filled_quantity : String
+    <br/>Quantity that has been filled so far.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">last_update_at : Date
     <br/>
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">status : String
+  <li class="param-required-false">opened_at : Date
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">inverse_leverage : String
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">side : Side
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">status : OrderStatus
     <br/>
   </li>
 </ul>
@@ -36,12 +76,12 @@
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">user_text : String
+  <li class="param-required-false">order_modifiers : List
     <br/>
   </li>
 </ul>
 <ul class="parameter">
-  <li class="param-required-false">order_modifiers : List
+  <li class="param-required-false">position_id : UUID
     <br/>
   </li>
 </ul>
