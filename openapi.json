@@ -2617,7 +2617,7 @@
         }
       }
     },
-    "/v1/liquidity/pool/{pool_id}/subtract": {
+    "/v1/liquidity/pool/{pool_id}/remove": {
       "post": {
         "summary": "Subtract liquidity from a pool",
         "operationId": "liquiditySubtract",
@@ -3671,15 +3671,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
             }
           }
         ],
