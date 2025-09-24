@@ -2215,124 +2215,6 @@
         }
       }
     },
-    "/v1/leverage/borrow": {
-      "post": {
-        "summary": "Directly borrow assets",
-        "operationId": "leverageBorrow",
-        "description": "TODO: Finish this when implementation has been completed",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BorrowRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Borrow successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BorrowResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. insufficient collateral or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/leverage/repay": {
-      "post": {
-        "summary": "Repay borrowed assets",
-        "operationId": "leverageRepay",
-        "description": "TODO: Finish this when implementation has been completed",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RepayRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Repay successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RepayResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. insufficient collateral or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/leverage/isolate_collateral": {
       "post": {
         "summary": "Create an isolated position by transferring collateral to the position from the user's global collateral",
@@ -2473,7 +2355,7 @@
       "post": {
         "summary": "Combines all isolated positions into a single global position",
         "operationId": "leverageUnite",
-        "description": "TODO: Finish this when implementation has been completed",
+        "description": "Combines all isolated positions into a single global position",
         "requestBody": {
           "required": true,
           "content": {
@@ -3587,15 +3469,6 @@
             }
           },
           {
-            "name": "order_book_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
             "name": "since",
             "in": "query",
             "required": false,
@@ -3785,6 +3658,74 @@
           },
           "404": {
             "description": "User not found or no transactions available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets/stream": {
+      "get": {
+        "summary": "Get all inserts or updates for assets",
+        "operationId": "getAssetsStream",
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Asset's stream",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamAssetsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
             "content": {
               "application/json": {
                 "schema": {
@@ -4033,11 +3974,19 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
+        "enum": [
+          "BOND",
+          "CURRENCY",
+          "INTEREST",
+          "POOL_SHARE"
+        ]
       },
       "BondKind": {
         "type": "string",
-        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
+        "enum": [
+          "COUPON-PAYING",
+          "PRINCIPAL-ONLY"
+        ]
       },
       "UserRole": {
         "type": "string",
@@ -4206,7 +4155,10 @@
             "description": "User's timezone, e.g., 'America/New_York', or an offset."
           }
         },
-        "required": ["photo_url", "timezone"]
+        "required": [
+          "photo_url",
+          "timezone"
+        ]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -4232,7 +4184,9 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -4247,11 +4201,17 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
+        "enum": [
+          "CLOSED",
+          "OPEN",
+          "SUSPENDED"
+        ]
       },
       "OrderBook": {
         "type": "object",
@@ -4357,19 +4317,33 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": ["LIMIT", "MARKET"]
+        "enum": [
+          "LIMIT",
+          "MARKET"
+        ]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED"]
+        "enum": [
+          "OPEN",
+          "FILLED",
+          "PARTIAL_FILL",
+          "CANCELLED"
+        ]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": ["LIQUIDATION", "MAX_BUY"]
+        "enum": [
+          "LIQUIDATION",
+          "MAX_BUY"
+        ]
       },
       "Side": {
         "type": "string",
-        "enum": ["BUY", "SELL"]
+        "enum": [
+          "BUY",
+          "SELL"
+        ]
       },
       "Order": {
         "type": "object",
@@ -4555,11 +4529,6 @@
             "format": "uuid",
             "description": "Required: the order book to submit the order to"
           },
-          "order_info": {
-            "type": "string",
-            "nullable": true,
-            "description": "Optional: User-defined text for the order, e.g., 'buying dips'"
-          },
           "order_modifiers": {
             "type": "array",
             "items": {
@@ -4696,6 +4665,16 @@
           "avg_entry_price": {
             "type": "string",
             "description": "average cost per unit quantity that was paid (long positions) or received (short positions) for this asset.",
+            "format": "decimal"
+          },
+          "borrow_limit": {
+            "type": "string",
+            "description": "The borrow limit",
+            "format": "decimal"
+          },
+          "liquidation_threshold": {
+            "type": "string",
+            "description": "The borrow limit",
             "format": "decimal"
           },
           "created_at": {
@@ -4972,7 +4951,11 @@
             "format": "decimal"
           }
         },
-        "required": ["global_position_id", "asset_id", "quantity"]
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -5022,7 +5005,9 @@
             "format": "uuid"
           }
         },
-        "required": ["global_position_id"]
+        "required": [
+          "global_position_id"
+        ]
       },
       "IsolatedPosition": {
         "type": "object",
@@ -5064,7 +5049,9 @@
             "format": "uuid"
           }
         },
-        "required": ["global_position_id"]
+        "required": [
+          "global_position_id"
+        ]
       },
       "UnitedPosition": {
         "type": "object",
@@ -5108,7 +5095,10 @@
             "type": "string"
           }
         },
-        "required": ["asset_id", "quantity"]
+        "required": [
+          "asset_id",
+          "quantity"
+        ]
       },
       "FundUser": {
         "type": "object",
@@ -5146,7 +5136,11 @@
             "format": "decimal"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Supply": {
         "type": "object",
@@ -5200,7 +5194,11 @@
             "format": "decimal"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Withdraw": {
         "type": "object",
@@ -5254,7 +5252,11 @@
             "format": "decimal"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Collateral": {
         "type": "object",
@@ -5293,7 +5295,11 @@
             "format": "decimal"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "LiquidityRequest": {
         "type": "object",
@@ -5306,7 +5312,11 @@
             "type": "string"
           }
         },
-        "required": ["order_book_id", "position_id", "quantity"]
+        "required": [
+          "order_book_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "Liquidity": {
         "type": "object",
@@ -5453,6 +5463,27 @@
           "$ref": "#/components/schemas/StreamTransactionsEntry"
         }
       },
+      "StreamAssetsEntry": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StreamEntry"
+          },
+          {
+            "properties": {
+              "Val": {
+                "$ref": "#/components/schemas/Asset"
+              }
+            }
+          }
+        ]
+      },
+      "StreamAssetsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/StreamAssetsEntry"
+        }
+      },
       "GetTransactionResponse": {
         "type": "object",
         "allOf": [
@@ -5476,7 +5507,6 @@
             "type": "object"
           },
           "error": {
-            "$id": "error",
             "type": "string",
             "description": "The error message. Present for error (non-2xx) responses."
           },
@@ -5521,7 +5551,14 @@
       },
       "CandleResolution": {
         "type": "string",
-        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
+        "enum": [
+          "1m",
+          "5m",
+          "15m",
+          "1h",
+          "4h",
+          "1d"
+        ]
       },
       "Candle": {
         "type": "object",
@@ -5712,7 +5749,11 @@
               "format": "date-time"
             }
           },
-          "required": ["asset_id", "price", "time"]
+          "required": [
+            "asset_id",
+            "price",
+            "time"
+          ]
         },
         "example": {
           "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
