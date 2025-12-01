@@ -12,6 +12,15 @@
     {
       "url": "https://dora-staging.fly.dev",
       "description": "DORA staging server"
+    },
+    {
+      "url": "ws://localhost:8085",
+      "description": "local DORA WebSocket server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
     }
   ],
   "paths": {
@@ -1343,8 +1352,35 @@
         }
       },
       "delete": {
-        "summary": "Cancel all open orders",
+        "summary": "Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user's orders on specific orderbook",
         "operationId": "cancelAllOpenOrders",
+        "parameters": [
+          {
+            "name": "order_book_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "order_kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderKind"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "All open orders have been cancelled",
@@ -1352,6 +1388,64 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ListOrdersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/validate": {
+      "post": {
+        "summary": "Validate submit order request data",
+        "operationId": "validateSubmitOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateSubmitOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validated submit order request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateSubmitOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
                 }
               }
             }
@@ -1741,6 +1835,142 @@
         }
       }
     },
+    "/v1/positions/new_isolated": {
+      "post": {
+        "summary": "Create a new isolated position for a user transferring available assets into the position",
+        "operationId": "createNewIsolatedPosition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewIsolatedPositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated Position Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewIsolatedPositionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/positions/transfer_balances": {
+      "post": {
+        "summary": "Transfer available balance between a user's accounts (e.g. global to isolated position)",
+        "operationId": "transferAvailableBalances",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferBalancesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated Position Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferBalancesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/ledger/balances/self": {
       "get": {
         "summary": "Get your own available, locked, and borrowed assets",
@@ -1885,220 +2115,6 @@
         }
       }
     },
-    "/v1/ledger/deposit": {
-      "post": {
-        "summary": "Deposit assets into your account from the outside world",
-        "operationId": "ledgerDeposit",
-        "description": "TODO: finish this when implementation has been completed",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FundUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Deposit successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FundUserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. invalid parameters or insufficient funds",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/ledger/withdraw": {
-      "post": {
-        "summary": "Withdraw assets from your account to the outside world",
-        "operationId": "ledgerWithdraw",
-        "description": "TODO: Finish this when implementation has been completed",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FundUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Withdraw successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FundUserResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. invalid parameters or insufficient funds",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/leverage/collateralize": {
-      "post": {
-        "summary": "Move supplied and available to supplied_collateral and collateral, for a specified position",
-        "operationId": "leverageCollateralize",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CollateralizeRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Collateralize successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CollateralizeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. insufficient available or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/leverage/de-collateralize": {
-      "post": {
-        "summary": "Move collateral and supplied_collateral to available and supplied, for a specified position.",
-        "operationId": "leverageDeCollateralize",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeCollateralizeRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Collateralize successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeCollateralizeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. insufficient collateral or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/leverage/supply": {
       "post": {
         "summary": "Supply leverage for a specific asset",
@@ -2219,6 +2235,8 @@
       "post": {
         "summary": "Create an isolated position by transferring collateral to the position from the user's global collateral",
         "operationId": "leverageIsolateCollateral",
+        "deprecated": true,
+        "x-deprecated-reason": "Use /v1/positions/new_isolated instead, to create an isolated position with available balance, then collateralize it in a separate step.",
         "requestBody": {
           "required": true,
           "content": {
@@ -2270,66 +2288,8 @@
               }
             }
           },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/leverage/isolate_position": {
-      "post": {
-        "summary": "Create an isolated position using all collateral, supplied_collateral, and borrows from the user's global position",
-        "operationId": "leverageIsolatePosition",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IsolatePositionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Leverage position isolated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IsolatePositionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. insufficient collateral or invalid parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Leverage position not found",
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
             "content": {
               "application/json": {
                 "schema": {
@@ -2403,6 +2363,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LeverageRequestError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
                 }
               }
             }
@@ -2486,6 +2456,16 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -2557,6 +2537,16 @@
           },
           "404": {
             "description": "Pool not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
             "content": {
               "application/json": {
                 "schema": {
@@ -2746,7 +2736,7 @@
         "operationId": "getTrades",
         "parameters": [
           {
-            "name": "pools",
+            "name": "order_book_ids",
             "in": "query",
             "schema": {
               "type": "array",
@@ -3746,9 +3736,64 @@
           }
         }
       }
+    },
+    "/v1/user/{email}/exists": {
+      "get": {
+        "summary": "Check whether a user email exists",
+        "operationId": "checkUserEmailExists",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "True if the email exists, false otherwise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid path parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
     "schemas": {
       "Asset": {
         "type": "object",
@@ -3996,7 +4041,8 @@
           "ADMIN",
           "BOND_PROVIDER",
           "LIQUIDITY_PROVIDER",
-          "TRADER"
+          "TRADER",
+          "INTEGRATOR"
         ]
       },
       "GetUserResponse": {
@@ -4328,7 +4374,8 @@
           "OPEN",
           "FILLED",
           "PARTIAL_FILL",
-          "CANCELLED"
+          "CANCELLED",
+          "PENDING"
         ]
       },
       "OrderModifierKind": {
@@ -4388,6 +4435,11 @@
             "type": "string",
             "format": "decimal"
           },
+          "filled_notional": {
+            "description": "Quote quantity that has been filled so far.",
+            "type": "string",
+            "format": "decimal"
+          },
           "last_update_at": {
             "type": "string",
             "format": "date-time"
@@ -4419,6 +4471,18 @@
           "position_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "order_info": {
+            "type": "string",
+            "format": "text"
+          },
+          "good_till_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trigger_price": {
+            "type": "string",
+            "format": "decimal"
           }
         }
       },
@@ -4534,6 +4598,14 @@
             "items": {
               "$ref": "#/components/schemas/OrderModifierKind"
             }
+          },
+          "good_till_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trigger_price": {
+            "type": "string",
+            "format": "decimal"
           }
         },
         "required": [
@@ -4545,12 +4617,68 @@
           "position_id"
         ]
       },
+      "ValidateSubmitOrderRequest": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "tick": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Minimum tradable increment for the selected order book"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/OrderKind",
+            "description": "Must be LIMIT or MARKET"
+          },
+          "side": {
+            "$ref": "#/components/schemas/Side",
+            "description": "Must be BUY or SELL"
+          },
+          "price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "If kind is LIMIT, must be > 0; if MARKET it must be 0 or omitted"
+          },
+          "good_till_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "inverse_leverage": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "user_balance": {
+            "type": "string",
+            "format": "decimal",
+            "description": "User balance used to ensure they can afford the requested quantity"
+          }
+        },
+        "required": [
+          "quantity",
+          "tick",
+          "kind",
+          "price",
+          "inverse_leverage",
+          "user_balance"
+        ]
+      },
       "OrderId": {
         "type": "object",
         "properties": {
           "order_id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "ValidateSubmitOrderResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "boolean"
           }
         }
       },
@@ -4680,6 +4808,9 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "position_name": {
+            "type": "string"
           }
         }
       },
@@ -4997,18 +5128,6 @@
           }
         ]
       },
-      "IsolatePositionRequest": {
-        "type": "object",
-        "properties": {
-          "global_position_id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "global_position_id"
-        ]
-      },
       "IsolatedPosition": {
         "type": "object",
         "properties": {
@@ -5025,21 +5144,6 @@
             "format": "uuid"
           }
         }
-      },
-      "IsolatePositionResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/IsolatedPosition"
-              }
-            }
-          }
-        ]
       },
       "UnitePositionRequest": {
         "type": "object",
@@ -5083,42 +5187,6 @@
             }
           }
         ]
-      },
-      "FundUserRequest": {
-        "type": "object",
-        "properties": {
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "asset_id",
-          "quantity"
-        ]
-      },
-      "FundUser": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "position_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "final_quantity": {
-            "type": "string"
-          }
-        }
       },
       "SupplyRequest": {
         "type": "object",
@@ -5236,28 +5304,6 @@
           }
         ]
       },
-      "CollateralizeRequest": {
-        "type": "object",
-        "properties": {
-          "position_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string",
-            "format": "decimal"
-          }
-        },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
-      },
       "Collateral": {
         "type": "object",
         "properties": {
@@ -5278,28 +5324,6 @@
             "format": "decimal"
           }
         }
-      },
-      "DeCollateralizeRequest": {
-        "type": "object",
-        "properties": {
-          "position_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string",
-            "format": "decimal"
-          }
-        },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
       },
       "LiquidityRequest": {
         "type": "object",
@@ -5653,6 +5677,13 @@
           "user_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "side": {
+            "$ref": "#/components/schemas/Side"
+          },
+          "aggressor_indicator": {
+            "type": "boolean",
+            "description": "If true, then this order is the aggressor (taker); otherwise it is the maker."
           }
         }
       },
@@ -6201,21 +6232,6 @@
           }
         ]
       },
-      "FundUserResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/FundUser"
-              }
-            }
-          }
-        ]
-      },
       "LiquidationTargetsResponse": {
         "type": "object",
         "allOf": [
@@ -6230,36 +6246,6 @@
                   "type": "string",
                   "format": "uuid"
                 }
-              }
-            }
-          }
-        ]
-      },
-      "CollateralizeResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/Collateral"
-              }
-            }
-          }
-        ]
-      },
-      "DeCollateralizeResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/Collateral"
               }
             }
           }
@@ -6347,6 +6333,105 @@
             "properties": {
               "error": {
                 "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "NewIsolatedPositionRequest": {
+        "type": "object",
+        "properties": {
+          "global_position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "position_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "NewIsolatedPositionResponse": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/Position"
+              }
+            }
+          }
+        ]
+      },
+      "TransferBalancesRequest": {
+        "type": "object",
+        "properties": {
+          "from_position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          }
+        },
+        "required": [
+          "from_position_id",
+          "to_position_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "BalanceTransfer": {
+        "type": "object",
+        "properties": {
+          "from_position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TransferBalancesResponse": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/BalanceTransfer"
               }
             }
           }
