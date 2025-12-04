@@ -3758,7 +3758,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/EmailExistsResponse"
                 }
               }
             }
@@ -3917,13 +3917,13 @@
           }
         }
       },
-      "ListAssetsResponse": {
-        "type": "object",
+      "ResponseEnvelopeOfListAssets": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -3935,8 +3935,10 @@
           }
         ]
       },
-      "GetAssetByIDResponse": {
-        "type": "object",
+      "ListAssetsResponse": {
+        "$ref": "#/components/schemas/ResponseEnvelopeOfListAssets"
+      },
+      "GetAssetByIDResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -3944,11 +3946,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Asset"
               }
             }
           }
         ]
+      },
+      "GetAssetByIDResponse": {
+        "$ref": "#/components/schemas/GetAssetByIDResponseEnvelope"
       },
       "CouponPayment": {
         "type": "object",
@@ -3999,13 +4005,13 @@
           }
         }
       },
-      "ListCouponPaymentsResponse": {
-        "type": "object",
+      "ListCouponPaymentsResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -4016,6 +4022,9 @@
             }
           }
         ]
+      },
+      "ListCouponPaymentsResponse": {
+        "$ref": "#/components/schemas/ListCouponPaymentsResponseEnvelope"
       },
       "AssetKind": {
         "type": "string",
@@ -4045,8 +4054,7 @@
           "INTEGRATOR"
         ]
       },
-      "GetUserResponse": {
-        "type": "object",
+      "UserEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4054,14 +4062,17 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/User"
               }
             }
           }
         ]
       },
-      "UserUpdatedResponse": {
-        "type": "object",
+      "GetUserResponse": {
+        "$ref": "#/components/schemas/UserEnvelope"
+      },
+      "UserUpdatedResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4069,20 +4080,24 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/CreateOrUpdateUserResponse"
               }
             }
           }
         ]
       },
-      "UserDeletedResponse": {
-        "type": "object",
+      "UserUpdatedResponse": {
+        "$ref": "#/components/schemas/UserUpdatedResponseEnvelope"
+      },
+      "UserDeletedResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
             "properties": {
+              "type": "object",
               "data": {
                 "type": "string",
                 "format": "uuid"
@@ -4091,8 +4106,10 @@
           }
         ]
       },
-      "GetUserConfigResponse": {
-        "type": "object",
+      "UserDeletedResponse": {
+        "$ref": "#/components/schemas/UserDeletedResponseEnvelope"
+      },
+      "UserConfigResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4100,11 +4117,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/UserConfig"
               }
             }
           }
         ]
+      },
+      "GetUserConfigResponse": {
+        "$ref": "#/components/schemas/UserConfigResponseEnvelope"
       },
       "User": {
         "type": "object",
@@ -4328,8 +4349,7 @@
           }
         }
       },
-      "GetOrderBookResponse": {
-        "type": "object",
+      "OrderBookResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4337,19 +4357,23 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/OrderBook"
               }
             }
           }
         ]
       },
-      "ListOrderBooksResponse": {
-        "type": "object",
+      "GetOrderBookResponse": {
+        "$ref": "#/components/schemas/OrderBookResponseEnvelope"
+      },
+      "ListOrderbookResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -4360,6 +4384,9 @@
             }
           }
         ]
+      },
+      "ListOrderBooksResponse": {
+        "$ref": "#/components/schemas/ListOrderbookResponseEnvelope"
       },
       "OrderKind": {
         "type": "string",
@@ -4486,13 +4513,13 @@
           }
         }
       },
-      "ListOrdersResponse": {
-        "type": "object",
+      "ListOrdersResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -4503,6 +4530,9 @@
             }
           }
         ]
+      },
+      "ListOrdersResponse": {
+        "$ref": "#/components/schemas/ListOrdersResponseEnvelope"
       },
       "StreamOrdersEntry": {
         "type": "object",
@@ -4546,8 +4576,7 @@
           "$ref": "#/components/schemas/StreamOrderUpdatesEntry"
         }
       },
-      "GetOrderResponse": {
-        "type": "object",
+      "OrderResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4555,11 +4584,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Order"
               }
             }
           }
         ]
+      },
+      "GetOrderResponse": {
+        "$ref": "#/components/schemas/OrderResponseEnvelope"
       },
       "CreateOrderRequest": {
         "type": "object",
@@ -4682,8 +4715,25 @@
           }
         }
       },
-      "CreateOrderResponse": {
-        "type": "object",
+      "EmailExistsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "type": "object",
+              "data": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "EmailExistsResponse": {
+        "$ref": "#/components/schemas/EmailExistsResponseEnvelope"
+      },
+      "CreateOrderResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -4691,11 +4741,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/OrderId"
               }
             }
           }
         ]
+      },
+      "CreateOrderResponse": {
+        "$ref": "#/components/schemas/CreateOrderResponseEnvelope"
       },
       "PositionResponse": {
         "type": "object",
@@ -5173,8 +5227,7 @@
           }
         }
       },
-      "UnitePositionResponse": {
-        "type": "object",
+      "UnitePositionResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5182,11 +5235,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/UnitedPosition"
               }
             }
           }
         ]
+      },
+      "UnitePositionResponse": {
+        "$ref": "#/components/schemas/UnitePositionResponseEnvelope"
       },
       "SupplyRequest": {
         "type": "object",
@@ -5231,8 +5288,7 @@
           }
         }
       },
-      "SupplyResponse": {
-        "type": "object",
+      "SupplyResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5240,11 +5296,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Supply"
               }
             }
           }
         ]
+      },
+      "SupplyResponse": {
+        "$ref": "#/components/schemas/SupplyResponseEnvelope"
       },
       "WithdrawRequest": {
         "type": "object",
@@ -5289,8 +5349,7 @@
           }
         }
       },
-      "WithdrawResponse": {
-        "type": "object",
+      "WithdrawResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5298,11 +5357,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Withdraw"
               }
             }
           }
         ]
+      },
+      "WithdrawResponse": {
+        "$ref": "#/components/schemas/WithdrawResponseEnvelope"
       },
       "Collateral": {
         "type": "object",
@@ -5371,8 +5434,7 @@
           }
         }
       },
-      "LiquidityResponse": {
-        "type": "object",
+      "LiquidityResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5380,11 +5442,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Liquidity"
               }
             }
           }
         ]
+      },
+      "LiquidityResponse": {
+        "$ref": "#/components/schemas/LiquidityResponseEnvelope"
       },
       "TransactionKind": {
         "type": "string",
@@ -5448,13 +5514,13 @@
           }
         }
       },
-      "ListTransactionsResponse": {
-        "type": "object",
+      "ListTransactionsResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -5465,6 +5531,9 @@
             }
           }
         ]
+      },
+      "ListTransactionsResponse": {
+        "$ref": "#/components/schemas/ListTransactionsResponseEnvelope"
       },
       "StreamTransactionsEntry": {
         "type": "object",
@@ -5508,8 +5577,7 @@
           "$ref": "#/components/schemas/StreamAssetsEntry"
         }
       },
-      "GetTransactionResponse": {
-        "type": "object",
+      "TransactionResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5517,11 +5585,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Transaction"
               }
             }
           }
         ]
+      },
+      "GetTransactionResponse": {
+        "$ref": "#/components/schemas/TransactionResponseEnvelope"
       },
       "ResponseEnvelope": {
         "type": "object",
@@ -5617,8 +5689,7 @@
           }
         }
       },
-      "TradeResponse": {
-        "type": "object",
+      "TradeResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5626,11 +5697,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Trade"
               }
             }
           }
         ]
+      },
+      "TradeResponse": {
+        "$ref": "#/components/schemas/TradeResponseEnvelope"
       },
       "Trade": {
         "type": "object",
@@ -5687,13 +5762,13 @@
           }
         }
       },
-      "ListTradeResponse": {
-        "type": "object",
+      "ListTradeResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -5704,6 +5779,9 @@
             }
           }
         ]
+      },
+      "ListTradeResponse": {
+        "$ref": "#/components/schemas/ListTradeResponseEnvelope"
       },
       "StreamTradesEntry": {
         "type": "object",
@@ -5743,13 +5821,13 @@
           }
         }
       },
-      "ListAssetPriceResponse": {
-        "type": "object",
+      "ListAssetPriceResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -5760,6 +5838,9 @@
             }
           }
         ]
+      },
+      "ListAssetPriceResponse": {
+        "$ref": "#/components/schemas/ListAssetPriceResponseEnvelope"
       },
       "StreamAssetPricesResponse": {
         "type": "object",
@@ -5799,8 +5880,7 @@
           }
         }
       },
-      "GetAssetPriceResponse": {
-        "type": "object",
+      "AssetPriceResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5808,11 +5888,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/AssetPrice"
               }
             }
           }
         ]
+      },
+      "GetAssetPriceResponse": {
+        "$ref": "#/components/schemas/AssetPriceResponseEnvelope"
       },
       "PoolPrice": {
         "type": "object",
@@ -5831,8 +5915,7 @@
           }
         }
       },
-      "GetPoolPriceResponse": {
-        "type": "object",
+      "PoolPriceResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5840,11 +5923,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/PoolPrice"
               }
             }
           }
         ]
+      },
+      "GetPoolPriceResponse": {
+        "$ref": "#/components/schemas/PoolPriceResponseEnvelope"
       },
       "OrderBookBalance": {
         "type": "object",
@@ -5949,8 +6036,7 @@
           }
         }
       },
-      "ListOrderBookDepthResponse": {
-        "type": "object",
+      "ListOrderBookDepthResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5958,11 +6044,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/OrderBookDepth"
               }
             }
           }
         ]
+      },
+      "ListOrderBookDepthResponse": {
+        "$ref": "#/components/schemas/ListOrderBookDepthResponseEnvelope"
       },
       "OrderBookTop": {
         "type": "object",
@@ -5985,8 +6075,7 @@
           }
         }
       },
-      "GetTopOfBookResponse": {
-        "type": "object",
+      "GetTopOfBookResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -5994,11 +6083,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/OrderBookTop"
               }
             }
           }
         ]
+      },
+      "GetTopOfBookResponse": {
+        "$ref": "#/components/schemas/GetTopOfBookResponseEnvelope"
       },
       "OrderBookSummary": {
         "type": "object",
@@ -6025,8 +6118,7 @@
           }
         }
       },
-      "GetOrderBookSummaryResponse": {
-        "type": "object",
+      "OrderBookSummaryResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6034,20 +6126,42 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/OrderBookSummary"
               }
             }
           }
         ]
       },
-      "OrderBookHaltResponse": {
-        "type": "object",
+      "GetOrderBookSummaryResponse": {
+        "$ref": "#/components/schemas/OrderBookSummaryResponseEnvelope"
+      },
+      "OrderBookHaltResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
             "properties": {
+              "type": "object",
+              "data": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "OrderBookHaltResponse": {
+        "$ref": "#/components/schemas/OrderBookHaltResponseEnvelope"
+      },
+      "OrderBookResumeResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "type": "object",
               "data": {
                 "type": "boolean"
               }
@@ -6056,7 +6170,9 @@
         ]
       },
       "OrderBookResumeResponse": {
-        "type": "object",
+        "$ref": "#/components/schemas/OrderBookResumeResponseEnvelope"
+      },
+      "OrderBookTerminateResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6071,22 +6187,9 @@
         ]
       },
       "OrderBookTerminateResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "properties": {
-              "data": {
-                "type": "boolean"
-              }
-            }
-          }
-        ]
+        "$ref": "#/components/schemas/OrderBookTerminateResponseEnvelope"
       },
-      "CancelOrderResponse": {
-        "type": "object",
+      "CancelOrderResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6094,19 +6197,23 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Order"
               }
             }
           }
         ]
       },
-      "ListCandlesResponse": {
-        "type": "object",
+      "CancelOrderResponse": {
+        "$ref": "#/components/schemas/CancelOrderResponseEnvelope"
+      },
+      "ListCandlesResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -6117,6 +6224,9 @@
             }
           }
         ]
+      },
+      "ListCandlesResponse": {
+        "$ref": "#/components/schemas/ListCandlesResponseEnvelope"
       },
       "StreamCandlesEntry": {
         "type": "object",
@@ -6139,8 +6249,7 @@
           "$ref": "#/components/schemas/StreamCandlesEntry"
         }
       },
-      "LedgerModuleResponse": {
-        "type": "object",
+      "LedgerModuleResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6157,8 +6266,10 @@
           }
         ]
       },
-      "LedgerModuleByAssetResponse": {
-        "type": "object",
+      "LedgerModuleResponse": {
+        "$ref": "#/components/schemas/LedgerModuleResponseEnvelope"
+      },
+      "LedgerModuleByAssetResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6166,14 +6277,17 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/ModuleBalance"
               }
             }
           }
         ]
       },
-      "UserPositionResponse": {
-        "type": "object",
+      "LedgerModuleByAssetResponse": {
+        "$ref": "#/components/schemas/LedgerModuleByAssetResponseEnvelope"
+      },
+      "UserPositionResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6181,14 +6295,17 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/PositionResponse"
               }
             }
           }
         ]
       },
-      "UserBalanceResponse": {
-        "type": "object",
+      "UserPositionResponse": {
+        "$ref": "#/components/schemas/UserPositionResponseEnvelope"
+      },
+      "UserBalanceResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6196,14 +6313,17 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/BalancesResponse"
               }
             }
           }
         ]
       },
-      "UserValueResponse": {
-        "type": "object",
+      "UserBalanceResponse": {
+        "$ref": "#/components/schemas/UserBalanceResponseEnvelope"
+      },
+      "UserValueResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6211,14 +6331,17 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/UserValue"
               }
             }
           }
         ]
       },
-      "UserInterestResponse": {
-        "type": "object",
+      "UserValueResponse": {
+        "$ref": "#/components/schemas/UserValueResponseEnvelope"
+      },
+      "UserInterestResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6226,19 +6349,23 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/UserInterest"
               }
             }
           }
         ]
       },
-      "LiquidationTargetsResponse": {
-        "type": "object",
+      "UserInterestResponse": {
+        "$ref": "#/components/schemas/UserInterestResponseEnvelope"
+      },
+      "LiquidationTargetsResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "array",
@@ -6250,6 +6377,9 @@
             }
           }
         ]
+      },
+      "LiquidationTargetsResponse": {
+        "$ref": "#/components/schemas/LiquidationTargetsResponseEnvelope"
       },
       "BorrowRequest": {
         "type": "object"
@@ -6363,8 +6493,7 @@
           "quantity"
         ]
       },
-      "NewIsolatedPositionResponse": {
-        "type": "object",
+      "NewIsolatedPositionResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6372,11 +6501,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/Position"
               }
             }
           }
         ]
+      },
+      "NewIsolatedPositionResponse": {
+        "$ref": "#/components/schemas/NewIsolatedPositionResponseEnvelope"
       },
       "TransferBalancesRequest": {
         "type": "object",
@@ -6422,8 +6555,7 @@
           }
         }
       },
-      "TransferBalancesResponse": {
-        "type": "object",
+      "TransferBalancesResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -6431,11 +6563,15 @@
           {
             "properties": {
               "data": {
+                "type": "object",
                 "$ref": "#/components/schemas/BalanceTransfer"
               }
             }
           }
         ]
+      },
+      "TransferBalancesResponse": {
+        "$ref": "#/components/schemas/TransferBalancesResponseEnvelope"
       }
     }
   }
