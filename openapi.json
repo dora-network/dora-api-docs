@@ -6797,6 +6797,24 @@
         }
       },
       "CreateAPIKeyResponse": {
+        "$ref": "#/components/schemas/CreateAPIKeyResponseEnvelope"
+      },
+      "CreateAPIKeyResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "object",
+                "$ref": "#/components/schemas/CreateAPIKeyData"
+              }
+            }
+          }
+        ]
+      },
+      "CreateAPIKeyData": {
         "type": "object",
         "properties": {
           "key_id": {
@@ -6811,6 +6829,24 @@
         }
       },
       "RevokeAPIKeyResponse": {
+        "$ref": "#/components/schemas/RevokeAPIKeyResponseEnvelope"
+      },
+      "RevokeAPIKeyResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "object",
+                "$ref": "#/components/schemas/RevokeAPIKeyData"
+              }
+            }
+          }
+        ]
+      },
+      "RevokeAPIKeyData": {
         "type": "object",
         "properties": {
           "user_id": {
