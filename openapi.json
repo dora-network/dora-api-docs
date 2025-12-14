@@ -402,6 +402,55 @@
         }
       }
     },
+    "/v1/user/self/position_accounts": {
+      "get": {
+        "summary": "List all position accounts for the authenticated user",
+        "operationId": "listPositionAccountsSelf",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of position accounts including the position id, the position name, and global account indicator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListPositionAccountsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{user_id}/config": {
       "put": {
         "summary": "Update user configuration by ID",
@@ -3737,18 +3786,17 @@
         }
       }
     },
-    "/v1/user/{email}/exists": {
+    "/v1/user/exists": {
       "get": {
         "summary": "Check whether a user email exists",
         "operationId": "checkUserEmailExists",
         "parameters": [
           {
             "name": "email",
-            "in": "path",
+            "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "email"
+              "type": "string"
             }
           }
         ],
@@ -3859,6 +3907,9 @@
           "can_virtual_borrow": {
             "type": "boolean"
           },
+          "max_leverage": {
+            "type": "number"
+          },
           "bond": {
             "$ref": "#/components/schemas/Bond",
             "nullable": true
@@ -3914,6 +3965,10 @@
             "description": "Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond)",
             "type": "integer",
             "minimum": 1000
+          },
+          "next_coupon_payment": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -4028,19 +4083,11 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": [
-          "BOND",
-          "CURRENCY",
-          "INTEREST",
-          "POOL_SHARE"
-        ]
+        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
       },
       "BondKind": {
         "type": "string",
-        "enum": [
-          "COUPON-PAYING",
-          "PRINCIPAL-ONLY"
-        ]
+        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
       },
       "UserRole": {
         "type": "string",
@@ -4096,8 +4143,8 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
-              "type": "object",
               "data": {
                 "type": "string",
                 "format": "uuid"
@@ -4222,10 +4269,7 @@
             "description": "User's timezone, e.g., 'America/New_York', or an offset."
           }
         },
-        "required": [
-          "photo_url",
-          "timezone"
-        ]
+        "required": ["photo_url", "timezone"]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -4251,9 +4295,7 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": [
-          "update"
-        ]
+        "required": ["update"]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -4268,17 +4310,11 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": [
-          "update"
-        ]
+        "required": ["update"]
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": [
-          "CLOSED",
-          "OPEN",
-          "SUSPENDED"
-        ]
+        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
       },
       "OrderBook": {
         "type": "object",
@@ -4390,34 +4426,19 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": [
-          "LIMIT",
-          "MARKET"
-        ]
+        "enum": ["LIMIT", "MARKET"]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": [
-          "OPEN",
-          "FILLED",
-          "PARTIAL_FILL",
-          "CANCELLED",
-          "PENDING"
-        ]
+        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED", "PENDING"]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": [
-          "LIQUIDATION",
-          "MAX_BUY"
-        ]
+        "enum": ["LIQUIDATION", "MAX_BUY"]
       },
       "Side": {
         "type": "string",
-        "enum": [
-          "BUY",
-          "SELL"
-        ]
+        "enum": ["BUY", "SELL"]
       },
       "Order": {
         "type": "object",
@@ -4721,8 +4742,8 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
-              "type": "object",
               "data": {
                 "type": "boolean"
               }
@@ -5136,11 +5157,7 @@
             "format": "decimal"
           }
         },
-        "required": [
-          "global_position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["global_position_id", "asset_id", "quantity"]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -5207,9 +5224,7 @@
             "format": "uuid"
           }
         },
-        "required": [
-          "global_position_id"
-        ]
+        "required": ["global_position_id"]
       },
       "UnitedPosition": {
         "type": "object",
@@ -5261,11 +5276,7 @@
             "format": "decimal"
           }
         },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["position_id", "asset_id", "quantity"]
       },
       "Supply": {
         "type": "object",
@@ -5322,11 +5333,7 @@
             "format": "decimal"
           }
         },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["position_id", "asset_id", "quantity"]
       },
       "Withdraw": {
         "type": "object",
@@ -5399,11 +5406,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "order_book_id",
-          "position_id",
-          "quantity"
-        ]
+        "required": ["order_book_id", "position_id", "quantity"]
       },
       "Liquidity": {
         "type": "object",
@@ -5647,14 +5650,7 @@
       },
       "CandleResolution": {
         "type": "string",
-        "enum": [
-          "1m",
-          "5m",
-          "15m",
-          "1h",
-          "4h",
-          "1d"
-        ]
+        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
       },
       "Candle": {
         "type": "object",
@@ -5861,11 +5857,7 @@
               "format": "date-time"
             }
           },
-          "required": [
-            "asset_id",
-            "price",
-            "time"
-          ]
+          "required": ["asset_id", "price", "time"]
         },
         "example": {
           "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
@@ -6142,8 +6134,8 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
-              "type": "object",
               "data": {
                 "type": "boolean"
               }
@@ -6160,8 +6152,8 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
-              "type": "object",
               "data": {
                 "type": "boolean"
               }
@@ -6178,6 +6170,7 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
                 "type": "boolean"
@@ -6195,9 +6188,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Order"
               }
             }
@@ -6487,11 +6480,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "global_position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["global_position_id", "asset_id", "quantity"]
       },
       "NewIsolatedPositionResponseEnvelope": {
         "allOf": [
@@ -6572,6 +6561,48 @@
       },
       "TransferBalancesResponse": {
         "$ref": "#/components/schemas/TransferBalancesResponseEnvelope"
+      },
+      "PositionAccount": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "description": "The ID of the position account",
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_name": {
+            "description": "The name of the position account",
+            "type": "string"
+          },
+          "is_global": {
+            "description": "Whether the position account is the global or an isolated account",
+            "type": "boolean"
+          }
+        }
+      },
+      "PositionAccounts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PositionAccount"
+        }
+      },
+      "ListPositionAccountsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PositionAccounts"
+              }
+            }
+          }
+        ]
+      },
+      "ListPositionAccountsResponse": {
+        "$ref": "#/components/schemas/ListPositionAccountsResponseEnvelope"
       }
     }
   }
