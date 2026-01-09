@@ -2,18 +2,188 @@
 
 ## Introduction
 
-The DORA platform provides a digital marketplace for trading fractionalized bonds opening a new era of financial inclusion.
-The DORA API allows developers to interact with the platform programmatically, enabling them to build applications that can
-trade, make markets, manage positions and analyse market data on the DORA platform.
+The DORA platform provides a digital marketplace for trading fractionalized bonds
+opening a new era of financial inclusion.
+
+The DORA API allows developers to interact with the platform programmatically,
+enabling them to build applications that can trade, make markets, manage positions
+and analyse market data on the DORA platform.
 
 ## Authentication
 
-TODO: describe how to authenticate with the DORA API, waiting for the dev team to provide details.
+At present, DORA's API requires authentication via a Bearer token or an API key.
 
-## Streaming APIs
+### Bearer Token
+
+To obtain a Bearer token, you need to log in to the DORA UI using your credentials.
+
+Once logged in, you can find your authentication token in the user menu by clicking
+on your user avatar in the top right corner.
+
+Click on the `COPY TOKEN` button to copy your authentication token to the clipboard.
+
+You can then use this token to authenticate your API requests by including it in the
+`Authorization` header as follows:
+
+```
+Authorization: Bearer <your-authentication-token>
+```
+
+Authentication tokens are valid for a limited time and will need to be refreshed
+periodically using the method above.
+
+### API Key
+
+At present, API key management can only be done via DORA's API.
+We are actively working on adding this functionality to the DORA UI
+to make this easier in future releases.
+
+To create an API key for the first time, you will need to use your Bearer token
+to authenticate the request. Follow the steps above to obtain your authentication token.
+
+> Note: This authentication token is refreshed periodically for security reasons.
+> if you encounter authentication issues while using the API, please repeat the
+> steps above to obtain a new token, then try again.
+
+Once you have your authentication token, you can use the following `curl` command
+to request a new API key:
+
+```bash
+curl -L -X POST -H "Authorizatio: Bearer <YOUR TOKEN>" -H "Content-Type: application/json" --data '{"label": "your-label-for-identifying-this-key"}' https://dora-staging.fly.dev/v1/user/apikey
+```
+
+If you receive an error response like this:
+
+```json
+{
+  "error":"unauthorized: token has invalid claims: token is expired",
+  "metadata":{
+    "status_code":401,
+    "trace_id":"staging-019b9916-a6cb-7f12-a897-f1a7ca750ee7",
+    "request_id":"staging-019b9916-a6cb-7f15-89d5-0a7023e32dac"
+  }
+}
+```
+
+The authorization key you provided is invalid or expired. See note above for details.
+Obtain a new token from the DORA UI and try again.
+
+If the request is successful, you will receive a response like this:
+
+```json
+{
+  "data": {
+    "key_id": "unique identifier for your key",
+    "api_key": "your-generated-api-key",
+    "label": "your-label-for-identifying-this-key"
+  },
+  "metadata": {
+    ... metadata fields ...
+  }
+}
+```
+
+The `key_id` is the unique identifier for your api key and will be required when you
+want to delete the key. When requesting your list of keys, this identifier is provided
+in the response.
+
+The `label` is the identifying label you provided when creating the key.
+
+The `api_key` is the key you will use to authenticate your API requests to DORA. Please
+store this value securely, as it will not be shown again. If you lose this value, you
+will need to delete the key and create a new one.
+
+### Using the API Key for Authentication
+
+Once you have generated your API key, you can use it to authenticate your requests to
+DORA's API. To do this, replace the `Bearer <token>` part of your Authorization header
+with `ApiKey <your-generated-api-key>`
+
+**Example:**
+
+Replace this:
+
+```bash
+curl -L -X GET -H "Authorization: Bearer <token> ...
+
+```
+
+With this:
+
+```bash
+curl -L -X GET -H "Authorization: ApiKey <your-generated-api-key> ...
+```
+
+For streaming API requests, you need to provide the api key as a query parameter instead of in the header.
+The query parameter to pass is `x-api-key`.
+
+**Example:**
+
+```bash
+wscat -c "wss://dora-staging.fly.dev:8085/v1/orderbooks/<order_book_id>/open/stream?since=2026-01-01T09:28:23.687804Z&x-api-key=<your-generated-api-key>
+```
+
+### Listing your API Keys
+
+Once you have your generated API keys, you can start using them to authenticate your requests.
+You can test that your key is working by listing your existing API keys.
+
+```bash
+curl -L -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://dora-staging.fly.dev/v1/user/apikey
+```
+
+You should receive a response like this:
+
+```json
+{
+  "data": {
+    "api_keys": [
+      {
+        "user_id": "your-user-id",
+        "key_id": "unique identifier for your key",
+        "label": "your-label-for-identifying-this-key",
+        "expires_at": null,
+        "is_active": true
+      },
+    ]
+  },
+  "metadata": {
+    ... metadata fields ...
+  }
+}
+```
+
+### Revoking an API Key
+
+To revoke an API key, you will need the `key_id` of the key you want to delete.
+It is recommended to create a new API key before revoking an existing one to avoid any disruption in service.
+Once you have created a new key, you can use the key in the request to revoke the old key.
+
+If you revoked an API key that is currently in use, and you don't have another valid API key,
+you will need to login to the DORA UI to generate a new authentication token to create a new API key.
+
+To revoke an API key, you can make a `PUT` request to the following endpoint: `https://dora-staging.fly.dev/v1/user/apikey/{key-id}/revoke`
+
+**Example:**
+
+```bash
+curl -L -X PUT -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://dora-staging.fly.dev/v1/user/apikey/{key_id}/revoke
+```
+
+### Streaming APIs
 
 DORA provides several websocket endpoints for real-time data streaming. These endpoints allow you to receive updates on
 market data, user orders, transactions, and ledgers.
+
+For streaming endpoints that require authentication, you need to provide your API key or bearer token as a query parameter.
+
+For Bearer token authentication, use the `token` query parameter:
+
+`GET /v1/user/{user_id}/orders/all/stream?token=<your-authentication-token>`
+
+For API key authentication, use the `x-api-key` query parameter:
+
+`GET /v1/user/{user_id}/orders/all/stream?x-api-key=<your-generated-api-key>`
 
 All streaming endpoints allow users to fetch historical data before receiving the real-time updates. This is useful for
 cases where you want to start processing data from a specific point in time. For example, if you disconnected from DORA
@@ -151,11 +321,14 @@ This endpoint allows you to submit a new order to the specified order book. The 
   "price": "100.0", // required for limit orders, decimal value expressed as a string
   "kind": "limit", // the kind of order, can be "market" or "limit"
   "side": "buy", // the side of the order, can be "buy" or "sell"
-  "order_book": "some-orderbook-id", // this must be a uuid v7 id of the order book you want to place the order on
-  "user_text": "some user text", // optional user text to attach to the order, can be used for custom metadata
+  "from_global_position": true, // whether to use the global position for the order or an isolated position
+  "order_book_id": "some-orderbook-id", // this must be a uuid v7 id of the order book you want to place the order on
   "order_modifiers": [
     "MAX_BUY"
   ] // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
+  good_till_date: "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
+  "trigger_price": "95.0", // optional trigger price for conditional orders, decimal value expressed as a string
+  "trigger_type": "STOP_LOSS" // optional trigger type for conditional orders, can be "STOP_LOSS" or "TAKE_PROFIT"
 }
 ```
 

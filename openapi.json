@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.1.0",
   "info": {
     "title": "DORA",
     "version": "1.0.0"
@@ -21,6 +21,9 @@
   "security": [
     {
       "bearerAuth": []
+    },
+    {
+      "apiKeyAuthHeader": []
     }
   ],
   "paths": {
@@ -28,6 +31,7 @@
       "get": {
         "summary": "List assets",
         "operationId": "listAssets",
+        "security": [],
         "parameters": [
           {
             "name": "created_after",
@@ -143,6 +147,7 @@
       "get": {
         "summary": "Get asset by ID",
         "operationId": "getAssetById",
+        "security": [],
         "parameters": [
           {
             "name": "asset_id",
@@ -192,6 +197,7 @@
       "get": {
         "summary": "Get coupon payments for a bond asset",
         "operationId": "getCouponPaymentsByAssetId",
+        "security": [],
         "parameters": [
           {
             "name": "asset_id",
@@ -776,10 +782,126 @@
         }
       }
     },
+    "/v1/orderbooks/{order_book_id}/stats": {
+      "get": {
+        "summary": "Get orderbook stats",
+        "operationId": "getOrderbookStats",
+        "security": [],
+        "parameters": [
+          {
+            "name": "order_book_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orderbook stats details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrderbookStatsResponse"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Orderbook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orderbooks/{order_book_id}/stats/stream": {
+      "get": {
+        "summary": "Orderbook stats stream",
+        "operationId": "getOrderbookStatsStream",
+        "parameters": [
+          {
+            "name": "order_book_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orderbook stats stream",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderbookStats"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Orderbook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/orderbooks/{order_book_id}/orders": {
       "get": {
         "summary": "Get all open orders for a specific orderbook (L3 market depth)",
         "operationId": "getOrderbookOrders",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -849,6 +971,7 @@
       "get": {
         "summary": "Get the aggregated price levels for a specific orderbook (L2 market depth)",
         "operationId": "getOrderbookDepth",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -908,6 +1031,7 @@
       "get": {
         "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
         "operationId": "getOrderbookTop",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -967,6 +1091,7 @@
       "get": {
         "summary": "Get all open orders for a specific orderbook (L3 market depth)",
         "operationId": "getL3Depth",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -1036,6 +1161,7 @@
       "get": {
         "summary": "Get the aggregated price levels for a specific orderbook (L2 market depth)",
         "operationId": "getL2Depth",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -1095,6 +1221,7 @@
       "get": {
         "summary": "Get the top price levels for a specific orderbook (L1 market depth)",
         "operationId": "getL1Depth",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -1662,6 +1789,7 @@
       "get": {
         "summary": "Get candlestick data for an orderbook",
         "operationId": "getCandleData",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -1999,6 +2127,74 @@
           },
           "409": {
             "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/positions/close": {
+      "post": {
+        "summary": "Close isolated positions, repaying the borrowed",
+        "operationId": "closeIsolatedPosition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosePositionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated Position Closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosePositionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, e.g. order_book or position not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2439,6 +2635,192 @@
         }
       }
     },
+    "/v1/leverage/accrued_interest/self": {
+      "get": {
+        "summary": "Get current accrued leverage interest for the user",
+        "operationId": "leverageGetAccruedInterestByUser",
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "asset_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current leverage accrued interest retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentLeverageAccruedInterestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/leverage/accrued_interest/pay": {
+      "post": {
+        "summary": "Pay current accrued leverage interest for a specific user",
+        "operationId": "payLeverageGetAccruedInterest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayLeverageAccruedInterestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current leverage accrued interest paid successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayLeverageAccruedInterestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/leverage/accrued_interest/claim": {
+      "post": {
+        "summary": "Claim current accrued leverage interest for a specific user",
+        "operationId": "claimLeverageGetAccruedInterest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimLeverageAccruedInterestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current leverage accrued interest claimed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimLeverageAccruedInterestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/liquidity/pool/{pool_id}/add": {
       "post": {
         "summary": "Add liquidity to a pool",
@@ -2621,6 +3003,7 @@
       "get": {
         "summary": "Get a filtered, paginated list of transactions",
         "operationId": "getTransactions",
+        "security": [],
         "parameters": [
           {
             "name": "pools",
@@ -2724,6 +3107,7 @@
       "get": {
         "summary": "Get a transaction by ID",
         "operationId": "getTransactionById",
+        "security": [],
         "parameters": [
           {
             "name": "transaction_id",
@@ -2886,6 +3270,7 @@
       "get": {
         "summary": "Get a trade by ID",
         "operationId": "getTradeById",
+        "security": [],
         "parameters": [
           {
             "name": "trade_id",
@@ -3091,6 +3476,7 @@
       "get": {
         "summary": "Get a snapshot of open orders in an order book and open a stream for real-time updates",
         "operationId": "streamOrderbookOpenOrders",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -3159,6 +3545,7 @@
       "get": {
         "summary": "Get a snapshot of base and quote balances for an order book and open a stream for real-time updates",
         "operationId": "streamOrderBookBalances",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -3227,6 +3614,7 @@
       "get": {
         "summary": "Get a snapshot of candlestick data from date provided, and open a stream for real-time updates",
         "operationId": "streamCandleData",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -3302,6 +3690,7 @@
       "get": {
         "summary": "Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates",
         "operationId": "streamTrades",
+        "security": [],
         "parameters": [
           {
             "name": "order_book_id",
@@ -3360,6 +3749,7 @@
       "get": {
         "summary": "Stream real-time asset prices as map objects",
         "operationId": "streamAssetPrices",
+        "security": [],
         "description": "Opens a WebSocket stream for real-time asset price updates. First message contains all current prices, subsequent messages contain only changed prices. Data is sent as JSON objects keyed by asset ID.",
         "parameters": [
           {
@@ -3369,6 +3759,15 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "asset_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -3410,6 +3809,11 @@
       "get": {
         "summary": "Get a snapshot of user's order updates for the given order book since a specific time, and opens a stream for further updates",
         "operationId": "getUserOrderUpdatesStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
         "parameters": [
           {
             "name": "user_id",
@@ -3497,6 +3901,11 @@
       "get": {
         "summary": "Get a snapshot of user's order updates across all order books since a specific time, and opens a stream for further updates",
         "operationId": "getUserOrdersUpdatesStreamAll",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
         "parameters": [
           {
             "name": "user_id",
@@ -3575,6 +3984,11 @@
       "get": {
         "summary": "Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates",
         "operationId": "getUserLedgerStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
         "parameters": [
           {
             "name": "user_id",
@@ -3644,6 +4058,11 @@
       "get": {
         "summary": "Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates",
         "operationId": "getUserTransactionsStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
         "parameters": [
           {
             "name": "user_id",
@@ -3722,6 +4141,7 @@
       "get": {
         "summary": "Get all inserts or updates for assets",
         "operationId": "getAssetsStream",
+        "security": [],
         "parameters": [
           {
             "name": "since",
@@ -3972,9 +4392,22 @@
   },
   "components": {
     "securitySchemes": {
-      "BearerAuth": {
+      "bearerAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "apiKeyAuthHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "description": "API Key should be provided in the 'Authorization' header as 'ApiKey {your-api-key}'",
+        "name": "Authorization"
+      },
+      "apiKeyAuthQuery": {
+        "type": "apiKey",
+        "description": "API Key should be provided as a query parameter 'x-api-key' for streaming endpoints",
+        "in": "query",
+        "name": "x-api-key"
       }
     },
     "schemas": {
@@ -4090,8 +4523,7 @@
             "format": "date-time"
           },
           "principal_value": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "payments_per_year": {
             "type": "integer"
@@ -4134,9 +4566,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Asset"
               }
             }
@@ -4173,8 +4605,7 @@
             "format": "date-time"
           },
           "available_to_pay": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "completed_at": {
             "type": "string",
@@ -4218,11 +4649,19 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
+        "enum": [
+          "BOND",
+          "CURRENCY",
+          "INTEREST",
+          "POOL_SHARE"
+        ]
       },
       "BondKind": {
         "type": "string",
-        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
+        "enum": [
+          "COUPON-PAYING",
+          "PRINCIPAL-ONLY"
+        ]
       },
       "UserRole": {
         "type": "string",
@@ -4242,9 +4681,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/User"
               }
             }
@@ -4260,9 +4699,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/CreateOrUpdateUserResponse"
               }
             }
@@ -4297,9 +4736,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/UserConfig"
               }
             }
@@ -4404,7 +4843,9 @@
             "description": "User's timezone, e.g., 'America/New_York', or an offset."
           }
         },
-        "required": ["photo_url", "timezone"]
+        "required": [
+          "timezone"
+        ]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -4430,7 +4871,9 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -4445,11 +4888,17 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
+        "enum": [
+          "CLOSED",
+          "OPEN",
+          "SUSPENDED"
+        ]
       },
       "OrderBook": {
         "type": "object",
@@ -4526,9 +4975,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/OrderBook"
               }
             }
@@ -4561,19 +5010,41 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": ["LIMIT", "MARKET"]
+        "enum": [
+          "LIMIT",
+          "MARKET"
+        ]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED", "PENDING"]
+        "enum": [
+          "OPEN",
+          "FILLED",
+          "PARTIAL_FILL",
+          "CANCELLED",
+          "PENDING"
+        ]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": ["LIQUIDATION", "MAX_BUY"]
+        "enum": [
+          "LIQUIDATION",
+          "MAX_BUY"
+        ]
       },
       "Side": {
         "type": "string",
-        "enum": ["BUY", "SELL"]
+        "enum": [
+          "BUY",
+          "SELL"
+        ]
+      },
+      "TriggerType": {
+        "type": "string",
+        "enum": [
+          "STOP_LOSS",
+          "TAKE_PROFIT"
+        ]
       },
       "Order": {
         "type": "object",
@@ -4591,37 +5062,30 @@
           },
           "original_price": {
             "description": "If Kind is LIMIT, this is the original limit price. If Kind is MARKET, this may be 0 or omitted.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "avg_fill_price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "cancelled_quantity": {
             "description": "Quantity that was cancelled, if any.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "open_quantity": {
             "description": "Quantity that is still open, i.e., not filled or cancelled.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "original_quantity": {
             "description": "The original quantity of the order when it was created.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "filled_quantity": {
             "description": "Quantity that has been filled so far.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "filled_notional": {
             "description": "Quote quantity that has been filled so far.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "last_update_at": {
             "type": "string",
@@ -4632,8 +5096,7 @@
             "format": "date-time"
           },
           "inverse_leverage": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "side": {
             "$ref": "#/components/schemas/Side"
@@ -4664,8 +5127,10 @@
             "format": "date-time"
           },
           "trigger_price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
+          },
+          "trigger_type": {
+            "$ref": "#/components/schemas/TriggerType"
           }
         }
       },
@@ -4738,9 +5203,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Order"
               }
             }
@@ -4754,16 +5219,13 @@
         "type": "object",
         "properties": {
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "inverse_leverage": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "kind": {
             "$ref": "#/components/schemas/OrderKind"
@@ -4772,10 +5234,9 @@
             "$ref": "#/components/schemas/Side",
             "description": "Required: Must be either 'BUY' or 'SELL'"
           },
-          "position_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "position ID to use for the order. required."
+          "from_global_position": {
+            "type": "boolean",
+            "description": "use global position for the order or isolated. required."
           },
           "order_book_id": {
             "type": "string",
@@ -4793,8 +5254,10 @@
             "format": "date-time"
           },
           "trigger_price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
+          },
+          "trigger_type": {
+            "$ref": "#/components/schemas/TriggerType"
           }
         },
         "required": [
@@ -4803,19 +5266,17 @@
           "kind",
           "side",
           "order_book_id",
-          "position_id"
+          "from_global_position"
         ]
       },
       "ValidateSubmitOrderRequest": {
         "type": "object",
         "properties": {
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "tick": {
             "type": "string",
-            "format": "decimal",
             "description": "Minimum tradable increment for the selected order book"
           },
           "kind": {
@@ -4828,7 +5289,6 @@
           },
           "price": {
             "type": "string",
-            "format": "decimal",
             "description": "If kind is LIMIT, must be > 0; if MARKET it must be 0 or omitted"
           },
           "good_till_date": {
@@ -4836,13 +5296,80 @@
             "format": "date-time"
           },
           "inverse_leverage": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "user_balance": {
             "type": "string",
-            "format": "decimal",
             "description": "User balance used to ensure they can afford the requested quantity"
+          },
+          "base_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "base asset of orderbook"
+          },
+          "quote_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "quote asset of orderbook"
+          },
+          "position_assets": {
+            "type": "array",
+            "description": "Full list of assets in the position with their price and collateral weight, required when inverse_leverage < 1 for leverage health checks",
+            "items": {
+              "type": "object",
+              "title": "PositionAsset",
+              "properties": {
+                "asset_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "kind": {
+                  "$ref": "#/components/schemas/AssetKind"
+                },
+                "borrowed": {
+                  "type": "string"
+                },
+                "impending_borrows": {
+                  "type": "string"
+                },
+                "available": {
+                  "type": "string"
+                },
+                "locked": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "asset_id",
+                "kind",
+                "borrowed",
+                "impending_borrows",
+                "available",
+                "locked"
+              ]
+            }
+          },
+          "assets_config": {
+            "type": "array",
+            "description": "Configuration for the assets in the order",
+            "items": {
+              "type": "object",
+              "title": "AssetConfig",
+              "properties": {
+                "asset_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "price": {
+                  "description": "if an asset is a CURRENCY, set 1 USD price,If an asset is a BOND and the price isn't found, set to 0 USD \n You can find price details on /price/asset/{asset_id} route",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "asset_id",
+                "price"
+              ]
+            }
           }
         },
         "required": [
@@ -4851,7 +5378,8 @@
           "kind",
           "price",
           "inverse_leverage",
-          "user_balance"
+          "user_balance",
+          "asset_id"
         ]
       },
       "OrderId": {
@@ -4870,6 +5398,65 @@
             "type": "boolean"
           }
         }
+      },
+      "OrderbookStats": {
+        "type": "object",
+        "properties": {
+          "order_book_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "open_price": {
+            "type": "string",
+            "description": "Open price of the orderbook"
+          },
+          "last_price": {
+            "type": "string",
+            "description": "Price of the most recent executed trade."
+          },
+          "high_24h": {
+            "type": "string",
+            "description": "Highest price of the orderbook in the last 24 hours."
+          },
+          "low_24h": {
+            "type": "string",
+            "description": "Lowest price of the orderbook in the last 24 hours."
+          },
+          "change_24h": {
+            "type": "string",
+            "description": "Change in price of the orderbook in the last 24 hours."
+          },
+          "change_pct_24h": {
+            "type": "string",
+            "description": "Change percentage in price of the orderbook in the last 24 hours."
+          },
+          "volume_24h_base": {
+            "type": "string",
+            "description": "Total volume of the orderbook in the last 24 hours."
+          },
+          "volume_24h_usd": {
+            "type": "string",
+            "description": "Total volume of the orderbook in the last 24 hours in USD."
+          }
+        }
+      },
+      "OrderbookStatsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/OrderbookStats"
+              }
+            }
+          }
+        ]
+      },
+      "GetOrderbookStatsResponse": {
+        "$ref": "#/components/schemas/OrderbookStatsResponseEnvelope"
       },
       "EmailExistsResponseEnvelope": {
         "allOf": [
@@ -4895,9 +5482,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/OrderId"
               }
             }
@@ -4967,53 +5554,35 @@
           },
           "available": {
             "type": "string",
-            "description": "The available balance in the position for this asset that are not locked, supplied, or used as collateral",
-            "format": "decimal"
+            "description": "The available balance in the position for this asset that are not locked, supplied, or used as collateral"
           },
           "locked": {
             "type": "string",
-            "description": "The balance that has been reserved for a current order. If spent by the order, they are removed. If the order is cancelled, they are returned to the position's available balance.",
-            "format": "decimal"
+            "description": "The balance that has been reserved for a current order. If spent by the order, they are removed. If the order is cancelled, they are returned to the position's available balance."
           },
           "supplied": {
             "type": "string",
-            "description": "The balance that user has supplied to the leverage module. The user remains entitled to these assets and can withdraw them into their available balance.",
-            "format": "decimal"
-          },
-          "collateral": {
-            "type": "string",
-            "description": "The balance that has been locked or supplied, but are marked as collateral to support borrow limits and can be consumed in case of liquidation. When unmarked as collateral, the balance returns to the available balance.",
-            "format": "decimal"
-          },
-          "supplied_collateral": {
-            "type": "string",
-            "description": "The balance that have been supplied to the leverage module and marked as collateral. The user remains entitled to this balance and can withdraw it into the collateral balance, or unmark them as collateral and move them to the supplied balance.",
-            "format": "decimal"
+            "description": "The balance that user has supplied to the leverage module. The user remains entitled to these assets and can withdraw them into their available balance."
           },
           "borrowed": {
             "type": "string",
-            "description": "The total amount of debt outstanding for this position. The position's collateral + supplied_collateral must support a borrow limit sufficient to cover all borrowed assets. This position cannot be closed until all debt is fully repaid, i.e. borrowed = 0.",
-            "format": "decimal"
+            "description": "The total amount of debt outstanding for this position. This position cannot be closed until all debt is fully repaid, i.e. borrowed = 0."
           },
           "impending_borrows": {
             "type": "string",
-            "description": "The equivalent of locked balances, but for leveraged orders. If a user has an active order that would borrow assets as part of its input, then their borrow limit must be reduced until the order is executed or cancelled.",
-            "format": "decimal"
+            "description": "The equivalent of locked balances, but for leveraged orders. If a user has an active order that would borrow assets as part of its input, then their borrow limit must be reduced until the order is executed or cancelled."
           },
           "avg_entry_price": {
             "type": "string",
-            "description": "average cost per unit quantity that was paid (long positions) or received (short positions) for this asset.",
-            "format": "decimal"
+            "description": "average cost per unit quantity that was paid (long positions) or received (short positions) for this asset."
           },
           "borrow_limit": {
             "type": "string",
-            "description": "The borrow limit",
-            "format": "decimal"
+            "description": "The borrow limit"
           },
           "liquidation_threshold": {
             "type": "string",
-            "description": "The borrow limit",
-            "format": "decimal"
+            "description": "The borrow limit"
           },
           "created_at": {
             "type": "string",
@@ -5070,16 +5639,14 @@
             "type": "object",
             "description": "Assets that have been gained by stablecoin equivalence transformations. They cannot be withdrawn from the platform until converted back to the original asset.",
             "additionalProperties": {
-              "type": "string",
-              "format": "decimal"
+              "type": "string"
             }
           },
           "lost": {
             "type": "object",
             "description": "Assets that have been lost by stablecoin equivalence transformations. They can be recovered by converting back any assets gained by stablecoin equivalence transformations.",
             "additionalProperties": {
-              "type": "string",
-              "format": "decimal"
+              "type": "string"
             }
           }
         }
@@ -5117,18 +5684,6 @@
             }
           },
           "supplied": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "collateral": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "supplied_collateral": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
@@ -5243,28 +5798,19 @@
           },
           "available": {
             "type": "string",
-            "description": "The available balance in the module for this asset",
-            "format": "decimal"
+            "description": "The available balance in the module for this asset"
           },
           "supplied": {
             "type": "string",
-            "description": "The total amount supplied to the module for this asset",
-            "format": "decimal"
-          },
-          "supplied_collateral": {
-            "type": "string",
-            "description": "The amount supplied as collateral from user balances in the module for this asset",
-            "format": "decimal"
+            "description": "The total amount supplied to the module for this asset"
           },
           "virtual": {
             "type": "string",
-            "description": "Assets minted by virtual-borrowing, but not yet repaid",
-            "format": "decimal"
+            "description": "Assets minted by virtual-borrowing, but not yet repaid"
           },
           "borrowed": {
             "type": "string",
-            "description": "The total amount borrowed from the supplied but not yet repaid",
-            "format": "decimal"
+            "description": "The total amount borrowed from the supplied but not yet repaid"
           }
         }
       },
@@ -5288,11 +5834,14 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
-        "required": ["global_position_id", "asset_id", "quantity"]
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -5314,8 +5863,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -5359,7 +5907,9 @@
             "format": "uuid"
           }
         },
-        "required": ["global_position_id"]
+        "required": [
+          "global_position_id"
+        ]
       },
       "UnitedPosition": {
         "type": "object",
@@ -5383,9 +5933,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/UnitedPosition"
               }
             }
@@ -5407,11 +5957,14 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Supply": {
         "type": "object",
@@ -5429,8 +5982,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -5440,9 +5992,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Supply"
               }
             }
@@ -5464,11 +6016,14 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Withdraw": {
         "type": "object",
@@ -5486,8 +6041,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -5497,9 +6051,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Withdraw"
               }
             }
@@ -5525,10 +6079,197 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
+      },
+      "PayLeverageAccruedInterestRequest": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "PayLeverageAccruedInterest": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_accrued_interest": {
+            "type": "string"
+          }
+        }
+      },
+      "PayLeverageAccruedInterestResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PayLeverageAccruedInterest"
+              }
+            }
+          }
+        ]
+      },
+      "PayLeverageAccruedInterestResponse": {
+        "$ref": "#/components/schemas/PayLeverageAccruedInterestResponseEnvelope"
+      },
+      "ClaimLeverageAccruedInterestRequest": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimLeverageAccruedInterest": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_accrued_interest": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimLeverageAccruedInterestResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/ClaimLeverageAccruedInterest"
+              }
+            }
+          }
+        ]
+      },
+      "ClaimLeverageAccruedInterestResponse": {
+        "$ref": "#/components/schemas/ClaimLeverageAccruedInterestResponseEnvelope"
+      },
+      "PayLeverageAccruedInterestReq": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "ClaimLeverageAccruedInterestReq": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "CurrentLeverageAccruedInterest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_accrued_interest": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentLeverageAccruedInterestResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CurrentLeverageAccruedInterest"
+              }
+            }
+          }
+        ]
+      },
+      "CurrentLeverageAccruedInterestResponse": {
+        "$ref": "#/components/schemas/CurrentLeverageAccruedInterestResponseEnvelope"
       },
       "LiquidityRequest": {
         "type": "object",
@@ -5541,7 +6282,11 @@
             "type": "string"
           }
         },
-        "required": ["order_book_id", "position_id", "quantity"]
+        "required": [
+          "order_book_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "Liquidity": {
         "type": "object",
@@ -5559,16 +6304,13 @@
             "format": "uuid"
           },
           "base_quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "quote_quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "shares_quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -5578,9 +6320,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Liquidity"
               }
             }
@@ -5721,9 +6463,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Transaction"
               }
             }
@@ -5785,7 +6527,14 @@
       },
       "CandleResolution": {
         "type": "string",
-        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
+        "enum": [
+          "1m",
+          "5m",
+          "15m",
+          "1h",
+          "4h",
+          "1d"
+        ]
       },
       "Candle": {
         "type": "object",
@@ -5799,24 +6548,19 @@
             "format": "date-time"
           },
           "open": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "high": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "low": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "close": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "volume": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -5826,9 +6570,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Trade"
               }
             }
@@ -5858,8 +6602,7 @@
             "format": "uuid"
           },
           "fee_quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "order_book_id": {
             "type": "string",
@@ -5873,12 +6616,10 @@
             "type": "integer"
           },
           "price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "quantity_0": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "user_id": {
             "type": "string",
@@ -5943,8 +6684,7 @@
             "format": "uuid"
           },
           "price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "time": {
             "type": "string",
@@ -5978,21 +6718,25 @@
         "description": "Map of asset prices keyed by asset ID. Format: {\"asset_id\": {\"asset_id\": \"uuid\", \"price\": \"decimal\", \"time\": \"date-time\"}}",
         "additionalProperties": {
           "type": "object",
+          "title": "StreamedAssetPrice",
           "properties": {
             "asset_id": {
               "type": "string",
               "format": "uuid"
             },
             "price": {
-              "type": "string",
-              "format": "decimal"
+              "type": "string"
             },
             "time": {
               "type": "string",
               "format": "date-time"
             }
           },
-          "required": ["asset_id", "price", "time"]
+          "required": [
+            "asset_id",
+            "price",
+            "time"
+          ]
         },
         "example": {
           "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
@@ -6013,9 +6757,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/AssetPrice"
               }
             }
@@ -6033,8 +6777,7 @@
             "format": "uuid"
           },
           "price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "timestamp": {
             "type": "string",
@@ -6048,9 +6791,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/PoolPrice"
               }
             }
@@ -6110,12 +6853,10 @@
         "type": "object",
         "properties": {
           "price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -6169,9 +6910,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/OrderBookDepth"
               }
             }
@@ -6189,12 +6930,10 @@
             "format": "uuid"
           },
           "best_bid": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "best_ask": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "timestamp": {
             "type": "string",
@@ -6208,9 +6947,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/OrderBookTop"
               }
             }
@@ -6228,20 +6967,16 @@
             "format": "uuid"
           },
           "mid_price": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "spread": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "best_bid": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "best_ask": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -6251,9 +6986,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/OrderBookSummary"
               }
             }
@@ -6383,9 +7118,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "items": {
                   "$ref": "#/components/schemas/LeverageModuleResponse"
                 }
@@ -6403,9 +7138,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/ModuleBalance"
               }
             }
@@ -6421,9 +7156,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/PositionResponse"
               }
             }
@@ -6439,9 +7174,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/BalancesResponse"
               }
             }
@@ -6457,9 +7192,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/UserValue"
               }
             }
@@ -6475,9 +7210,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/UserInterest"
               }
             }
@@ -6608,14 +7343,17 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "position_name": {
             "type": "string"
           }
         },
-        "required": ["global_position_id", "asset_id", "quantity"]
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "NewIsolatedPositionResponseEnvelope": {
         "allOf": [
@@ -6623,9 +7361,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/Position"
               }
             }
@@ -6651,8 +7389,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
         "required": [
@@ -6685,9 +7422,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/BalanceTransfer"
               }
             }
@@ -6748,14 +7485,22 @@
             "type": "object",
             "properties": {
               "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/APIKeyResponse"
-                }
+                "$ref": "#/components/schemas/APIKeys"
               }
             }
           }
         ]
+      },
+      "APIKeys": {
+        "type": "object",
+        "properties": {
+          "api_keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/APIKeyResponse"
+            }
+          }
+        }
       },
       "GetAPIKeyResponse": {
         "$ref": "#/components/schemas/APIKeyResponseEnvelope"
@@ -6805,9 +7550,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/CreateAPIKeyData"
               }
             }
@@ -6837,9 +7582,9 @@
             "$ref": "#/components/schemas/ResponseEnvelope"
           },
           {
+            "type": "object",
             "properties": {
               "data": {
-                "type": "object",
                 "$ref": "#/components/schemas/RevokeAPIKeyData"
               }
             }
@@ -6863,6 +7608,50 @@
             "type": "boolean"
           }
         }
+      },
+      "ClosePositionResponse": {
+        "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
+      },
+      "ClosePositionRequest": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "order_book_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "position_id",
+          "order_book_id"
+        ]
+      },
+      "ClosePositionResp": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ClosePositionResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/ClosePositionResp"
+              }
+            }
+          }
+        ]
       }
     }
   }
