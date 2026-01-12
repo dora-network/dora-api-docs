@@ -34,9 +34,36 @@ periodically using the method above.
 
 ### API Key
 
-At present, API key management can only be done via DORA's API.
-We are actively working on adding this functionality to the DORA UI
-to make this easier in future releases.
+#### API Key Management via DORA UI
+
+Log into DORA as usual, using the user menu in the top right corner,
+
+![User Menu](./images/dora-ui-top-right.png)
+
+choose the account settings option from the menu.
+
+![Full User Menu](./images/dora-ui-user-menu.png)
+
+This will load the account settings page where you will be able to generate
+your API keys.
+
+![API Key Generator](./images/dora-ui-api-key-generation.png)
+
+In the `Label` box, give a name for your api, this is to help you remember what the key is for.
+
+You can optionally set an expiration date for the key. If an expiration date is set
+the key will automatically become invalid at the expiration time.
+
+Click the `Generate Key` button to generate the key, you will be presented with a
+dialog presenting you with the key id, the label you selected, and the generated key.
+
+You will be warned to save the generated key as it cannot be displayed again after
+you close the dialog.
+
+The keys you have generated will be listed below the API Key Generation section. To revoke
+any key, choose the key you want to revoke and press the `Revoke` button.
+
+#### API Key Management via API
 
 To create an API key for the first time, you will need to use your Bearer token
 to authenticate the request. Follow the steps above to obtain your authentication token.
