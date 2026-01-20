@@ -409,6 +409,25 @@ It is recommended to use the `since` parameter to specify a starting point for t
 catch up on any missed updates since your last connection. Once connected, you will receive real-time updates
 on your orders as you place them, and they are processed, filled, or cancelled.
 
+#### Closing positions
+
+Typically, to close an existing position, you would need to place a new order in the opposite direction to offset the
+existing position. For example, if you originally bought 100 units of an asset, and have a long open position,
+you would need to place a sell order for 100 units to close the position. This can be done using the `POST /v1/orders` endpoint
+as described earlier. Your order can be a market order or a limit order, depending on your preference. For example, to close
+the position immediately at the best available price, you would place a market sell order for 100 units. Alternatively, if you want to close the position at a specific price, you would place a limit sell order for 100 units at your desired price.
+
+To create a quick market order to close an existing postion, you can use the endpoint `POST /v1/positions/close`. This
+endpoint allows you to specify the id of the position and order book you want to close the position on. DORA will automatically
+generate a market order with the correct quantity and side to close the position. The request body looks like this:
+
+```json
+{
+  "position_id": "some-position-uuid", // the id of the position you want to close
+  "order_book_id": "some-orderbook-uuid" // the id of the order book you want to close the position on
+}
+```
+
 ### Ledgers
 
 The DORA platform maintains a ledger for each user, which tracks their positions, balances, and other relevant information.
@@ -478,6 +497,91 @@ To view just a list of all your global positions, you can use the endpoint:
 `GET /v1/ledger/balances/self`
 
 instead. You can also filter the positions by asset ID using the `asset_id` query parameter.
+
+### Accounts
+
+Asset positions are maintained within accounts, a user on the DORA network will
+have one global position account, and may have multiple isolated accounts. In
+the current version, the following rules apply:
+
+- When a user account is created, a global account is created for the user
+- Users can trade through the global account, and positions for each asset will be created within the global account.
+- Users cannot use leverage when trading through the global account.
+- Leverage can only be used within an isolated account.
+- An isolated account can only hold positions in the assets associated with the order book being traded with leverage.
+- Each isolated account is tied to a specific asset, and can only hold positions in that asset.
+- A user can have multiple isolated accounts, each tied to a different asset.
+- Users can transfer balances between their global account and isolated accounts.
+- Users can transfer balances between their isolated accounts.
+- Closing a position in an isolated account will automatically repay any borrows.
+- Balances transferred to an isolated account will stay in the isolated account until the user chooses to move the money
+    to another account.
+
+#### Creating isolated accounts
+
+When placing a new order, if you specify `from_global_position` as `false`, and there is no existing isolated
+position for the asset being traded, a new isolated position will be created automatically for you. The required
+funds will be transferred from your global position to the new isolated position, and the order will be placed using
+the isolated position.
+
+If an isolated position already exists for the asset being traded, and the `from_global_position` is set to `false`,
+the order will be placed using the existing isolated position, as long as there are sufficient funds available in the
+isolated position. If there are insufficient funds in the isolated position, the order will be rejected. To rectify this,
+you need to transfer more funds to the isolated position from your global position or another isolated position using the
+`POST /v1/positions/transfer_balances` endpoint.
+
+When you close a position in an isolated account, any borrowed funds will be automatically repaid, and any remaining
+balance will stay in the isolated account until you choose to transfer it to another account. As the USD balance remains
+in the isolated account, you can use it to place new orders using leverage without needing to transfer funds from your
+global position again, however, your order size will be limited based on the available balance, and the amount of
+leverage you are using.
+
+##### Example: creating an isolated position on-the-fly
+
+1. You have a global position with 5000 USD available for trading.
+2. You want to place a leveraged buy order for $100 units of a BOND1/USD using 2x leverage.
+3. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`.
+4. Since there is no existing isolated position for USD, a new isolated position is created automatically.
+5. The required funds for the order is calculated and transferred from your global position to the new isolated position.
+6. The order is placed using the new isolated position.
+
+##### Example: using an existing isolated position
+
+1. You have the above existing isolated position for \$100 of BOND1, you want to increase your position by placing another leveraged buy order for \$100 of BOND1/USD using 2x leverage.
+2. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`.
+3. Since there is an existing isolated position for USD, the order is placed using the existing isolated position.
+4. As the isolated position was created with only sufficient funds for the first order, the order is rejected due to insufficient funds.
+5. You transfer an additional $100 from your global position to the isolated position using the `POST /v1/positions/transfer_balances` endpoint.
+6. You re-submit the order, and it is successfully placed using the existing isolated position.
+
+#### Maximum leverage
+
+The maximum leverage available per asset is determined by DORA and can be obtained from the asset data using the endpoint:
+`GET /v1/assets/{asset_id}`. This information is provided in the `max_leverage` field of the asset data. This is the maximum
+leverage that can be used when trading the asset on the DORA platform.
+
+You can set the leverage on the order when placing a new order using the `inverse_leverage` field in the order request body.
+The `inverse_leverage` is a decimal value between 0 and 1.0, where 1.0 represents no leverage (i.e., trading with your own funds),
+and lower values represent higher leverage. For example, an `inverse_leverage` of 0.5 represents 2x leverage, while an `inverse_leverage` of 0.25 represents 4x leverage.
+
+Once you have created a levered position in an isolated account, you cannot adjust the leverage for that position,
+it will remain at the level set when the position was created. To change the leverage, you must close the existing
+position and create a new position in the isolated account. By closing the position, the leverage for the isolated account
+is reset, allowing you to create a new position with a different leverage level.
+
+##### Example: Setting leverage on an order
+
+1. You have a global position with 5000 USD available for trading, and you have no isolated positions.
+2. You want to place a leveraged buy order for $200 units of BOND2/USD using 4x leverage.
+3. You check the maximum leverage for BOND2 using the `GET /v1/assets/{asset_id}` endpoint, and find that the maximum leverage is 5x.
+4. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`, and `inverse_leverage` to `0.25` (which represents 4x leverage).
+5. A new isolated position is created automatically for USD, and the required funds are transferred from your global position to the new isolated position.
+6. The order is placed using the new isolated position with 4x leverage.
+7. You decide to change your leverage to 3x for the same asset.
+8. You close the existing position in the isolated account, which repays any borrowed funds and leaves any remaining balance in the isolated account.
+9. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`, and `inverse_leverage` to `0.3333` (which represents 3x leverage).
+10. The order is placed using the existing isolated position with 3x leverage.
+11. You now have a position in BOND2/USD with 3x leverage in your isolated account.
 
 ### Leverage operations
 
