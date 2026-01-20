@@ -13,9 +13,11 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**claimLeverageGetAccruedInterest**](Apis/DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
 *DefaultApi* | [**closeIsolatedPosition**](Apis/DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 *DefaultApi* | [**createAPIKeyForUser**](Apis/DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
-*DefaultApi* | [**createNewIsolatedPosition**](Apis/DefaultApi.md#createNewIsolatedPosition) | **POST** /v1/positions/new_isolated | Create a new isolated position for a user transferring available assets into the position |
+*DefaultApi* | [**createAPIKeyForUserID**](Apis/DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 *DefaultApi* | [**createOrder**](Apis/DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
+*DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
+*DefaultApi* | [**getAPIKeysForUserID**](Apis/DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user's api keys: admin or integrator only |
 *DefaultApi* | [**getAllAssetPrices**](Apis/DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
 *DefaultApi* | [**getAssetById**](Apis/DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 *DefaultApi* | [**getAssetPrice**](Apis/DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
@@ -39,18 +41,22 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**getOrderbookStatsStream**](Apis/DefaultApi.md#getOrderbookStatsStream) | **GET** /v1/orderbooks/{order_book_id}/stats/stream | Orderbook stats stream |
 *DefaultApi* | [**getOrderbookSummary**](Apis/DefaultApi.md#getOrderbookSummary) | **GET** /v1/orderbooks/{order_book_id}/summary | Get summary of an orderbook |
 *DefaultApi* | [**getOrderbookTop**](Apis/DefaultApi.md#getOrderbookTop) | **GET** /v1/orderbooks/{order_book_id}/top | Get the top price levels for a specific orderbook (L1 market depth) |
+*DefaultApi* | [**getPLForSelfByAccount**](Apis/DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 *DefaultApi* | [**getPoolPrice**](Apis/DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
 *DefaultApi* | [**getTradeById**](Apis/DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 *DefaultApi* | [**getTransactionById**](Apis/DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 *DefaultApi* | [**getTransactions**](Apis/DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
 *DefaultApi* | [**getUserById**](Apis/DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
+*DefaultApi* | [**getUserCouponPaymentsStream**](Apis/DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user's coupon payment accruals in real time |
 *DefaultApi* | [**getUserLedgerStream**](Apis/DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserOrderUpdatesStream**](Apis/DefaultApi.md#getUserOrderUpdatesStream) | **GET** /v1/user/{user_id}/orders/{order_book_id}/updates/stream | Get a snapshot of user's order updates for the given order book since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserOrdersUpdatesStreamAll**](Apis/DefaultApi.md#getUserOrdersUpdatesStreamAll) | **GET** /v1/user/{user_id}/orders/all/updates/stream | Get a snapshot of user's order updates across all order books since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserSelf**](Apis/DefaultApi.md#getUserSelf) | **GET** /v1/user/self | Get user details for the authenticated user |
 *DefaultApi* | [**getUserTransactionsStream**](Apis/DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUsersAPIKeys**](Apis/DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user's api keys |
+*DefaultApi* | [**ledgerDeposit**](Apis/DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user's account from the outside world |
+*DefaultApi* | [**ledgerWithdraw**](Apis/DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 *DefaultApi* | [**leverageGetAccruedInterestByUser**](Apis/DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
 *DefaultApi* | [**leverageIsolateCollateral**](Apis/DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user's global collateral |
 *DefaultApi* | [**leverageSupply**](Apis/DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
@@ -64,6 +70,8 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**listPositionAccountsSelf**](Apis/DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
 *DefaultApi* | [**payLeverageGetAccruedInterest**](Apis/DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 *DefaultApi* | [**revokeAPIKeyForUser**](Apis/DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
+*DefaultApi* | [**revokeAPIKeyForUserID**](Apis/DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
+*DefaultApi* | [**settleLeverageAccruedInterest**](Apis/DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
 *DefaultApi* | [**streamAssetPrices**](Apis/DefaultApi.md#streamAssetPrices) | **GET** /v1/prices/stream | Stream real-time asset prices as map objects |
 *DefaultApi* | [**streamCandleData**](Apis/DefaultApi.md#streamCandleData) | **GET** /v1/charts/{order_book_id}/candle/stream | Get a snapshot of candlestick data from date provided, and open a stream for real-time updates |
 *DefaultApi* | [**streamOrderBookBalances**](Apis/DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
@@ -96,7 +104,6 @@ All URIs are relative to *https://localhost:8084*
  - [Candle](./Models/Candle.md)
  - [CandleResolution](./Models/CandleResolution.md)
  - [ClaimLeverageAccruedInterest](./Models/ClaimLeverageAccruedInterest.md)
- - [ClaimLeverageAccruedInterestReq](./Models/ClaimLeverageAccruedInterestReq.md)
  - [ClaimLeverageAccruedInterestRequest](./Models/ClaimLeverageAccruedInterestRequest.md)
  - [ClaimLeverageAccruedInterestResponseEnvelope](./Models/ClaimLeverageAccruedInterestResponseEnvelope.md)
  - [ClosePositionRequest](./Models/ClosePositionRequest.md)
@@ -107,12 +114,17 @@ All URIs are relative to *https://localhost:8084*
  - [CreateAPIKeyData](./Models/CreateAPIKeyData.md)
  - [CreateAPIKeyRequest](./Models/CreateAPIKeyRequest.md)
  - [CreateAPIKeyResponseEnvelope](./Models/CreateAPIKeyResponseEnvelope.md)
+ - [CreateIntegratorUserRequest](./Models/CreateIntegratorUserRequest.md)
  - [CreateOrUpdateUserResponse](./Models/CreateOrUpdateUserResponse.md)
  - [CreateOrderRequest](./Models/CreateOrderRequest.md)
  - [CreateOrderResponseEnvelope](./Models/CreateOrderResponseEnvelope.md)
  - [CurrentLeverageAccruedInterest](./Models/CurrentLeverageAccruedInterest.md)
  - [CurrentLeverageAccruedInterestResponseEnvelope](./Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
+ - [DefundUserRequest](./Models/DefundUserRequest.md)
  - [EmailExistsResponseEnvelope](./Models/EmailExistsResponseEnvelope.md)
+ - [FundUser](./Models/FundUser.md)
+ - [FundUserRequest](./Models/FundUserRequest.md)
+ - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
  - [IsolateCollateralRequest](./Models/IsolateCollateralRequest.md)
@@ -140,10 +152,9 @@ All URIs are relative to *https://localhost:8084*
  - [ListTradeResponseEnvelope](./Models/ListTradeResponseEnvelope.md)
  - [ListTransactionsResponseEnvelope](./Models/ListTransactionsResponseEnvelope.md)
  - [LiveOrderbook](./Models/LiveOrderbook.md)
+ - [Margin](./Models/Margin.md)
  - [Metadata](./Models/Metadata.md)
  - [ModuleBalance](./Models/ModuleBalance.md)
- - [NewIsolatedPositionRequest](./Models/NewIsolatedPositionRequest.md)
- - [NewIsolatedPositionResponseEnvelope](./Models/NewIsolatedPositionResponseEnvelope.md)
  - [Order](./Models/Order.md)
  - [OrderBook](./Models/OrderBook.md)
  - [OrderBookBalance](./Models/OrderBookBalance.md)
@@ -163,8 +174,11 @@ All URIs are relative to *https://localhost:8084*
  - [OrderStatus](./Models/OrderStatus.md)
  - [OrderbookStats](./Models/OrderbookStats.md)
  - [OrderbookStatsResponseEnvelope](./Models/OrderbookStatsResponseEnvelope.md)
+ - [PLAccount](./Models/PLAccount.md)
+ - [PLAsset](./Models/PLAsset.md)
+ - [PLResponseEnvelope](./Models/PLResponseEnvelope.md)
+ - [PLSummary](./Models/PLSummary.md)
  - [PayLeverageAccruedInterest](./Models/PayLeverageAccruedInterest.md)
- - [PayLeverageAccruedInterestReq](./Models/PayLeverageAccruedInterestReq.md)
  - [PayLeverageAccruedInterestRequest](./Models/PayLeverageAccruedInterestRequest.md)
  - [PayLeverageAccruedInterestResponseEnvelope](./Models/PayLeverageAccruedInterestResponseEnvelope.md)
  - [PoolPrice](./Models/PoolPrice.md)
@@ -181,6 +195,9 @@ All URIs are relative to *https://localhost:8084*
  - [ResponseEnvelopeOfListAssets](./Models/ResponseEnvelopeOfListAssets.md)
  - [RevokeAPIKeyData](./Models/RevokeAPIKeyData.md)
  - [RevokeAPIKeyResponseEnvelope](./Models/RevokeAPIKeyResponseEnvelope.md)
+ - [SettleLeverageAccruedInterest](./Models/SettleLeverageAccruedInterest.md)
+ - [SettleLeverageAccruedInterestRequest](./Models/SettleLeverageAccruedInterestRequest.md)
+ - [SettleLeverageAccruedInterestResponseEnvelope](./Models/SettleLeverageAccruedInterestResponseEnvelope.md)
  - [Side](./Models/Side.md)
  - [StreamAssetsEntry](./Models/StreamAssetsEntry.md)
  - [StreamCandlesEntry](./Models/StreamCandlesEntry.md)
@@ -191,6 +208,7 @@ All URIs are relative to *https://localhost:8084*
  - [StreamPositionsEntry](./Models/StreamPositionsEntry.md)
  - [StreamTradesEntry](./Models/StreamTradesEntry.md)
  - [StreamTransactionsEntry](./Models/StreamTransactionsEntry.md)
+ - [StreamUserCouponPaymentsEntry](./Models/StreamUserCouponPaymentsEntry.md)
  - [StreamedAssetPrice](./Models/StreamedAssetPrice.md)
  - [Supply](./Models/Supply.md)
  - [SupplyRequest](./Models/SupplyRequest.md)
@@ -209,6 +227,7 @@ All URIs are relative to *https://localhost:8084*
  - [UnitePositionRequest](./Models/UnitePositionRequest.md)
  - [UnitePositionResponseEnvelope](./Models/UnitePositionResponseEnvelope.md)
  - [UnitedPosition](./Models/UnitedPosition.md)
+ - [UpdateFieldBoolean](./Models/UpdateFieldBoolean.md)
  - [UpdateFieldString](./Models/UpdateFieldString.md)
  - [UpdateRolesString](./Models/UpdateRolesString.md)
  - [UpdateUserConfigRequest](./Models/UpdateUserConfigRequest.md)
@@ -216,8 +235,11 @@ All URIs are relative to *https://localhost:8084*
  - [UserBalanceResponseEnvelope](./Models/UserBalanceResponseEnvelope.md)
  - [UserConfig](./Models/UserConfig.md)
  - [UserConfigResponseEnvelope](./Models/UserConfigResponseEnvelope.md)
+ - [UserCouponPayment](./Models/UserCouponPayment.md)
+ - [UserCreatedResponseEnvelope](./Models/UserCreatedResponseEnvelope.md)
  - [UserDeletedResponseEnvelope](./Models/UserDeletedResponseEnvelope.md)
  - [UserEnvelope](./Models/UserEnvelope.md)
+ - [UserExistsResponse](./Models/UserExistsResponse.md)
  - [UserInterest](./Models/UserInterest.md)
  - [UserInterestResponseEnvelope](./Models/UserInterestResponseEnvelope.md)
  - [UserPositionResponseEnvelope](./Models/UserPositionResponseEnvelope.md)

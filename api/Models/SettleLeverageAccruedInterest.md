@@ -1,4 +1,4 @@
-# PayLeverageAccruedInterest
+# SettleLeverageAccruedInterest
 ## Properties
 
 | Name | Type | Description | Notes |

@@ -243,6 +243,54 @@
         }
       }
     },
+    "/v1/integrators/user": {
+      "post": {
+        "summary": "Create a new user",
+        "operationId": "createUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateIntegratorUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{user_id}": {
       "get": {
         "summary": "Get user by ID (admin only)",
@@ -2012,74 +2060,6 @@
         }
       }
     },
-    "/v1/positions/new_isolated": {
-      "post": {
-        "summary": "Create a new isolated position for a user transferring available assets into the position",
-        "operationId": "createNewIsolatedPosition",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewIsolatedPositionRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Isolated Position Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NewIsolatedPositionResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. missing required fields",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict, e.g. the requested amount is not available to transfer",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/positions/transfer_balances": {
       "post": {
         "summary": "Transfer available balance between a user's accounts (e.g. global to isolated position)",
@@ -2339,6 +2319,126 @@
           },
           "404": {
             "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/deposit/{user_id}": {
+      "post": {
+        "summary": "Deposit assets into this user's account from the outside world",
+        "operationId": "ledgerDeposit",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Deposit assets into this user's account from the outside world. Note that this does not interact with any external systems; it simply adds the amount to the user's available balance in the ledger. Actual transfer of assets must be handled separately.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FundUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Deposit successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FundUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/withdraw/{user_id}": {
+      "post": {
+        "summary": "Withdraw assets from this user to the outside world",
+        "operationId": "ledgerWithdraw",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Withdraw assets from this user's account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user's available balance in the ledger. Actual transfer of assets must be handled separately.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefundUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Withdraw successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FundUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters or insufficient funds",
             "content": {
               "application/json": {
                 "schema": {
@@ -2784,6 +2884,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ClaimLeverageAccruedInterestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/leverage/accrued_interest/settle": {
+      "post": {
+        "summary": "Settle current accrued leverage interest for a specific user",
+        "operationId": "settleLeverageAccruedInterest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettleLeverageAccruedInterestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current leverage accrued interest settled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettleLeverageAccruedInterestResponse"
                 }
               }
             }
@@ -4054,6 +4213,80 @@
         }
       }
     },
+    "/v1/user/{user_id}/coupon_payments/stream": {
+      "get": {
+        "summary": "Stream user's coupon payment accruals in real time",
+        "operationId": "getUserCouponPaymentsStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User's coupon payments stream",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamUserCouponPaymentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or no coupon payments available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{user_id}/transactions/stream": {
       "get": {
         "summary": "Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates",
@@ -4340,6 +4573,112 @@
         }
       }
     },
+    "/v1/user/{user_id}/apikey": {
+      "get": {
+        "summary": "Get user's api keys: admin or integrator only",
+        "operationId": "getAPIKeysForUserID",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of existing api-keys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAPIKeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid path parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create apikey for a user",
+        "operationId": "createAPIKeyForUserID",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "text"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAPIKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "APIKey created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAPIKeyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/apikey/{key_id}/revoke": {
       "put": {
         "summary": "Revoke apikey for a user",
@@ -4362,6 +4701,112 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RevokeAPIKeyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user/{user_id}/apikey/{key_id}/revoke": {
+      "put": {
+        "summary": "Revoke apikey for a user: admin or integrator only",
+        "operationId": "revokeAPIKeyForUserID",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "text"
+            }
+          },
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIKey revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeAPIKeyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/pl/self": {
+      "get": {
+        "summary": "Get account-by-account PL breakdown for the logged in user",
+        "operationId": "getPLForSelfByAccount",
+        "responses": {
+          "200": {
+            "description": "List of user accounts with a PL breakdown by asset and summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PLResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user is not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
                 }
               }
             }
@@ -4626,6 +5071,47 @@
           }
         }
       },
+      "UserCouponPayment": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "coupon_payment_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pending": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "completed": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ended_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "ListCouponPaymentsResponseEnvelope": {
         "allOf": [
           {
@@ -4649,19 +5135,11 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": [
-          "BOND",
-          "CURRENCY",
-          "INTEREST",
-          "POOL_SHARE"
-        ]
+        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
       },
       "BondKind": {
         "type": "string",
-        "enum": [
-          "COUPON-PAYING",
-          "PRINCIPAL-ONLY"
-        ]
+        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
       },
       "UserRole": {
         "type": "string",
@@ -4674,6 +5152,66 @@
           "TRADER",
           "INTEGRATOR"
         ]
+      },
+      "CreateIntegratorUserRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "native_asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "photo_url": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "provider_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "required": ["email", "name", "native_asset_id"]
+          },
+          {
+            "required": [
+              "email",
+              "name",
+              "native_asset_id",
+              "provider",
+              "provider_id"
+            ]
+          }
+        ]
+      },
+      "UserCreatedResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CreateOrUpdateUserResponse"
+              }
+            }
+          }
+        ]
+      },
+      "UserCreatedResponse": {
+        "$ref": "#/components/schemas/UserCreatedResponseEnvelope"
       },
       "UserEnvelope": {
         "allOf": [
@@ -4803,6 +5341,12 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "show_tutorial_cards": {
+            "type": "boolean"
+          },
+          "notifications_enabled": {
+            "type": "boolean"
           }
         }
       },
@@ -4827,6 +5371,12 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "show_tutorial_cards": {
+            "type": "boolean"
+          },
+          "notifications_enabled": {
+            "type": "boolean"
           }
         }
       },
@@ -4841,11 +5391,17 @@
           "timezone": {
             "$ref": "#/components/schemas/UpdateFieldString",
             "description": "User's timezone, e.g., 'America/New_York', or an offset."
+          },
+          "show_tutorial_cards": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to show the tutorial."
+          },
+          "notifications_enabled": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to show the notifications."
           }
         },
-        "required": [
-          "timezone"
-        ]
+        "required": ["timezone"]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -4871,9 +5427,7 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": [
-          "update"
-        ]
+        "required": ["update"]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -4888,17 +5442,26 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": [
-          "update"
-        ]
+        "required": ["update"]
+      },
+      "UpdateFieldBoolean": {
+        "type": "object",
+        "description": "A generic struct to handle optional updates for boolean fields in user requests.",
+        "properties": {
+          "update": {
+            "type": "boolean",
+            "description": "Whether to update the field."
+          },
+          "value": {
+            "type": "boolean",
+            "description": "The new value to set for the field."
+          }
+        },
+        "required": ["update"]
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": [
-          "CLOSED",
-          "OPEN",
-          "SUSPENDED"
-        ]
+        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
       },
       "OrderBook": {
         "type": "object",
@@ -5010,41 +5573,23 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": [
-          "LIMIT",
-          "MARKET"
-        ]
+        "enum": ["LIMIT", "MARKET"]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": [
-          "OPEN",
-          "FILLED",
-          "PARTIAL_FILL",
-          "CANCELLED",
-          "PENDING"
-        ]
+        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED", "PENDING"]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": [
-          "LIQUIDATION",
-          "MAX_BUY"
-        ]
+        "enum": ["LIQUIDATION", "MAX_BUY"]
       },
       "Side": {
         "type": "string",
-        "enum": [
-          "BUY",
-          "SELL"
-        ]
+        "enum": ["BUY", "SELL"]
       },
       "TriggerType": {
         "type": "string",
-        "enum": [
-          "STOP_LOSS",
-          "TAKE_PROFIT"
-        ]
+        "enum": ["STOP_LOSS", "TAKE_PROFIT"]
       },
       "Order": {
         "type": "object",
@@ -5365,10 +5910,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "asset_id",
-                "price"
-              ]
+              "required": ["asset_id", "price"]
             }
           }
         },
@@ -5388,6 +5930,20 @@
           "order_id": {
             "type": "string",
             "format": "uuid"
+          }
+        }
+      },
+      "UserExistsResponse": {
+        "type": "object",
+        "properties": {
+          "email_exists": {
+            "type": "boolean"
+          },
+          "firebase_set": {
+            "type": "boolean"
+          },
+          "should_create_user": {
+            "type": "boolean"
           }
         }
       },
@@ -5467,7 +6023,7 @@
             "type": "object",
             "properties": {
               "data": {
-                "type": "boolean"
+                "$ref": "#/components/schemas/UserExistsResponse"
               }
             }
           }
@@ -5630,6 +6186,27 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/StreamPositionsEntry"
+        }
+      },
+      "StreamUserCouponPaymentsEntry": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StreamEntry"
+          },
+          {
+            "properties": {
+              "Val": {
+                "$ref": "#/components/schemas/UserCouponPayment"
+              }
+            }
+          }
+        ]
+      },
+      "StreamUserCouponPaymentsResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/StreamUserCouponPaymentsEntry"
         }
       },
       "TransformedAssets": {
@@ -5837,11 +6414,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "global_position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["global_position_id", "asset_id", "quantity"]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -5907,9 +6480,7 @@
             "format": "uuid"
           }
         },
-        "required": [
-          "global_position_id"
-        ]
+        "required": ["global_position_id"]
       },
       "UnitedPosition": {
         "type": "object",
@@ -5945,6 +6516,75 @@
       "UnitePositionResponse": {
         "$ref": "#/components/schemas/UnitePositionResponseEnvelope"
       },
+      "FundUserRequest": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          }
+        },
+        "required": ["asset_id", "quantity"]
+      },
+      "DefundUserRequest": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          }
+        },
+        "required": ["asset_id", "quantity"]
+      },
+      "FundUser": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "final_quantity": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        }
+      },
+      "FundUserResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/FundUser"
+              }
+            }
+          }
+        ]
+      },
+      "FundUserResponse": {
+        "$ref": "#/components/schemas/FundUserResponseEnvelope"
+      },
       "SupplyRequest": {
         "type": "object",
         "properties": {
@@ -5960,11 +6600,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["position_id", "asset_id", "quantity"]
       },
       "Supply": {
         "type": "object",
@@ -6019,11 +6655,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
+        "required": ["position_id", "asset_id", "quantity"]
       },
       "Withdraw": {
         "type": "object",
@@ -6114,7 +6746,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "current_accrued_interest": {
+          "current_accrued_interest_usd": {
             "type": "string"
           }
         }
@@ -6168,7 +6800,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "current_accrued_interest": {
+          "current_accrued_interest_usd": {
             "type": "string"
           }
         }
@@ -6191,31 +6823,44 @@
       "ClaimLeverageAccruedInterestResponse": {
         "$ref": "#/components/schemas/ClaimLeverageAccruedInterestResponseEnvelope"
       },
-      "PayLeverageAccruedInterestReq": {
-        "type": "object",
-        "properties": {
-          "position_id": {
-            "type": "string",
-            "format": "uuid"
+      "SettleLeverageAccruedInterestResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
           },
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SettleLeverageAccruedInterest"
+                }
+              }
+            }
           }
-        },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
         ]
       },
-      "ClaimLeverageAccruedInterestReq": {
+      "SettleLeverageAccruedInterestResponse": {
+        "$ref": "#/components/schemas/SettleLeverageAccruedInterestResponseEnvelope"
+      },
+      "SettleLeverageAccruedInterestRequest": {
         "type": "object",
         "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "position_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "SettleLeverageAccruedInterest": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -6223,15 +6868,14 @@
             "type": "string",
             "format": "uuid"
           },
-          "quantity": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_accrued_interest_usd": {
             "type": "string"
           }
-        },
-        "required": [
-          "position_id",
-          "asset_id",
-          "quantity"
-        ]
+        }
       },
       "CurrentLeverageAccruedInterest": {
         "type": "object",
@@ -6248,7 +6892,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "current_accrued_interest": {
+          "current_accrued_interest_usd": {
             "type": "string"
           }
         }
@@ -6282,11 +6926,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "order_book_id",
-          "position_id",
-          "quantity"
-        ]
+        "required": ["order_book_id", "position_id", "quantity"]
       },
       "Liquidity": {
         "type": "object",
@@ -6527,14 +7167,7 @@
       },
       "CandleResolution": {
         "type": "string",
-        "enum": [
-          "1m",
-          "5m",
-          "15m",
-          "1h",
-          "4h",
-          "1d"
-        ]
+        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
       },
       "Candle": {
         "type": "object",
@@ -6732,11 +7365,7 @@
               "format": "date-time"
             }
           },
-          "required": [
-            "asset_id",
-            "price",
-            "time"
-          ]
+          "required": ["asset_id", "price", "time"]
         },
         "example": {
           "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
@@ -7331,48 +7960,6 @@
           }
         ]
       },
-      "NewIsolatedPositionRequest": {
-        "type": "object",
-        "properties": {
-          "global_position_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "type": "string"
-          },
-          "position_name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "global_position_id",
-          "asset_id",
-          "quantity"
-        ]
-      },
-      "NewIsolatedPositionResponseEnvelope": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/Position"
-              }
-            }
-          }
-        ]
-      },
-      "NewIsolatedPositionResponse": {
-        "$ref": "#/components/schemas/NewIsolatedPositionResponseEnvelope"
-      },
       "TransferBalancesRequest": {
         "type": "object",
         "properties": {
@@ -7624,10 +8211,7 @@
             "format": "uuid"
           }
         },
-        "required": [
-          "position_id",
-          "order_book_id"
-        ]
+        "required": ["position_id", "order_book_id"]
       },
       "ClosePositionResp": {
         "type": "object",
@@ -7652,6 +8236,161 @@
             }
           }
         ]
+      },
+      "Margin": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "description": "The total margin available from this position.",
+            "type": "string",
+            "format": "decimal"
+          },
+          "used": {
+            "description": "The amount of margin used from this position.",
+            "type": "string",
+            "format": "decimal"
+          },
+          "remaining": {
+            "description": "The margin remaining available from this position.",
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
+      "PLAsset": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "description": "The symbol of the asset",
+            "type": "string"
+          },
+          "side": {
+            "description": "The side of the position (LONG or SHORT)",
+            "type": "string",
+            "enum": ["LONG", "SHORT"]
+          },
+          "avg_entry_price": {
+            "description": "The average entry price of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "mark_price": {
+            "description": "The current mark price for the asset to calculate daily PL. This is usually the close price of the previous day",
+            "type": "string",
+            "format": "decimal"
+          },
+          "liquidation_price": {
+            "description": "The liquidation price of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "available": {
+            "description": "The available quantity in units of the asset",
+            "type": "string",
+            "format": "decimal"
+          },
+          "borrowed": {
+            "description": "The borrowed quantity in units of the asset",
+            "type": "string",
+            "format": "decimal"
+          },
+          "margin": {
+            "$ref": "#/components/schemas/Margin"
+          },
+          "unrealized_pl": {
+            "description": "The unrealized profit or loss of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "leverage_limit": {
+            "description": "The leverage limit for the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "tp": {
+            "description": "The take profit price set for the position, if any",
+            "type": "string",
+            "format": "decimal"
+          },
+          "sl": {
+            "description": "The stop loss price set for the position, if any",
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
+      "PLSummary": {
+        "type": "object",
+        "properties": {
+          "leverage": {
+            "description": "The leverage used to obtain the position on the isolated account",
+            "type": "string",
+            "format": "decimal"
+          },
+          "account_equity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "available": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "health": {
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
+      "PLAccount": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "description": "The ID of the account holding the position",
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_name": {
+            "description": "The name of the account holding the position",
+            "type": "string"
+          },
+          "is_global": {
+            "description": "Whether the account is the global or an isolated account",
+            "type": "boolean"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PLAsset"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/PLSummary"
+          }
+        }
+      },
+      "PLAccounts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PLAccount"
+        }
+      },
+      "PLResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/PLAccounts"
+              }
+            }
+          }
+        ]
+      },
+      "PLResponse": {
+        "$ref": "#/components/schemas/PLResponseEnvelope"
       }
     }
   }

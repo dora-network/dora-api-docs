@@ -1,9 +1,9 @@
-# NewIsolatedPositionResponseEnvelope
+# UserCreatedResponseEnvelope
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **data** | [**Position**](Position.md) |  | [optional] [default to null] |
+| **data** | [**CreateOrUpdateUserResponse**](CreateOrUpdateUserResponse.md) |  | [optional] [default to null] |
 | **error** | **String** | The error message. Present for error (non-2xx) responses. | [optional] [default to null] |
 | **metadata** | [**Metadata**](Metadata.md) | Metadata about the response, including status code and trace information. | [optional] [default to null] |
 
