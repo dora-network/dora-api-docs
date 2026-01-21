@@ -9,6 +9,7 @@ Models/AssetKind.md
 Models/AssetPrice.md
 Models/AssetPriceResponseEnvelope.md
 Models/AssetRequestError.md
+Models/AssetYTM.md
 Models/BalanceTransfer.md
 Models/BalancesResponse.md
 Models/Bond.md
@@ -39,6 +40,7 @@ Models/FundUser.md
 Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
 Models/GetAssetByIDResponseEnvelope.md
+Models/GetAssetYTMByIDResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
 Models/IsolateCollateralRequest.md
 Models/IsolateCollateralResponse.md

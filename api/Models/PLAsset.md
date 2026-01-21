@@ -15,6 +15,10 @@
 | **leverage\_limit** | **BigDecimal** | The leverage limit for the position | [optional] [default to null] |
 | **tp** | **BigDecimal** | The take profit price set for the position, if any | [optional] [default to null] |
 | **sl** | **BigDecimal** | The stop loss price set for the position, if any | [optional] [default to null] |
+| **initial\_capital** | **BigDecimal** | The initial capital of the position | [optional] [default to null] |
+| **impending\_borrows** | **BigDecimal** | The impending borrows of the position | [optional] [default to null] |
+| **locked** | **BigDecimal** | The locked amount of the position | [optional] [default to null] |
+| **unused\_collateral** | **BigDecimal** | The unused collateral of the position | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

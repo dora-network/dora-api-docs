@@ -243,6 +243,56 @@
         }
       }
     },
+    "/v1/assets/{asset_id}/ytm": {
+      "get": {
+        "summary": "Get annualized yield to maturity for a bond asset",
+        "operationId": "getAssetYTMById",
+        "security": [],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Asset YTM details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAssetYTMByIDResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Asset not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/integrators/user": {
       "post": {
         "summary": "Create a new user",
@@ -5023,6 +5073,43 @@
       "GetAssetByIDResponse": {
         "$ref": "#/components/schemas/GetAssetByIDResponseEnvelope"
       },
+      "AssetYTM": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "current_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current_price": {
+            "type": "string"
+          },
+          "yield_to_maturity": {
+            "type": "string"
+          }
+        }
+      },
+      "GetAssetYTMByIDResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AssetYTM"
+              }
+            }
+          }
+        ]
+      },
+      "GetAssetYTMByIDResponse": {
+        "$ref": "#/components/schemas/GetAssetYTMByIDResponseEnvelope"
+      },
       "CouponPayment": {
         "type": "object",
         "properties": {
@@ -5135,11 +5222,19 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
+        "enum": [
+          "BOND",
+          "CURRENCY",
+          "INTEREST",
+          "POOL_SHARE"
+        ]
       },
       "BondKind": {
         "type": "string",
-        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
+        "enum": [
+          "COUPON-PAYING",
+          "PRINCIPAL-ONLY"
+        ]
       },
       "UserRole": {
         "type": "string",
@@ -5182,7 +5277,11 @@
         },
         "oneOf": [
           {
-            "required": ["email", "name", "native_asset_id"]
+            "required": [
+              "email",
+              "name",
+              "native_asset_id"
+            ]
           },
           {
             "required": [
@@ -5401,7 +5500,9 @@
             "description": "Optional: Whether to show the notifications."
           }
         },
-        "required": ["timezone"]
+        "required": [
+          "timezone"
+        ]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -5427,7 +5528,9 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -5442,7 +5545,9 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateFieldBoolean": {
         "type": "object",
@@ -5457,11 +5562,17 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
+        "enum": [
+          "CLOSED",
+          "OPEN",
+          "SUSPENDED"
+        ]
       },
       "OrderBook": {
         "type": "object",
@@ -5573,23 +5684,41 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": ["LIMIT", "MARKET"]
+        "enum": [
+          "LIMIT",
+          "MARKET"
+        ]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED", "PENDING"]
+        "enum": [
+          "OPEN",
+          "FILLED",
+          "PARTIAL_FILL",
+          "CANCELLED",
+          "PENDING"
+        ]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": ["LIQUIDATION", "MAX_BUY"]
+        "enum": [
+          "LIQUIDATION",
+          "MAX_BUY"
+        ]
       },
       "Side": {
         "type": "string",
-        "enum": ["BUY", "SELL"]
+        "enum": [
+          "BUY",
+          "SELL"
+        ]
       },
       "TriggerType": {
         "type": "string",
-        "enum": ["STOP_LOSS", "TAKE_PROFIT"]
+        "enum": [
+          "STOP_LOSS",
+          "TAKE_PROFIT"
+        ]
       },
       "Order": {
         "type": "object",
@@ -5910,7 +6039,10 @@
                   "type": "string"
                 }
               },
-              "required": ["asset_id", "price"]
+              "required": [
+                "asset_id",
+                "price"
+              ]
             }
           }
         },
@@ -6414,7 +6546,11 @@
             "type": "string"
           }
         },
-        "required": ["global_position_id", "asset_id", "quantity"]
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -6480,7 +6616,9 @@
             "format": "uuid"
           }
         },
-        "required": ["global_position_id"]
+        "required": [
+          "global_position_id"
+        ]
       },
       "UnitedPosition": {
         "type": "object",
@@ -6528,7 +6666,10 @@
             "format": "decimal"
           }
         },
-        "required": ["asset_id", "quantity"]
+        "required": [
+          "asset_id",
+          "quantity"
+        ]
       },
       "DefundUserRequest": {
         "type": "object",
@@ -6542,7 +6683,10 @@
             "format": "decimal"
           }
         },
-        "required": ["asset_id", "quantity"]
+        "required": [
+          "asset_id",
+          "quantity"
+        ]
       },
       "FundUser": {
         "type": "object",
@@ -6600,7 +6744,11 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Supply": {
         "type": "object",
@@ -6655,7 +6803,11 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Withdraw": {
         "type": "object",
@@ -6926,7 +7078,11 @@
             "type": "string"
           }
         },
-        "required": ["order_book_id", "position_id", "quantity"]
+        "required": [
+          "order_book_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "Liquidity": {
         "type": "object",
@@ -7167,7 +7323,14 @@
       },
       "CandleResolution": {
         "type": "string",
-        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
+        "enum": [
+          "1m",
+          "5m",
+          "15m",
+          "1h",
+          "4h",
+          "1d"
+        ]
       },
       "Candle": {
         "type": "object",
@@ -7365,7 +7528,11 @@
               "format": "date-time"
             }
           },
-          "required": ["asset_id", "price", "time"]
+          "required": [
+            "asset_id",
+            "price",
+            "time"
+          ]
         },
         "example": {
           "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
@@ -8211,7 +8378,10 @@
             "format": "uuid"
           }
         },
-        "required": ["position_id", "order_book_id"]
+        "required": [
+          "position_id",
+          "order_book_id"
+        ]
       },
       "ClosePositionResp": {
         "type": "object",
@@ -8267,7 +8437,10 @@
           "side": {
             "description": "The side of the position (LONG or SHORT)",
             "type": "string",
-            "enum": ["LONG", "SHORT"]
+            "enum": [
+              "LONG",
+              "SHORT"
+            ]
           },
           "avg_entry_price": {
             "description": "The average entry price of the position",
@@ -8316,6 +8489,26 @@
             "description": "The stop loss price set for the position, if any",
             "type": "string",
             "format": "decimal"
+          },
+          "initial_capital": {
+            "description": "The initial capital of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "impending_borrows": {
+            "description": "The impending borrows of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "locked": {
+            "description": "The locked amount of the position",
+            "type": "string",
+            "format": "decimal"
+          },
+          "unused_collateral": {
+            "description": "The unused collateral of the position",
+            "type": "string",
+            "format": "decimal"
           }
         }
       },
@@ -8357,7 +8550,7 @@
             "description": "Whether the account is the global or an isolated account",
             "type": "boolean"
           },
-          "rows": {
+          "assets": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PLAsset"

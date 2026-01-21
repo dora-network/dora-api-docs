@@ -21,6 +21,7 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**getAllAssetPrices**](Apis/DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
 *DefaultApi* | [**getAssetById**](Apis/DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 *DefaultApi* | [**getAssetPrice**](Apis/DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
+*DefaultApi* | [**getAssetYTMById**](Apis/DefaultApi.md#getAssetYTMById) | **GET** /v1/assets/{asset_id}/ytm | Get annualized yield to maturity for a bond asset |
 *DefaultApi* | [**getAssetsStream**](Apis/DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 *DefaultApi* | [**getCandleData**](Apis/DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 *DefaultApi* | [**getCouponPaymentsByAssetId**](Apis/DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
@@ -96,6 +97,7 @@ All URIs are relative to *https://localhost:8084*
  - [AssetPrice](./Models/AssetPrice.md)
  - [AssetPriceResponseEnvelope](./Models/AssetPriceResponseEnvelope.md)
  - [AssetRequestError](./Models/AssetRequestError.md)
+ - [AssetYTM](./Models/AssetYTM.md)
  - [BalanceTransfer](./Models/BalanceTransfer.md)
  - [BalancesResponse](./Models/BalancesResponse.md)
  - [Bond](./Models/Bond.md)
@@ -126,6 +128,7 @@ All URIs are relative to *https://localhost:8084*
  - [FundUserRequest](./Models/FundUserRequest.md)
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
+ - [GetAssetYTMByIDResponseEnvelope](./Models/GetAssetYTMByIDResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
  - [IsolateCollateralRequest](./Models/IsolateCollateralRequest.md)
  - [IsolateCollateralResponse](./Models/IsolateCollateralResponse.md)
