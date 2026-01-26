@@ -247,8 +247,9 @@ you can use the endpoint: `GET /v1/price/asset/{asset_id}`.
 >
 > When a market order is placed, it is executed at the best available price in the liquidity pool. If the size of the market order
 > is sufficiently large, it may impact the price of the asset in the liquidity pool, and move the price towards the top of the order book.
-> If this happens, the market order may be partially filled by the liquidity pool, and the remaining quantity may be filled by limit
-> orders in the order book at the new price level.
+> If this happens, the market order may be partially filled by the liquidity pool until the price reaches the top of the order book, at
+> which point, the resting orders on the order book are matched against the liquidity pool until they are filled. The remaining quantity of
+> the market order is then filled at the new price level until it is completely filled, or the price moves an reaches the new top of the order book.
 >
 > When a limit order is placed, the matching engine will check the liquidity pool for the best available price. If the price set by
 > the liquidity pool is better than the limit price set by the user, the order will be filled at the liquidity pool price.
@@ -256,8 +257,9 @@ you can use the endpoint: `GET /v1/price/asset/{asset_id}`.
 > conditions are met.
 >
 > It is possible for large limit orders to impact the liquidity pool price as well, if the order size is sufficiently large.
-> In this case, the limit order may be partially filled by the liquidity pool, and the remaining quantity may be filled by
-> other limit orders in the order book at the new price level.
+> In this case, the limit order will be filled by the liquidity pool, if the pool price moves enough to trigger the next level of
+> orders on the order book, they will continue to be filled and move the price until the orders on the order book are exhausted,
+> and the price has not moved sufficiently to match against the top of the order book.
 >
 > It is also important to note that the mid price calculated from the best bid and ask prices in the order book may not be better
 > than the liquidity pool price. This is why it is recommended to use the price stream or price snapshot endpoints to determine
