@@ -233,6 +233,36 @@ This endpoint is useful for tracking the history of trades and understanding mar
 `GET /v1/prices/stream?[since=YYYY-MM-DDTHH:mm:ssZZZ]` provides the latest price updates for all assets on the DORA platform.
 This endpoint is useful for tracking the current price of assets and understanding market trends.
 
+It is also possible to filter the price stream by specific asset IDs using the `asset_id` query parameter
+`GET /v1/prices/stream?asset_id={asset_id1}`.
+
+To get a one-time snapshot of the current prices for all assets, you can use the endpoint: `GET /v1/price` which returns
+the latest price for all assets on the DORA platform. If you want a one-time snapshot of the price for a specific asset only,
+you can use the endpoint: `GET /v1/price/asset/{asset_id}`.
+
+> **Note**: It is important to note that the price stream, or price snapshot endpoints should be used to get the latest price
+> an asset is trading at on it's associated order book. This is due to the liquidity pool model used by DORA, where each order book
+> is backed by a liquidity pool that determines the price of the asset based on supply and demand. All orders, whether market or limit
+> orders, are matched against the liquidity pool.
+>
+> When a market order is placed, it is executed at the best available price in the liquidity pool. If the size of the market order
+> is sufficiently large, it may impact the price of the asset in the liquidity pool, and move the price towards the top of the order book.
+> If this happens, the market order may be partially filled by the liquidity pool, and the remaining quantity may be filled by limit
+> orders in the order book at the new price level.
+>
+> When a limit order is placed, the matching engine will check the liquidity pool for the best available price. If the price set by
+> the liquidity pool is better than the limit price set by the user, the order will be filled at the liquidity pool price.
+> If the limit price is better than the liquidity pool price, the order will be added to the order book and matched when the price
+> conditions are met.
+>
+> It is possible for large limit orders to impact the liquidity pool price as well, if the order size is sufficiently large.
+> In this case, the limit order may be partially filled by the liquidity pool, and the remaining quantity may be filled by
+> other limit orders in the order book at the new price level.
+>
+> It is also important to note that the mid price calculated from the best bid and ask prices in the order book may not be better
+> than the liquidity pool price. This is why it is recommended to use the price stream or price snapshot endpoints to determine
+> the latest asset price when market making or trading on the DORA platform.
+
 `GET /v1/orderbook/{orderbook_id}/balances/stream?[since=YYYY-MM-DDTHH:mm:ssZZZ]` provides updates on the balances of the base and
 quote asset of the order book. The balances provide a view of the current liquidity available in the AMM pool associated with
 the order book.
