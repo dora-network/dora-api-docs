@@ -8,8 +8,8 @@
 | **asset\_id** | **UUID** |  | [optional] [default to null] |
 | **coupon\_payment\_id** | **UUID** |  | [optional] [default to null] |
 | **seq** | **Long** |  | [optional] [default to null] |
-| **pending** | **BigDecimal** |  | [optional] [default to null] |
-| **completed** | **BigDecimal** |  | [optional] [default to null] |
+| **pending** | **String** |  | [optional] [default to null] |
+| **completed** | **String** |  | [optional] [default to null] |
 | **started\_at** | **Date** |  | [optional] [default to null] |
 | **ended\_at** | **Date** |  | [optional] [default to null] |
 

@@ -9,7 +9,7 @@
 | **decimals** | **Integer** |  | [optional] [default to null] |
 | **fractionalized\_units** | **Integer** |  | [optional] [default to null] |
 | **description** | **String** |  | [optional] [default to null] |
-| **liquidation\_threshold** | **BigDecimal** |  | [optional] [default to null] |
+| **liquidation\_weight** | **BigDecimal** |  | [optional] [default to null] |
 | **maturity\_id** | **UUID** |  | [optional] [default to null] |
 | **max\_supply** | **Integer** |  | [optional] [default to null] |
 | **max\_utilization** | **Integer** |  | [optional] [default to null] |

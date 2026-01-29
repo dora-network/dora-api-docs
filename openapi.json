@@ -4929,7 +4929,7 @@
           "description": {
             "type": "string"
           },
-          "liquidation_threshold": {
+          "liquidation_weight": {
             "type": "number"
           },
           "maturity_id": {
@@ -5182,12 +5182,10 @@
             "format": "int64"
           },
           "pending": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "completed": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "started_at": {
             "type": "string",
@@ -5198,6 +5196,56 @@
             "format": "date-time"
           }
         }
+      },
+      "UserCouponPaymentAssetSummary": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pending": {
+            "type": "string"
+          },
+          "completed": {
+            "type": "string"
+          }
+        }
+      },
+      "UserCouponPaymentsResponseData": {
+        "type": "object",
+        "properties": {
+          "coupon_payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserCouponPayment"
+            }
+          },
+          "summary_by_asset": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserCouponPaymentAssetSummary"
+            }
+          }
+        }
+      },
+      "ListUserCouponPaymentsResponseEnvelope": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/UserCouponPaymentsResponseData"
+              }
+            }
+          }
+        ]
+      },
+      "ListUserCouponPaymentsResponse": {
+        "$ref": "#/components/schemas/ListUserCouponPaymentsResponseEnvelope"
       },
       "ListCouponPaymentsResponseEnvelope": {
         "allOf": [
@@ -6336,9 +6384,20 @@
         ]
       },
       "StreamUserCouponPaymentsResponse": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/StreamUserCouponPaymentsEntry"
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StreamUserCouponPaymentsEntry"
+            }
+          },
+          "summary_by_asset": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserCouponPaymentAssetSummary"
+            }
+          }
         }
       },
       "TransformedAssets": {
@@ -6662,8 +6721,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
         "required": [
@@ -6679,8 +6737,7 @@
             "format": "uuid"
           },
           "quantity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         },
         "required": [
@@ -7521,6 +7578,9 @@
               "format": "uuid"
             },
             "price": {
+              "type": "string"
+            },
+            "ytm": {
               "type": "string"
             },
             "time": {
@@ -8412,18 +8472,15 @@
         "properties": {
           "available": {
             "description": "The total margin available from this position.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "used": {
             "description": "The amount of margin used from this position.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "remaining": {
             "description": "The margin remaining available from this position.",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -8444,71 +8501,58 @@
           },
           "avg_entry_price": {
             "description": "The average entry price of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "mark_price": {
             "description": "The current mark price for the asset to calculate daily PL. This is usually the close price of the previous day",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "liquidation_price": {
             "description": "The liquidation price of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "available": {
             "description": "The available quantity in units of the asset",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "borrowed": {
             "description": "The borrowed quantity in units of the asset",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "margin": {
             "$ref": "#/components/schemas/Margin"
           },
           "unrealized_pl": {
             "description": "The unrealized profit or loss of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "leverage_limit": {
             "description": "The leverage limit for the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "tp": {
             "description": "The take profit price set for the position, if any",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "sl": {
             "description": "The stop loss price set for the position, if any",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "initial_capital": {
             "description": "The initial capital of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "impending_borrows": {
             "description": "The impending borrows of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "locked": {
             "description": "The locked amount of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "unused_collateral": {
             "description": "The unused collateral of the position",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           }
         }
       },
@@ -8517,20 +8561,19 @@
         "properties": {
           "leverage": {
             "description": "The leverage used to obtain the position on the isolated account",
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "account_equity": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "available": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
           },
           "health": {
-            "type": "string",
-            "format": "decimal"
+            "type": "string"
+          },
+          "ltv": {
+            "type": "string"
           }
         }
       },

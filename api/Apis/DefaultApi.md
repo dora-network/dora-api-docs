@@ -1131,7 +1131,7 @@ Get user by ID (admin only)
 
 <a name="getUserCouponPaymentsStream"></a>
 # **getUserCouponPaymentsStream**
-> List getUserCouponPaymentsStream(user\_id)
+> StreamUserCouponPaymentsResponse getUserCouponPaymentsStream(user\_id)
 
 Stream user&#39;s coupon payment accruals in real time
 
@@ -1143,7 +1143,7 @@ Stream user&#39;s coupon payment accruals in real time
 
 ### Return type
 
-[**List**](../Models/StreamUserCouponPaymentsEntry.md)
+[**StreamUserCouponPaymentsResponse**](../Models/StreamUserCouponPaymentsResponse.md)
 
 ### Authorization
 

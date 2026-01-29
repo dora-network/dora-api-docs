@@ -66,6 +66,7 @@ Models/ListPositionAccountsResponseEnvelope.md
 Models/ListPositionsResponse.md
 Models/ListTradeResponseEnvelope.md
 Models/ListTransactionsResponseEnvelope.md
+Models/ListUserCouponPaymentsResponseEnvelope.md
 Models/LiveOrderbook.md
 Models/Margin.md
 Models/Metadata.md
@@ -124,6 +125,7 @@ Models/StreamPositionsEntry.md
 Models/StreamTradesEntry.md
 Models/StreamTransactionsEntry.md
 Models/StreamUserCouponPaymentsEntry.md
+Models/StreamUserCouponPaymentsResponse.md
 Models/StreamedAssetPrice.md
 Models/Supply.md
 Models/SupplyRequest.md
@@ -151,6 +153,8 @@ Models/UserBalanceResponseEnvelope.md
 Models/UserConfig.md
 Models/UserConfigResponseEnvelope.md
 Models/UserCouponPayment.md
+Models/UserCouponPaymentAssetSummary.md
+Models/UserCouponPaymentsResponseData.md
 Models/UserCreatedResponseEnvelope.md
 Models/UserDeletedResponseEnvelope.md
 Models/UserEnvelope.md
