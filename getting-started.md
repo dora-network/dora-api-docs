@@ -25,7 +25,7 @@ Click on the `COPY TOKEN` button to copy your authentication token to the clipbo
 You can then use this token to authenticate your API requests by including it in the
 `Authorization` header as follows:
 
-```
+```html
 Authorization: Bearer <your-authentication-token>
 ```
 
@@ -385,8 +385,8 @@ This endpoint allows you to submit a new order to the specified order book. The 
   "order_book_id": "some-orderbook-id", // this must be a uuid v7 id of the order book you want to place the order on
   "order_modifiers": [
     "MAX_BUY"
-  ] // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
-  good_till_date: "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
+  ], // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
+  "good_till_date"": "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
   "trigger_price": "95.0", // optional trigger price for conditional orders, decimal value expressed as a string
   "trigger_type": "STOP_LOSS" // optional trigger type for conditional orders, can be "STOP_LOSS" or "TAKE_PROFIT"
 }
@@ -411,12 +411,15 @@ In addition to the usual badly formed request errors, some of the common reasons
 - Order is placed on an inactive order book.
 - Order is placed on an unknown order book, i.e. incorrect order book ID.
 - Leverage order is placed on an asset that is not supported for leverage trading.
+- Leverage order is placed using `from_global_position` = `true` (leverage is only allowed in an isolated position account)
 - Quantity on the order has more decimal places than the asset precision.
 - Order price for limit orders has more decimal places than the asset precision.
 - The requested leverage exceeds the leverage limit for the isolated position account.
-- The requested leverage exceeds the maximum allowed leverage for the asset.
+    The leverage limit is set when the position is first created. To set a different
+    leverage limit, the position must be closed, then opened with a new max leverage
+    limit that does not exceed the maximum allowed limit for the asset. See [below](#maximum-leverage)
+- The requested leverage exceeds the maximum allowed leverage for the asset. See [below](#maximum-leverage)
 - The user does not have enough balance to place the order.
-
 
 #### Cancelling orders
 
@@ -474,7 +477,8 @@ Typically, to close an existing position, you would need to place a new order in
 existing position. For example, if you originally bought 100 units of an asset, and have a long open position,
 you would need to place a sell order for 100 units to close the position. This can be done using the `POST /v1/orders` endpoint
 as described earlier. Your order can be a market order or a limit order, depending on your preference. For example, to close
-the position immediately at the best available price, you would place a market sell order for 100 units. Alternatively, if you want to close the position at a specific price, you would place a limit sell order for 100 units at your desired price.
+the position immediately at the best available price, you would place a market sell order for 100 units. Alternatively,
+if you want to close the position at a specific price, you would place a limit sell order for 100 units at your desired price.
 
 To create a quick market order to close an existing postion, you can use the endpoint `POST /v1/positions/close`. This
 endpoint allows you to specify the id of the position and order book you want to close the position on. DORA will automatically
@@ -624,6 +628,7 @@ The `inverse_leverage` is a decimal value between 0 and 1.0, where 1.0 represent
 and lower values represent higher leverage. For example, an `inverse_leverage` of 0.5 represents 2x leverage, while an `inverse_leverage` of 0.25 represents 4x leverage.
 
 > Note: Inverse leverage is calculated as $1/Selected Leverage$ where Selected Leverage is the leverage value set on the order, e.g.
+>
 > - 2x leverage = $1/2 = 0.5$
 > - 3x leverage = $1/3 = 0.3333$
 > - 4x leverage = $1/4 = 0.25$
