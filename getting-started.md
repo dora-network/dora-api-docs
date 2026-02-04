@@ -441,8 +441,9 @@ This will use the `user_id` from the authentication token to identify the user a
 
 #### Updating orders
 
-It is not possible to update an existing order on the DORA platform. If you need to change an order, you must cancel it
-and then place a new order with the desired changes.
+It is not currently possible to update an existing order on the DORA platform. If you need to change an order, you must cancel it
+and then place a new order with the desired changes. This may change in future iterations
+of DORA.
 
 #### Querying orders
 
