@@ -580,7 +580,7 @@ the current version, the following rules apply:
 - An isolated positions account can only hold positions in the assets associated with the order book being traded with leverage.
     For example, if a user creates an isolated account by trading BOND1/USD, the isolated account can only hold positions in BOND1 and USD.
 - A user can have multiple isolated accounts, each tied to the assets of the order book they created a leveraged order on.
-- Users can transfer bond asset balances between their global account and isolated accounts.
+- Users cannot transfer bond asset balances between their global account and isolated accounts.
 - Users can transfer USD balances only between their isolated accounts.
 - Closing a position in an isolated account will automatically repay any borrows.
 - Balances transferred to an isolated account will stay in the isolated account until the user chooses to move the money
