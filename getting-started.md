@@ -492,6 +492,11 @@ generate a market order with the correct quantity and side to close the position
 }
 ```
 
+#### Bulk order placement
+
+Bulk order placement is not currently supported in DORA, however we plan to offer this
+functionality in future iterations of DORA.
+
 ### Ledgers
 
 The DORA platform maintains a ledger for each user, which tracks their positions, balances, and other relevant information.
