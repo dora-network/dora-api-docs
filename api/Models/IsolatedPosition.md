@@ -3,9 +3,9 @@
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **global\_position\_id** | **UUID** |  | [optional] [default to null] |
-| **isolated\_position\_id** | **UUID** |  | [optional] [default to null] |
-| **transaction\_id** | **UUID** |  | [optional] [default to null] |
+| **global\_position\_id** | **UUID** |  | [default to null] |
+| **isolated\_position\_id** | **UUID** |  | [default to null] |
+| **transaction\_id** | **UUID** |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

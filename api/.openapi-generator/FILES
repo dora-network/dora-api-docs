@@ -126,7 +126,6 @@ Models/StreamTradesEntry.md
 Models/StreamTransactionsEntry.md
 Models/StreamUserCouponPaymentsEntry.md
 Models/StreamUserCouponPaymentsResponse.md
-Models/StreamedAssetPrice.md
 Models/Supply.md
 Models/SupplyRequest.md
 Models/SupplyResponseEnvelope.md

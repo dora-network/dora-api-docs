@@ -214,7 +214,6 @@ All URIs are relative to *https://localhost:8084*
  - [StreamTransactionsEntry](./Models/StreamTransactionsEntry.md)
  - [StreamUserCouponPaymentsEntry](./Models/StreamUserCouponPaymentsEntry.md)
  - [StreamUserCouponPaymentsResponse](./Models/StreamUserCouponPaymentsResponse.md)
- - [StreamedAssetPrice](./Models/StreamedAssetPrice.md)
  - [Supply](./Models/Supply.md)
  - [SupplyRequest](./Models/SupplyRequest.md)
  - [SupplyResponseEnvelope](./Models/SupplyResponseEnvelope.md)

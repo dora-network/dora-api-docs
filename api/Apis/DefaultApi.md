@@ -1773,7 +1773,7 @@ Stream real-time asset prices as map objects
 
 ### Return type
 
-[**Map**](../Models/StreamedAssetPrice.md)
+[**Map**](../Models/AssetPrice.md)
 
 ### Authorization
 

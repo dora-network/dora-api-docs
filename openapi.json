@@ -97,7 +97,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 1
+              "default": 1,
+              "minimum": 1
             }
           },
           {
@@ -105,7 +106,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 100
+              "default": 100,
+              "minimum": 1
             }
           }
         ],
@@ -775,7 +777,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 1
+              "default": 1,
+              "minimum": 1
             }
           },
           {
@@ -783,7 +786,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 100
+              "default": 100,
+              "minimum": 1
             }
           }
         ],
@@ -1560,7 +1564,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 1
+              "default": 1,
+              "minimum": 1
             }
           },
           {
@@ -1568,7 +1573,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 100
+              "default": 100,
+              "minimum": 1
             }
           }
         ],
@@ -3266,7 +3272,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 1
+              "default": 1,
+              "minimum": 1
             }
           },
           {
@@ -3274,7 +3281,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 100
+              "default": 100,
+              "minimum": 1
             }
           }
         ],
@@ -3419,7 +3427,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 1
+              "default": 1,
+              "minimum": 1
             }
           },
           {
@@ -3427,7 +3436,8 @@
             "in": "query",
             "schema": {
               "type": "integer",
-              "default": 100
+              "default": 100,
+              "minimum": 1
             }
           }
         ],
@@ -4914,34 +4924,37 @@
             "format": "uuid"
           },
           "collateral_weight": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "created_at": {
             "type": "string",
             "format": "date-time"
           },
           "decimals": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "fractionalized_units": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "description": {
             "type": "string"
           },
           "liquidation_weight": {
-            "type": "number"
-          },
-          "maturity_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "max_supply": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "max_utilization": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "name": {
             "type": "string"
@@ -4953,7 +4966,8 @@
             "$ref": "#/components/schemas/AssetKind"
           },
           "yield": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "can_add_liquidity": {
             "type": "boolean"
@@ -4971,13 +4985,41 @@
             "type": "boolean"
           },
           "max_leverage": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "leverage_interest_rate": {
+            "type": "number",
+            "default": 0
           },
           "bond": {
             "$ref": "#/components/schemas/Bond",
             "nullable": true
           }
-        }
+        },
+        "required": [
+          "id",
+          "collateral_weight",
+          "created_at",
+          "decimals",
+          "fractionalized_units",
+          "description",
+          "liquidation_weight",
+          "max_supply",
+          "max_utilization",
+          "name",
+          "symbol",
+          "kind",
+          "yield",
+          "can_add_liquidity",
+          "can_direct_borrow",
+          "can_onboard",
+          "can_trade",
+          "can_virtual_borrow",
+          "max_leverage",
+          "leverage_interest_rate"
+        ]
       },
       "Bond": {
         "type": "object",
@@ -5018,10 +5060,12 @@
             "format": "date-time"
           },
           "principal_value": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           },
           "payments_per_year": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           },
           "payments_every": {
             "description": "Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond)",
@@ -5032,7 +5076,19 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "isin",
+          "issued_at",
+          "issuer",
+          "maturity_at",
+          "principal_value",
+          "payments_per_year",
+          "payments_every"
+        ]
       },
       "ResponseEnvelopeOfListAssets": {
         "allOf": [
@@ -5090,7 +5146,13 @@
           "yield_to_maturity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "current_time",
+          "current_price",
+          "yield_to_maturity"
+        ]
       },
       "GetAssetYTMByIDResponseEnvelope": {
         "allOf": [
@@ -5122,7 +5184,8 @@
             "format": "uuid"
           },
           "yield": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "start_at": {
             "type": "string",
@@ -5156,7 +5219,20 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "id",
+          "asset_id",
+          "yield",
+          "start_at",
+          "end_at",
+          "pay_at",
+          "available_to_pay",
+          "completed_at",
+          "created_at",
+          "process_every",
+          "last_processed_at"
+        ]
       },
       "UserCouponPayment": {
         "type": "object",
@@ -5179,7 +5255,8 @@
           },
           "seq": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "minimum": 0
           },
           "pending": {
             "type": "string"
@@ -5195,7 +5272,18 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "user_id",
+          "position_id",
+          "asset_id",
+          "coupon_payment_id",
+          "seq",
+          "pending",
+          "completed",
+          "started_at",
+          "ended_at"
+        ]
       },
       "UserCouponPaymentAssetSummary": {
         "type": "object",
@@ -5210,7 +5298,12 @@
           "completed": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "pending",
+          "completed"
+        ]
       },
       "UserCouponPaymentsResponseData": {
         "type": "object",
@@ -5495,7 +5588,17 @@
           "notifications_enabled": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "native_asset_id",
+          "roles",
+          "tenant_id",
+          "show_tutorial_cards",
+          "notifications_enabled"
+        ]
       },
       "UserConfig": {
         "type": "object",
@@ -5525,7 +5628,14 @@
           "notifications_enabled": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "show_tutorial_cards",
+          "notifications_enabled"
+        ]
       },
       "UpdateUserConfigRequest": {
         "type": "object",
@@ -5561,7 +5671,10 @@
             "format": "uuid",
             "description": "The ID of the created or updated user."
           }
-        }
+        },
+        "required": [
+          "id"
+        ]
       },
       "UpdateFieldString": {
         "type": "object",
@@ -5630,7 +5743,8 @@
             "format": "uuid"
           },
           "base_quantity": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "base_asset_id": {
             "type": "string",
@@ -5644,30 +5758,37 @@
             "type": "string"
           },
           "fee_factor": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "initial_assets_ratio": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "maturity_at": {
             "type": "string",
             "format": "date-time"
           },
           "quote_quantity": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "quote_asset_id": {
             "type": "string",
             "format": "uuid"
           },
           "shares_quantity": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "status": {
             "$ref": "#/components/schemas/OrderBookStatus"
           },
           "tick_size": {
-            "type": "number"
+            "type": "number",
+            "minimum": 0
           },
           "updated_at": {
             "type": "string",
@@ -5689,7 +5810,26 @@
             "type": "string",
             "format": "uuid"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "base_quantity",
+          "base_asset_id",
+          "created_at",
+          "display_name",
+          "base_asset_fractionalized_units",
+          "quote_asset_fractionalized_units",
+          "fee_factor",
+          "initial_assets_ratio",
+          "maturity_at",
+          "quote_quantity",
+          "quote_asset_id",
+          "shares_quantity",
+          "status",
+          "tick_size",
+          "updated_at",
+          "shares_asset_id"
+        ]
       },
       "OrderBookResponseEnvelope": {
         "allOf": [
@@ -5853,8 +5993,32 @@
           },
           "trigger_type": {
             "$ref": "#/components/schemas/TriggerType"
+          },
+          "client_order_id": {
+            "type": "string",
+            "format": "text",
+            "description": "An optional client-provided identifier for the order."
           }
-        }
+        },
+        "required": [
+          "order_id",
+          "order_book_id",
+          "kind",
+          "original_price",
+          "avg_fill_price",
+          "cancelled_quantity",
+          "open_quantity",
+          "original_quantity",
+          "filled_quantity",
+          "filled_notional",
+          "last_updated_at",
+          "opened_at",
+          "inverse_leverage",
+          "side",
+          "status",
+          "user_id",
+          "position_id"
+        ]
       },
       "ListOrdersResponseEnvelope": {
         "allOf": [
@@ -5980,6 +6144,11 @@
           },
           "trigger_type": {
             "$ref": "#/components/schemas/TriggerType"
+          },
+          "client_order_id": {
+            "type": "string",
+            "format": "text",
+            "description": "An optional client-provided identifier for the order."
           }
         },
         "required": [
@@ -6033,6 +6202,11 @@
             "type": "string",
             "format": "uuid",
             "description": "quote asset of orderbook"
+          },
+          "client_order_id": {
+            "type": "string",
+            "format": "text",
+            "description": "An optional client-provided identifier for the order."
           },
           "position_assets": {
             "type": "array",
@@ -6125,7 +6299,12 @@
           "should_create_user": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "email_exists",
+          "firebase_set",
+          "should_create_user"
+        ]
       },
       "ValidateSubmitOrderResponse": {
         "type": "object",
@@ -6174,7 +6353,18 @@
             "type": "string",
             "description": "Total volume of the orderbook in the last 24 hours in USD."
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "open_price",
+          "last_price",
+          "high_24h",
+          "low_24h",
+          "change_24h",
+          "change_pct_24h",
+          "volume_24h_base",
+          "volume_24h_usd"
+        ]
       },
       "OrderbookStatsResponseEnvelope": {
         "allOf": [
@@ -6283,7 +6473,8 @@
             "format": "uuid"
           },
           "seq": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "is_global": {
             "type": "boolean"
@@ -6327,7 +6518,22 @@
           "position_name": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "asset_id",
+          "seq",
+          "available",
+          "locked",
+          "supplied",
+          "borrowed",
+          "impending_borrows",
+          "avg_entry_price",
+          "borrow_limit",
+          "liquidation_threshold",
+          "created_at",
+          "position_name"
+        ]
       },
       "ListPositionsResponse": {
         "type": "object",
@@ -6474,44 +6680,17 @@
             "additionalProperties": {
               "type": "string"
             }
-          },
-          "notional_long": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "notional_short": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "portfolio_value": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "net_liquidation_value": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "unrealized_pnl": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "realized_pnl": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
-        }
+        },
+        "required": [
+          "available",
+          "locked",
+          "borrowed",
+          "supplied",
+          "impending_borrows",
+          "borrow_limit",
+          "liquidation_threshold"
+        ]
       },
       "UserInterest": {
         "type": "object",
@@ -6528,7 +6707,11 @@
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "available",
+          "value"
+        ]
       },
       "LeverageType": {
         "type": "string",
@@ -6552,7 +6735,10 @@
               "$ref": "#/components/schemas/ModuleBalance"
             }
           }
-        }
+        },
+        "required": [
+          "balances"
+        ]
       },
       "ModuleBalance": {
         "type": "object",
@@ -6562,7 +6748,8 @@
             "format": "uuid"
           },
           "seq": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "available": {
             "type": "string",
@@ -6580,7 +6767,15 @@
             "type": "string",
             "description": "The total amount borrowed from the supplied but not yet repaid"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "seq",
+          "available",
+          "supplied",
+          "virtual",
+          "borrowed"
+        ]
       },
       "LeverageBalanceResponse": {
         "type": "object",
@@ -6633,7 +6828,14 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "global_position_id",
+          "isolated_position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "IsolateCollateralResponse": {
         "type": "object",
@@ -6665,7 +6867,12 @@
             "type": "string",
             "format": "uuid"
           }
-        }
+        },
+        "required": [
+          "global_position_id",
+          "isolated_position_id",
+          "transaction_id"
+        ]
       },
       "UnitePositionRequest": {
         "type": "object",
@@ -6693,7 +6900,11 @@
               "format": "uuid"
             }
           }
-        }
+        },
+        "required": [
+          "global_position_id",
+          "transaction_id"
+        ]
       },
       "UnitePositionResponseEnvelope": {
         "allOf": [
@@ -6766,7 +6977,14 @@
           "amount": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "user_id",
+          "position_id",
+          "asset_id",
+          "final_quantity",
+          "amount"
+        ]
       },
       "FundUserResponseEnvelope": {
         "allOf": [
@@ -6825,7 +7043,13 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "SupplyResponseEnvelope": {
         "allOf": [
@@ -6884,7 +7108,13 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "WithdrawResponseEnvelope": {
         "allOf": [
@@ -6922,7 +7152,13 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "PayLeverageAccruedInterestRequest": {
         "type": "object",
@@ -6938,7 +7174,12 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "PayLeverageAccruedInterest": {
         "type": "object",
@@ -6958,7 +7199,13 @@
           "current_accrued_interest_usd": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "transaction_id",
+          "asset_id",
+          "position_id",
+          "current_accrued_interest_usd"
+        ]
       },
       "PayLeverageAccruedInterestResponseEnvelope": {
         "allOf": [
@@ -6992,7 +7239,12 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "ClaimLeverageAccruedInterest": {
         "type": "object",
@@ -7012,7 +7264,13 @@
           "current_accrued_interest_usd": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "transaction_id",
+          "asset_id",
+          "position_id",
+          "current_accrued_interest_usd"
+        ]
       },
       "ClaimLeverageAccruedInterestResponseEnvelope": {
         "allOf": [
@@ -7064,7 +7322,11 @@
             "type": "string",
             "format": "uuid"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "position_id"
+        ]
       },
       "SettleLeverageAccruedInterest": {
         "type": "object",
@@ -7084,7 +7346,13 @@
           "current_accrued_interest_usd": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "transaction_id",
+          "asset_id",
+          "position_id",
+          "current_accrued_interest_usd"
+        ]
       },
       "CurrentLeverageAccruedInterest": {
         "type": "object",
@@ -7104,7 +7372,13 @@
           "current_accrued_interest_usd": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "user_id",
+          "asset_id",
+          "position_id",
+          "current_accrued_interest_usd"
+        ]
       },
       "CurrentLeverageAccruedInterestResponseEnvelope": {
         "allOf": [
@@ -7165,7 +7439,15 @@
           "shares_quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "position_id",
+          "transaction_id",
+          "base_quantity",
+          "quote_quantity",
+          "shares_quantity"
+        ]
       },
       "LiquidityResponseEnvelope": {
         "allOf": [
@@ -7244,8 +7526,27 @@
           "user_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "admin_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "order_side": {
+            "$ref": "#/components/schemas/Side"
           }
-        }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "kind",
+          "asset0",
+          "quantity0",
+          "quantity1",
+          "asset1",
+          "user_id",
+          "admin_user_id",
+          "order_side"
+        ]
       },
       "ListTransactionsResponseEnvelope": {
         "allOf": [
@@ -7333,18 +7634,23 @@
         "properties": {
           "data": {
             "description": "The response data. Present for successful (2xx) responses.",
-            "type": "object"
+            "type": "object",
+            "nullable": true
           },
           "error": {
             "type": "string",
-            "description": "The error message. Present for error (non-2xx) responses."
+            "description": "The error message. Present for error (non-2xx) responses.",
+            "nullable": true
           },
           "metadata": {
             "$ref": "#/components/schemas/Metadata",
             "description": "Metadata about the response, including status code and trace information."
           }
         },
-        "description": "Standard response envelope. For 2xx responses, 'data' is set. For errors, 'error' is set."
+        "description": "Standard response envelope. For 2xx responses, 'data' is set. For errors, 'error' is set.",
+        "required": [
+          "metadata"
+        ]
       },
       "StreamEntry": {
         "type": "object",
@@ -7358,7 +7664,11 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "Val",
+          "Time"
+        ]
       },
       "Metadata": {
         "type": "object",
@@ -7376,7 +7686,12 @@
             "description": "Request ID for correlating logs and debugging."
           }
         },
-        "description": "Metadata about the response, including status code and tracing information."
+        "description": "Metadata about the response, including status code and tracing information.",
+        "required": [
+          "status_code",
+          "trace_id",
+          "request_id"
+        ]
       },
       "CandleResolution": {
         "type": "string",
@@ -7415,7 +7730,16 @@
           "volume": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "start_timestamp",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+        ]
       },
       "TradeResponseEnvelope": {
         "allOf": [
@@ -7466,7 +7790,8 @@
             "format": "uuid"
           },
           "order_seq": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "price": {
             "type": "string"
@@ -7485,7 +7810,22 @@
             "type": "boolean",
             "description": "If true, then this order is the aggressor (taker); otherwise it is the maker."
           }
-        }
+        },
+        "required": [
+          "transaction_id",
+          "asset_0",
+          "created_at",
+          "fee_asset_id",
+          "fee_quantity",
+          "order_book_id",
+          "order_id",
+          "order_seq",
+          "price",
+          "quantity_0",
+          "user_id",
+          "side",
+          "aggressor_indicator"
+        ]
       },
       "ListTradeResponseEnvelope": {
         "allOf": [
@@ -7543,7 +7883,12 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "asset_id",
+          "price",
+          "time"
+        ]
       },
       "ListAssetPriceResponseEnvelope": {
         "allOf": [
@@ -7572,26 +7917,10 @@
         "additionalProperties": {
           "type": "object",
           "title": "StreamedAssetPrice",
-          "properties": {
-            "asset_id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "price": {
-              "type": "string"
-            },
-            "ytm": {
-              "type": "string"
-            },
-            "time": {
-              "type": "string",
-              "format": "date-time"
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/AssetPrice"
             }
-          },
-          "required": [
-            "asset_id",
-            "price",
-            "time"
           ]
         },
         "example": {
@@ -7639,7 +7968,12 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "pool_id",
+          "price",
+          "timestamp"
+        ]
       },
       "PoolPriceResponseEnvelope": {
         "allOf": [
@@ -7670,19 +8004,28 @@
           "base_quantity": {
             "type": "number",
             "format": "double",
-            "description": "The quantity of the base asset."
+            "description": "The quantity of the base asset.",
+            "minimum": 0
           },
           "quote_quantity": {
             "type": "number",
             "format": "double",
-            "description": "The quantity of the quote asset."
+            "description": "The quantity of the quote asset.",
+            "minimum": 0
           },
           "shares_quantity": {
             "type": "number",
             "format": "double",
-            "description": "The quantity of pool shares."
+            "description": "The quantity of pool shares.",
+            "minimum": 0
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "base_quantity",
+          "quote_quantity",
+          "shares_quantity"
+        ]
       },
       "StreamOrderBookBalanceEntry": {
         "type": "object",
@@ -7714,7 +8057,11 @@
           "quantity": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "price",
+          "quantity"
+        ]
       },
       "LiveOrderbook": {
         "type": "object",
@@ -7733,7 +8080,11 @@
             },
             "description": "sorted in asc order by price"
           }
-        }
+        },
+        "required": [
+          "bids",
+          "asks"
+        ]
       },
       "OrderBookDepth": {
         "type": "object",
@@ -7758,7 +8109,13 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "bids",
+          "asks",
+          "timestamp"
+        ]
       },
       "ListOrderBookDepthResponseEnvelope": {
         "allOf": [
@@ -7795,7 +8152,13 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "best_bid",
+          "best_ask",
+          "timestamp"
+        ]
       },
       "GetTopOfBookResponseEnvelope": {
         "allOf": [
@@ -7834,7 +8197,14 @@
           "best_ask": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "order_book_id",
+          "mid_price",
+          "spread",
+          "best_bid",
+          "best_ask"
+        ]
       },
       "OrderBookSummaryResponseEnvelope": {
         "allOf": [
@@ -8100,18 +8470,6 @@
       "LiquidationTargetsResponse": {
         "$ref": "#/components/schemas/LiquidationTargetsResponseEnvelope"
       },
-      "BorrowRequest": {
-        "type": "object"
-      },
-      "BorrowResponse": {
-        "type": "object"
-      },
-      "RepayRequest": {
-        "type": "object"
-      },
-      "RepayResponse": {
-        "type": "object"
-      },
       "LeverageRequestError": {
         "type": "object",
         "allOf": [
@@ -8228,7 +8586,12 @@
             "type": "string",
             "format": "uuid"
           }
-        }
+        },
+        "required": [
+          "from_position_id",
+          "to_position_id",
+          "transaction_id"
+        ]
       },
       "TransferBalancesResponseEnvelope": {
         "allOf": [
@@ -8264,7 +8627,12 @@
             "description": "Whether the position account is the global or an isolated account",
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "position_id",
+          "position_name",
+          "is_global"
+        ]
       },
       "PositionAccounts": {
         "type": "array",
@@ -8339,7 +8707,13 @@
           "is_active": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "user_id",
+          "key_id",
+          "label",
+          "is_active"
+        ]
       },
       "CreateAPIKeyRequest": {
         "type": "object",
@@ -8353,7 +8727,10 @@
             "nullable": true,
             "description": "Date at which the api-key will expire"
           }
-        }
+        },
+        "required": [
+          "label"
+        ]
       },
       "CreateAPIKeyResponse": {
         "$ref": "#/components/schemas/CreateAPIKeyResponseEnvelope"
@@ -8385,7 +8762,12 @@
           "label": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "key_id",
+          "api_key",
+          "label"
+        ]
       },
       "RevokeAPIKeyResponse": {
         "$ref": "#/components/schemas/RevokeAPIKeyResponseEnvelope"
@@ -8421,7 +8803,13 @@
           "is_active": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "user_id",
+          "key_id",
+          "label",
+          "is_active"
+        ]
       },
       "ClosePositionResponse": {
         "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
@@ -8482,7 +8870,12 @@
             "description": "The margin remaining available from this position.",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "available",
+          "used",
+          "remaining"
+        ]
       },
       "PLAsset": {
         "type": "object",
@@ -8554,7 +8947,24 @@
             "description": "The unused collateral of the position",
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "id",
+          "kind",
+          "symbol",
+          "side",
+          "avg_entry_price",
+          "mark_price",
+          "liquidation_price",
+          "available",
+          "locked",
+          "borrowed",
+          "margin",
+          "unrealized_pl",
+          "leverage_limit",
+          "initial_capital",
+          "unused_collateral"
+        ]
       },
       "PLSummary": {
         "type": "object",
@@ -8575,7 +8985,14 @@
           "ltv": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "leverage",
+          "account_equity",
+          "available",
+          "health",
+          "ltv"
+        ]
       },
       "PLAccount": {
         "type": "object",
@@ -8602,7 +9019,14 @@
           "summary": {
             "$ref": "#/components/schemas/PLSummary"
           }
-        }
+        },
+        "required": [
+          "account_id",
+          "account_name",
+          "is_global",
+          "assets",
+          "summary"
+        ]
       },
       "PLAccounts": {
         "type": "array",

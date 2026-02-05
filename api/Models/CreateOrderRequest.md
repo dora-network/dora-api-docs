@@ -14,6 +14,7 @@
 | **good\_till\_date** | **Date** |  | [optional] [default to null] |
 | **trigger\_price** | **String** |  | [optional] [default to null] |
 | **trigger\_type** | [**TriggerType**](TriggerType.md) |  | [optional] [default to null] |
+| **client\_order\_id** | **String** | An optional client-provided identifier for the order. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
