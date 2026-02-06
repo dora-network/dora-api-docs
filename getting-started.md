@@ -197,6 +197,13 @@ To revoke an API key, you can make a `PUT` request to the following endpoint: `h
 curl -L -X PUT -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://dora-staging.fly.dev/v1/user/apikey/{key_id}/revoke
 ```
 
+### Logging in to the DORA UI via API key
+
+The user's API key can also be used to log in to the DORA trading UI directly. Simply direct your browser to the
+base URL for the DORA UI and use the `/login?apikey=<your-api-key>` path. E.g. `https://<base-dora-url>/login?apikey=<your-api-key>`.
+This will allow users to be authenticated by their API key instead of having to use a username and password combination
+and bypass the login screen for direct access to the DORA UI.
+
 ### Streaming APIs
 
 DORA provides several websocket endpoints for real-time data streaming. These endpoints allow you to receive updates on
@@ -336,6 +343,9 @@ To retrieve a list of all order books available on the DORA platform, you can us
 
 To filter the order books, you can use query parameters such as `base_asset_id` and `quote_asset_id` to filter by
 specific asset pairs, or `status` to filter by the status of the order book (e.g., open, closed, suspended).
+
+The best way to get a list of order books that can be traded on is to call `GET /v1/orderbooks?status=OPEN` which
+will return all active order books.
 
 To retrieve detailed information about a specific order book, you can use the endpoint:
 
