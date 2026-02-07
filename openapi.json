@@ -10,7 +10,7 @@
       "description": "local DORA server"
     },
     {
-      "url": "https://dora-staging.fly.dev",
+      "url": "https://staging.dora.co",
       "description": "DORA staging server"
     },
     {
@@ -7322,11 +7322,7 @@
             "type": "string",
             "format": "uuid"
           }
-        },
-        "required": [
-          "asset_id",
-          "position_id"
-        ]
+        }
       },
       "SettleLeverageAccruedInterest": {
         "type": "object",
@@ -7773,13 +7769,6 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
-          },
-          "fee_asset_id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fee_quantity": {
-            "type": "string"
           },
           "order_book_id": {
             "type": "string",

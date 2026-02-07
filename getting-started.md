@@ -76,7 +76,7 @@ Once you have your authentication token, you can use the following `curl` comman
 to request a new API key:
 
 ```bash
-curl -L -X POST -H "Authorizatio: Bearer <YOUR TOKEN>" -H "Content-Type: application/json" --data '{"label": "your-label-for-identifying-this-key"}' https://dora-staging.fly.dev/v1/user/apikey
+curl -L -X POST -H "Authorizatio: Bearer <YOUR TOKEN>" -H "Content-Type: application/json" --data '{"label": "your-label-for-identifying-this-key"}' https://staging.dora.co/v1/user/apikey
 ```
 
 If you receive an error response like this:
@@ -147,7 +147,7 @@ The query parameter to pass is `x-api-key`.
 **Example:**
 
 ```bash
-wscat -c "wss://dora-staging.fly.dev:8085/v1/orderbooks/<order_book_id>/open/stream?since=2026-01-01T09:28:23.687804Z&x-api-key=<your-generated-api-key>
+wscat -c "wss://staging.dora.co:8085/v1/orderbooks/<order_book_id>/open/stream?since=2026-01-01T09:28:23.687804Z&x-api-key=<your-generated-api-key>
 ```
 
 ### Listing your API Keys
@@ -156,7 +156,7 @@ Once you have your generated API keys, you can start using them to authenticate 
 You can test that your key is working by listing your existing API keys.
 
 ```bash
-curl -L -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://dora-staging.fly.dev/v1/user/apikey
+curl -L -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://staging.dora.co/v1/user/apikey
 ```
 
 You should receive a response like this:
@@ -189,12 +189,12 @@ Once you have created a new key, you can use the key in the request to revoke th
 If you revoked an API key that is currently in use, and you don't have another valid API key,
 you will need to login to the DORA UI to generate a new authentication token to create a new API key.
 
-To revoke an API key, you can make a `PUT` request to the following endpoint: `https://dora-staging.fly.dev/v1/user/apikey/{key-id}/revoke`
+To revoke an API key, you can make a `PUT` request to the following endpoint: `https://staging.dora.co/v1/user/apikey/{key-id}/revoke`
 
 **Example:**
 
 ```bash
-curl -L -X PUT -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://dora-staging.fly.dev/v1/user/apikey/{key_id}/revoke
+curl -L -X PUT -H "Authorization: ApiKey <your-generated-api-key>" -H "Content-Type: application/json" https://staging.dora.co/v1/user/apikey/{key_id}/revoke
 ```
 
 ### Logging in to the DORA UI via API key
