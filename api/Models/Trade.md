@@ -6,8 +6,6 @@
 | **transaction\_id** | **UUID** |  | [default to null] |
 | **asset\_0** | **UUID** |  | [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
-| **fee\_asset\_id** | **UUID** |  | [default to null] |
-| **fee\_quantity** | **String** |  | [default to null] |
 | **order\_book\_id** | **UUID** |  | [default to null] |
 | **order\_id** | **UUID** |  | [default to null] |
 | **order\_seq** | **Integer** |  | [default to null] |
