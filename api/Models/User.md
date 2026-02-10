@@ -18,6 +18,7 @@
 | **verified\_at** | **Date** |  | [optional] [default to null] |
 | **show\_tutorial\_cards** | **Boolean** |  | [default to null] |
 | **notifications\_enabled** | **Boolean** |  | [default to null] |
+| **tenant\_id** | **String** |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
