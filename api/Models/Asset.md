@@ -15,14 +15,14 @@
 | **name** | **String** |  | [default to null] |
 | **symbol** | **String** |  | [default to null] |
 | **kind** | [**AssetKind**](AssetKind.md) |  | [default to null] |
-| **yield** | **BigDecimal** |  | [default to null] |
+| **yield** | **BigDecimal** |  | [optional] [default to null] |
 | **can\_add\_liquidity** | **Boolean** |  | [default to null] |
 | **can\_direct\_borrow** | **Boolean** |  | [default to null] |
 | **can\_onboard** | **Boolean** |  | [default to null] |
 | **can\_trade** | **Boolean** |  | [default to null] |
 | **can\_virtual\_borrow** | **Boolean** |  | [default to null] |
 | **max\_leverage** | **BigDecimal** |  | [default to null] |
-| **leverage\_interest\_rate** | **BigDecimal** |  | [default to 0] |
+| **leverage\_interest\_rate** | **BigDecimal** |  | [optional] [default to 0] |
 | **bond** | [**Bond**](Bond.md) |  | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -12,9 +12,9 @@
 | **issued\_at** | **Date** |  | [default to null] |
 | **issuer** | **String** |  | [default to null] |
 | **maturity\_at** | **Date** |  | [default to null] |
-| **principal\_value** | **BigDecimal** |  | [default to null] |
+| **principal\_value** | **String** |  | [default to null] |
 | **payments\_per\_year** | **Integer** |  | [default to null] |
-| **payments\_every** | **Integer** | Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond) | [default to null] |
+| **payments\_every** | **Long** | Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond) | [optional] [default to null] |
 | **next\_coupon\_payment** | **Date** |  | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -8,6 +8,8 @@
 | **base\_asset\_id** | **UUID** |  | [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
 | **display\_name** | **String** |  | [default to null] |
+| **base\_asset\_fractionalized\_units** | **Long** |  | [default to null] |
+| **quote\_asset\_fractionalized\_units** | **Long** |  | [default to null] |
 | **fee\_factor** | **BigDecimal** |  | [default to null] |
 | **initial\_assets\_ratio** | **BigDecimal** |  | [default to null] |
 | **maturity\_at** | **Date** |  | [default to null] |
