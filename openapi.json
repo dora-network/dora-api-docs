@@ -6527,6 +6527,10 @@
           },
           "position_name": {
             "type": "string"
+          },
+          "pending_withdrawal": {
+            "type": "string",
+            "description": "The amount of asset that is pending withdrawal from the position."
           }
         },
         "required": [
@@ -6542,7 +6546,8 @@
           "borrow_limit",
           "liquidation_threshold",
           "created_at",
-          "position_name"
+          "position_name",
+          "pending_withdrawal"
         ]
       },
       "ListPositionsResponse": {

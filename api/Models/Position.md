@@ -17,6 +17,7 @@
 | **liquidation\_threshold** | **String** | The borrow limit | [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
 | **position\_name** | **String** |  | [default to null] |
+| **pending\_withdrawal** | **String** | The amount of asset that is pending withdrawal from the position. | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
