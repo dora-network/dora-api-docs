@@ -1,5 +1,46 @@
 # Getting started with the DORA API
 
+- [Getting started with the DORA API](#getting-started-with-the-dora-api)
+  - [Introduction](#introduction)
+  - [Authentication](#authentication)
+    - [Bearer Token](#bearer-token)
+    - [API Key](#api-key)
+      - [API Key Management via DORA UI](#api-key-management-via-dora-ui)
+      - [API Key Management via API](#api-key-management-via-api)
+    - [Using the API Key for Authentication](#using-the-api-key-for-authentication)
+    - [Listing your API Keys](#listing-your-api-keys)
+    - [Revoking an API Key](#revoking-an-api-key)
+    - [Logging in to the DORA UI via API key](#logging-in-to-the-dora-ui-via-api-key)
+    - [Streaming APIs](#streaming-apis)
+    - [Market Data](#market-data)
+    - [User Specific Data](#user-specific-data)
+  - [Using the API](#using-the-api)
+    - [User configuration](#user-configuration)
+    - [Deposits And Withdrawals](#deposits-and-withdrawals)
+    - [Assets](#assets)
+      - [Coupons](#coupons)
+    - [Order books](#order-books)
+    - [Orders](#orders)
+      - [Submitting orders](#submitting-orders)
+        - [Error responses for invalid orders](#error-responses-for-invalid-orders)
+      - [Cancelling orders](#cancelling-orders)
+      - [Updating orders](#updating-orders)
+      - [Querying orders](#querying-orders)
+      - [Closing positions](#closing-positions)
+      - [Bulk order placement](#bulk-order-placement)
+    - [Ledgers](#ledgers)
+    - [Accounts](#accounts)
+      - [Creating isolated accounts](#creating-isolated-accounts)
+        - [Example: creating an isolated position on-the-fly](#example-creating-an-isolated-position-on-the-fly)
+        - [Example: using an existing isolated position](#example-using-an-existing-isolated-position)
+      - [Maximum leverage](#maximum-leverage)
+        - [Example: Setting leverage on an order](#example-setting-leverage-on-an-order)
+    - [Leverage operations](#leverage-operations)
+    - [Reporting](#reporting)
+      - [Trades](#trades)
+      - [Transactions](#transactions)
+    - [Historical Data](#historical-data)
+
 ## Introduction
 
 The DORA platform provides a digital marketplace for trading fractionalized bonds
@@ -299,6 +340,20 @@ via the DORA web application or through the user interface provided by the platf
 To retrieve your user configuration data, you can use the endpoint:
 
 `GET /v1/user/self`
+
+### Deposits And Withdrawals
+
+As a SaaS platform, DORA does not hold deposits of assets that are tradable on the platform. DORA performs the matching and
+maintains a ledger detailing the transactions and transfer of assets between the parties involved.
+
+As such, DORA can only record deposits that have been received by integrators from their users, and perform verification
+and authorization for withdrawals from DORA's platform when they are requested. The final authority for withdrawals lie
+with the integrators themselves as is any payments taken from, or made to the user.
+
+To accomplish this, DORA have provided deposit and withdrawal endpoints to facilitate the deposit and withdrawal workflow
+to and from DORA. For more details of the deposit and withdrawal workflows, please see the [Integrator Deposits and Withdrawals](./integrator-deposits-and-withdrawals.md)
+workflow document.
+
 
 ### Assets
 
