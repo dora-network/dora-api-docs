@@ -31,6 +31,7 @@ All URIs are relative to *https://localhost:8084*
 | [**getLedgerModuleByAsset**](DefaultApi.md#getLedgerModuleByAsset) | **GET** /v1/ledger/module/{asset_id} | Get the module object for a single asset ID |
 | [**getLedgerPositionsSelf**](DefaultApi.md#getLedgerPositionsSelf) | **GET** /v1/ledger/positions/self | Get your own positions |
 | [**getLedgerValueSelf**](DefaultApi.md#getLedgerValueSelf) | **GET** /v1/ledger/value/self | Get your own available, locked, and borrowed USD value; and realized and unrealized PnL |
+| [**getLedgerWithdrawRequestsBySelf**](DefaultApi.md#getLedgerWithdrawRequestsBySelf) | **GET** /v1/ledger/withdraw/requests/self | Get all pending withdrawal requests for the logged in user |
 | [**getOrderById**](DefaultApi.md#getOrderById) | **GET** /v1/orders/{order_id} | Get order by ID |
 | [**getOrderbookById**](DefaultApi.md#getOrderbookById) | **GET** /v1/orderbooks/{order_book_id} | Get orderbook by ID |
 | [**getOrderbookDepth**](DefaultApi.md#getOrderbookDepth) | **GET** /v1/orderbooks/{order_book_id}/depth | Get the aggregated price levels for a specific orderbook (L2 market depth) |
@@ -55,6 +56,7 @@ All URIs are relative to *https://localhost:8084*
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
+| [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 | [**leverageGetAccruedInterestByUser**](DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
 | [**leverageIsolateCollateral**](DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user&#39;s global collateral |
 | [**leverageSupply**](DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
@@ -746,6 +748,28 @@ This endpoint does not need any parameter.
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getLedgerWithdrawRequestsBySelf"></a>
+# **getLedgerWithdrawRequestsBySelf**
+> AllWithdrawalInitiationsResponseEnvelope getLedgerWithdrawRequestsBySelf()
+
+Get all pending withdrawal requests for the logged in user
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**AllWithdrawalInitiationsResponseEnvelope**](../Models/AllWithdrawalInitiationsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getOrderById"></a>
 # **getOrderById**
 > OrderResponseEnvelope getOrderById(order\_id)
@@ -1348,6 +1372,34 @@ Withdraw assets from this user to the outside world
 ### Return type
 
 [**FundUserResponseEnvelope**](../Models/FundUserResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="ledgerWithdrawRequest"></a>
+# **ledgerWithdrawRequest**
+> WithdrawalInitiationResponseEnvelope ledgerWithdrawRequest(user\_id, DefundUserRequest)
+
+Initiate a withdrawal request for the logged in user to the outside world
+
+    Withdraw assets from the logged in user&#39;s account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user&#39;s available balance in the ledger. Actual transfer of assets must be handled separately.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+| **DefundUserRequest** | [**DefundUserRequest**](../Models/DefundUserRequest.md)|  | |
+
+### Return type
+
+[**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
 
 ### Authorization
 

@@ -3,6 +3,7 @@ Apis/DefaultApi.md
 Models/APIKeyResponse.md
 Models/APIKeyResponseEnvelope.md
 Models/APIKeys.md
+Models/AllWithdrawalInitiationsResponseEnvelope.md
 Models/Asset.md
 Models/AssetConfig.md
 Models/AssetKind.md
@@ -170,4 +171,6 @@ Models/ValidateSubmitOrderResponse.md
 Models/Withdraw.md
 Models/WithdrawRequest.md
 Models/WithdrawResponseEnvelope.md
+Models/WithdrawalInitiation.md
+Models/WithdrawalInitiationResponseEnvelope.md
 README.md

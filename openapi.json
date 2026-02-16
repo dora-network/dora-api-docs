@@ -2516,6 +2516,113 @@
         }
       }
     },
+    "/v1/ledger/withdraw/requests/self": {
+      "get": {
+        "summary": "Get all pending withdrawal requests for the logged in user",
+        "operationId": "getLedgerWithdrawRequestsBySelf",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of pending withdrawal requests for the logged in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllWithdrawalInitiationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Initiate a withdrawal request for the logged in user to the outside world",
+        "operationId": "ledgerWithdrawRequest",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Withdraw assets from the logged in user's account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user's available balance in the ledger. Actual transfer of assets must be handled separately.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefundUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Withdraw request initiation successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalInitiationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/leverage/supply": {
       "post": {
         "summary": "Supply leverage for a specific asset",
@@ -5742,6 +5849,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "order_book_seq": {
+            "type": "integer",
+            "format": "int64"
+          },
           "base_quantity": {
             "type": "number",
             "minimum": 0
@@ -7083,6 +7194,90 @@
       },
       "SupplyResponse": {
         "$ref": "#/components/schemas/SupplyResponseEnvelope"
+      },
+      "WithdrawalInitiation": {
+        "type": "object",
+        "properties": {
+          "withdrawal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "withdrawal_id",
+          "user_id",
+          "position_id",
+          "asset_id",
+          "quantity",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "WithdrawalInitiationResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/WithdrawalInitiation"
+              }
+            }
+          }
+        ]
+      },
+      "WithdrawalInitiationResponse": {
+        "$ref": "#/components/schemas/WithdrawalInitiationResponseEnvelope"
+      },
+      "AllWithdrawalInitiationsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WithdrawalInitiation"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AllWithdrawalInitiationsResponse": {
+        "$ref": "#/components/schemas/AllWithdrawalInitiationsResponseEnvelope"
       },
       "WithdrawRequest": {
         "type": "object",

@@ -34,6 +34,7 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**getLedgerModuleByAsset**](Apis/DefaultApi.md#getLedgerModuleByAsset) | **GET** /v1/ledger/module/{asset_id} | Get the module object for a single asset ID |
 *DefaultApi* | [**getLedgerPositionsSelf**](Apis/DefaultApi.md#getLedgerPositionsSelf) | **GET** /v1/ledger/positions/self | Get your own positions |
 *DefaultApi* | [**getLedgerValueSelf**](Apis/DefaultApi.md#getLedgerValueSelf) | **GET** /v1/ledger/value/self | Get your own available, locked, and borrowed USD value; and realized and unrealized PnL |
+*DefaultApi* | [**getLedgerWithdrawRequestsBySelf**](Apis/DefaultApi.md#getLedgerWithdrawRequestsBySelf) | **GET** /v1/ledger/withdraw/requests/self | Get all pending withdrawal requests for the logged in user |
 *DefaultApi* | [**getOrderById**](Apis/DefaultApi.md#getOrderById) | **GET** /v1/orders/{order_id} | Get order by ID |
 *DefaultApi* | [**getOrderbookById**](Apis/DefaultApi.md#getOrderbookById) | **GET** /v1/orderbooks/{order_book_id} | Get orderbook by ID |
 *DefaultApi* | [**getOrderbookDepth**](Apis/DefaultApi.md#getOrderbookDepth) | **GET** /v1/orderbooks/{order_book_id}/depth | Get the aggregated price levels for a specific orderbook (L2 market depth) |
@@ -58,6 +59,7 @@ All URIs are relative to *https://localhost:8084*
 *DefaultApi* | [**getUsersAPIKeys**](Apis/DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user's api keys |
 *DefaultApi* | [**ledgerDeposit**](Apis/DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user's account from the outside world |
 *DefaultApi* | [**ledgerWithdraw**](Apis/DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
+*DefaultApi* | [**ledgerWithdrawRequest**](Apis/DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 *DefaultApi* | [**leverageGetAccruedInterestByUser**](Apis/DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
 *DefaultApi* | [**leverageIsolateCollateral**](Apis/DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user's global collateral |
 *DefaultApi* | [**leverageSupply**](Apis/DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
@@ -91,6 +93,7 @@ All URIs are relative to *https://localhost:8084*
  - [APIKeyResponse](./Models/APIKeyResponse.md)
  - [APIKeyResponseEnvelope](./Models/APIKeyResponseEnvelope.md)
  - [APIKeys](./Models/APIKeys.md)
+ - [AllWithdrawalInitiationsResponseEnvelope](./Models/AllWithdrawalInitiationsResponseEnvelope.md)
  - [Asset](./Models/Asset.md)
  - [AssetConfig](./Models/AssetConfig.md)
  - [AssetKind](./Models/AssetKind.md)
@@ -258,6 +261,8 @@ All URIs are relative to *https://localhost:8084*
  - [Withdraw](./Models/Withdraw.md)
  - [WithdrawRequest](./Models/WithdrawRequest.md)
  - [WithdrawResponseEnvelope](./Models/WithdrawResponseEnvelope.md)
+ - [WithdrawalInitiation](./Models/WithdrawalInitiation.md)
+ - [WithdrawalInitiationResponseEnvelope](./Models/WithdrawalInitiationResponseEnvelope.md)
 
 
 <a name="documentation-for-authorization"></a>

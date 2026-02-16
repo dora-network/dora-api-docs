@@ -4,6 +4,7 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **order\_book\_id** | **UUID** |  | [default to null] |
+| **order\_book\_seq** | **Long** |  | [optional] [default to null] |
 | **base\_quantity** | **BigDecimal** |  | [default to null] |
 | **base\_asset\_id** | **UUID** |  | [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
