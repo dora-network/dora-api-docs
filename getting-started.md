@@ -22,6 +22,7 @@
     - [Order books](#order-books)
     - [Orders](#orders)
       - [Submitting orders](#submitting-orders)
+        - [Conditional Orders](#conditional-orders)
         - [Error responses for invalid orders](#error-responses-for-invalid-orders)
       - [Cancelling orders](#cancelling-orders)
       - [Updating orders](#updating-orders)
@@ -451,14 +452,46 @@ This endpoint allows you to submit a new order to the specified order book. The 
   "order_modifiers": [
     "MAX_BUY"
   ], // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
-  "good_till_date"": "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
-  "trigger_price": "95.0", // optional trigger price for conditional orders, decimal value expressed as a string
-  "trigger_type": "STOP_LOSS" // optional trigger type for conditional orders, can be "STOP_LOSS" or "TAKE_PROFIT"
+  "good_till_date": "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
+  "client_order_id": "my-custom-id", // optional custom order id from your own system
+  "stop_loss_price": "99.0", // optional trigger price for a stop-loss conditional order
+  "take_profit_price": "101.0" // optional trigger price for a take-profit conditional order
 }
 ```
 
 For market orders, the `price` field is not required and should be omitted. Setting the `MAX_BUY` modifier allows the order to be
 executed at the best available price, up to the specified quantity, without exceeding the user's available balance.
+
+##### Conditional Orders
+
+Conditional orders are orders that will be triggered when the trigger price is reached. Once triggered, the order will be filled
+as a market order. These orders can be created to close a position when a desired price is reached after the initial position
+has been created, either to profit from a higher price, or limit losses if the price falls below a certain level.
+
+To place a conditional order on DORA, set the `stop_loss_price`, or `take_profit_price`, or both when placing the order that
+opens your position. For example, User A wants to buy $1000 of BOND1. The current market price of BOND1 is $0.90. User A
+creates an order to BUY $1000 of BOND1, with a `take_profit_price` of $0.92, and a `stop_loss_price` of $0.88.
+
+DORA receives the order and fills the parent order at the market price of $0.90. User A now has a position of $1000 worth
+of BOND1 with an average fill price of $0.90. DORA creates 2 child orders linked to the parent order that has been filled.
+As the market price of BOND1 moves, DORA continues to check whether if either of these child orders are triggered.
+
+If the market price moves up to $0.92, DORA will automatically trigger the `take_profit` order, and closes the position,
+allowing the user to realize their profit. The `stop_loss` order that was created is automatically cancelled as the
+`take_profit` has already been triggered. This is commonly known as an OCO (One-Cancels-Other) order.
+
+If the market price instead moved down to $0.88, DIRA will automatically trigger the `stop_loss` order, and closes the position.
+This allows the user to limit the loss they make on the position they created. The `take_profit` order that was created
+is automaticaaly cancelled as the `stop_loss` has already been triggered.
+
+It is possible for users to create conditional orders with just a `stop_loss_price` in order to limit the losses if the
+market moves against them, while leaving it up to them when they want to take profit by closing the position themselves.
+
+> NOTE:
+> While it's also possible to create a conditional order with just a `take_profit_price` and no stop loss, it is unlikely
+> for any user to want to do this as it creates a position that would limit profits, but allow unlimited losses. DORA does
+> not prevent users from doing this, so care should be taken to ensure the correct properties are set when placing
+> conditional orders.
 
 ##### Error responses for invalid orders
 

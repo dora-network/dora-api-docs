@@ -16,6 +16,8 @@
 | **client\_order\_id** | **String** | An optional client-provided identifier for the order. | [optional] [default to null] |
 | **position\_assets** | [**List**](PositionAsset.md) | Full list of assets in the position with their price and collateral weight, required when inverse_leverage &lt; 1 for leverage health checks | [optional] [default to null] |
 | **assets\_config** | [**List**](AssetConfig.md) | Configuration for the assets in the order | [optional] [default to null] |
+| **stop\_loss\_price** | **String** | Stop loss price | [optional] [default to null] |
+| **take\_profit\_price** | **String** | Take profit price | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
