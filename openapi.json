@@ -5524,15 +5524,13 @@
           {
             "required": [
               "email",
-              "name",
-              "native_asset_id"
+              "name"
             ]
           },
           {
             "required": [
               "email",
               "name",
-              "native_asset_id",
               "provider",
               "provider_id"
             ]
@@ -6119,6 +6117,10 @@
             "type": "string",
             "format": "text",
             "description": "An optional client-provided identifier for the order."
+          },
+          "parent_order_id": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
@@ -6260,16 +6262,18 @@
             "type": "string",
             "format": "date-time"
           },
-          "trigger_price": {
-            "type": "string"
-          },
-          "trigger_type": {
-            "$ref": "#/components/schemas/TriggerType"
-          },
           "client_order_id": {
             "type": "string",
             "format": "text",
             "description": "An optional client-provided identifier for the order."
+          },
+          "stop_loss_price": {
+            "type": "string",
+            "description": "Stop loss price"
+          },
+          "take_profit_price": {
+            "type": "string",
+            "description": "Take profit price"
           }
         },
         "required": [
@@ -6387,6 +6391,14 @@
                 "price"
               ]
             }
+          },
+          "stop_loss_price": {
+            "type": "string",
+            "description": "Stop loss price"
+          },
+          "take_profit_price": {
+            "type": "string",
+            "description": "Take profit price"
           }
         },
         "required": [

@@ -12,9 +12,9 @@
 | **order\_book\_id** | **UUID** | Required: the order book to submit the order to | [default to null] |
 | **order\_modifiers** | [**List**](OrderModifierKind.md) |  | [optional] [default to null] |
 | **good\_till\_date** | **Date** |  | [optional] [default to null] |
-| **trigger\_price** | **String** |  | [optional] [default to null] |
-| **trigger\_type** | [**TriggerType**](TriggerType.md) |  | [optional] [default to null] |
 | **client\_order\_id** | **String** | An optional client-provided identifier for the order. | [optional] [default to null] |
+| **stop\_loss\_price** | **String** | Stop loss price | [optional] [default to null] |
+| **take\_profit\_price** | **String** | Take profit price | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
