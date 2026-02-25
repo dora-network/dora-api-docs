@@ -1,10 +1,12 @@
 # DefaultApi
 
-All URIs are relative to *https://localhost:8084*
+All URIs are relative to *https://staging.dora.co*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
+| [**approveLedgerWithdrawRequest**](DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
 | [**cancelAllOpenOrders**](DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user&#39;s orders on specific orderbook |
+| [**cancelLedgerWithdrawRequest**](DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 | [**cancelOrderById**](DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
 | [**checkUserEmailExists**](DefaultApi.md#checkUserEmailExists) | **GET** /v1/user/exists | Check whether a user email exists |
 | [**claimLeverageGetAccruedInterest**](DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
@@ -16,6 +18,7 @@ All URIs are relative to *https://localhost:8084*
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
 | [**getAllAssetPrices**](DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
+| [**getAllWithdrawalRequests**](DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
 | [**getAssetById**](DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 | [**getAssetPrice**](DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
 | [**getAssetYTMById**](DefaultApi.md#getAssetYTMById) | **GET** /v1/assets/{asset_id}/ytm | Get annualized yield to maturity for a bond asset |
@@ -32,6 +35,7 @@ All URIs are relative to *https://localhost:8084*
 | [**getLedgerPositionsSelf**](DefaultApi.md#getLedgerPositionsSelf) | **GET** /v1/ledger/positions/self | Get your own positions |
 | [**getLedgerValueSelf**](DefaultApi.md#getLedgerValueSelf) | **GET** /v1/ledger/value/self | Get your own available, locked, and borrowed USD value; and realized and unrealized PnL |
 | [**getLedgerWithdrawRequestsBySelf**](DefaultApi.md#getLedgerWithdrawRequestsBySelf) | **GET** /v1/ledger/withdraw/requests/self | Get all pending withdrawal requests for the logged in user |
+| [**getLedgerWithdrawRequestsByUserID**](DefaultApi.md#getLedgerWithdrawRequestsByUserID) | **GET** /v1/ledger/withdraw/requests/{user_id} | Get all pending withdrawal requests for this user |
 | [**getOrderById**](DefaultApi.md#getOrderById) | **GET** /v1/orders/{order_id} | Get order by ID |
 | [**getOrderbookById**](DefaultApi.md#getOrderbookById) | **GET** /v1/orderbooks/{order_book_id} | Get orderbook by ID |
 | [**getOrderbookDepth**](DefaultApi.md#getOrderbookDepth) | **GET** /v1/orderbooks/{order_book_id}/depth | Get the aggregated price levels for a specific orderbook (L2 market depth) |
@@ -56,7 +60,8 @@ All URIs are relative to *https://localhost:8084*
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
-| [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
+| [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
+| [**ledgerWithdrawRequestSelf**](DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 | [**leverageGetAccruedInterestByUser**](DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
 | [**leverageIsolateCollateral**](DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user&#39;s global collateral |
 | [**leverageSupply**](DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
@@ -69,6 +74,7 @@ All URIs are relative to *https://localhost:8084*
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 | [**listPositionAccountsSelf**](DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
 | [**payLeverageGetAccruedInterest**](DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
+| [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 | [**revokeAPIKeyForUser**](DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 | [**settleLeverageAccruedInterest**](DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
@@ -83,6 +89,34 @@ All URIs are relative to *https://localhost:8084*
 | [**validateSubmitOrder**](DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 | [**verifyUser**](DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
+
+<a name="approveLedgerWithdrawRequest"></a>
+# **approveLedgerWithdrawRequest**
+> WithdrawalInitiationResponseEnvelope approveLedgerWithdrawRequest(withdrawal\_id, WithdrawalRequestReason)
+
+Approve a pending withdrawal request
+
+    Approve a pending withdrawal request, allowing the transfer of assets to the outside world to proceed. Note that this does not interact with any external systems; it simply updates the status of the withdrawal request in the ledger. Actual transfer of assets must be handled separately.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **withdrawal\_id** | **UUID**|  | [default to null] |
+| **WithdrawalRequestReason** | [**WithdrawalRequestReason**](../Models/WithdrawalRequestReason.md)|  | [optional] |
+
+### Return type
+
+[**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 <a name="cancelAllOpenOrders"></a>
 # **cancelAllOpenOrders**
@@ -109,6 +143,34 @@ Cancel all open orders, if user passes orderbook on query param it will cancel a
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="cancelLedgerWithdrawRequest"></a>
+# **cancelLedgerWithdrawRequest**
+> WithdrawalInitiationResponseEnvelope cancelLedgerWithdrawRequest(withdrawal\_id, WithdrawalRequestReason)
+
+Cancel a pending withdrawal request
+
+    Cancel a pending withdrawal request, providing an optional reason for the cancellation.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **withdrawal\_id** | **UUID**|  | [default to null] |
+| **WithdrawalRequestReason** | [**WithdrawalRequestReason**](../Models/WithdrawalRequestReason.md)|  | [optional] |
+
+### Return type
+
+[**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="cancelOrderById"></a>
@@ -374,6 +436,31 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**ListAssetPriceResponseEnvelope**](../Models/ListAssetPriceResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getAllWithdrawalRequests"></a>
+# **getAllWithdrawalRequests**
+> AllWithdrawalInitiationsResponseEnvelope getAllWithdrawalRequests(status)
+
+Get all withdrawal requests
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **status** | **String**|  | [optional] [default to null] |
+
+### Return type
+
+[**AllWithdrawalInitiationsResponseEnvelope**](../Models/AllWithdrawalInitiationsResponseEnvelope.md)
 
 ### Authorization
 
@@ -750,12 +837,41 @@ This endpoint does not need any parameter.
 
 <a name="getLedgerWithdrawRequestsBySelf"></a>
 # **getLedgerWithdrawRequestsBySelf**
-> AllWithdrawalInitiationsResponseEnvelope getLedgerWithdrawRequestsBySelf()
+> AllWithdrawalInitiationsResponseEnvelope getLedgerWithdrawRequestsBySelf(status)
 
 Get all pending withdrawal requests for the logged in user
 
 ### Parameters
-This endpoint does not need any parameter.
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **status** | **String**|  | [optional] [default to null] |
+
+### Return type
+
+[**AllWithdrawalInitiationsResponseEnvelope**](../Models/AllWithdrawalInitiationsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getLedgerWithdrawRequestsByUserID"></a>
+# **getLedgerWithdrawRequestsByUserID**
+> AllWithdrawalInitiationsResponseEnvelope getLedgerWithdrawRequestsByUserID(user\_id, status)
+
+Get all pending withdrawal requests for this user
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+| **status** | **String**|  | [optional] [default to null] |
 
 ### Return type
 
@@ -1099,7 +1215,7 @@ No authorization required
 
 <a name="getTransactions"></a>
 # **getTransactions**
-> ListTransactionsResponseEnvelope getTransactions(pools, user\_ids, tx\_kinds, start, end, page, limit)
+> ListTransactionsResponseEnvelope getTransactions(pools, user\_ids, tx\_kinds, start, end, tenant\_id, page, limit)
 
 Get a filtered, paginated list of transactions
 
@@ -1112,6 +1228,7 @@ Get a filtered, paginated list of transactions
 | **tx\_kinds** | [**List**](../Models/TransactionKind.md)|  | [optional] [default to null] |
 | **start** | **Date**|  | [optional] [default to null] |
 | **end** | **Date**|  | [optional] [default to null] |
+| **tenant\_id** | **UUID**|  | [optional] [default to null] |
 | **page** | **Integer**|  | [optional] [default to 1] |
 | **limit** | **Integer**|  | [optional] [default to 100] |
 
@@ -1356,7 +1473,7 @@ Deposit assets into this user&#39;s account from the outside world
 
 <a name="ledgerWithdraw"></a>
 # **ledgerWithdraw**
-> FundUserResponseEnvelope ledgerWithdraw(user\_id, DefundUserRequest)
+> FundUserResponseEnvelope ledgerWithdraw(user\_id, DefundUserRequest, status)
 
 Withdraw assets from this user to the outside world
 
@@ -1368,6 +1485,7 @@ Withdraw assets from this user to the outside world
 |------------- | ------------- | ------------- | -------------|
 | **user\_id** | **UUID**|  | [default to null] |
 | **DefundUserRequest** | [**DefundUserRequest**](../Models/DefundUserRequest.md)|  | |
+| **status** | **String**|  | [optional] [default to null] |
 
 ### Return type
 
@@ -1385,6 +1503,34 @@ Withdraw assets from this user to the outside world
 <a name="ledgerWithdrawRequest"></a>
 # **ledgerWithdrawRequest**
 > WithdrawalInitiationResponseEnvelope ledgerWithdrawRequest(user\_id, DefundUserRequest)
+
+Initiate a withdrawal request for this user to the outside world
+
+    Withdraw assets from this user&#39;s account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user&#39;s available balance in the ledger. Actual transfer of assets must be handled separately.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+| **DefundUserRequest** | [**DefundUserRequest**](../Models/DefundUserRequest.md)|  | |
+
+### Return type
+
+[**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="ledgerWithdrawRequestSelf"></a>
+# **ledgerWithdrawRequestSelf**
+> WithdrawalInitiationResponseEnvelope ledgerWithdrawRequestSelf(user\_id, DefundUserRequest)
 
 Initiate a withdrawal request for the logged in user to the outside world
 
@@ -1722,6 +1868,34 @@ Pay current accrued leverage interest for a specific user
 ### Return type
 
 [**PayLeverageAccruedInterestResponseEnvelope**](../Models/PayLeverageAccruedInterestResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="rejectLedgerWithdrawRequest"></a>
+# **rejectLedgerWithdrawRequest**
+> WithdrawalInitiationResponseEnvelope rejectLedgerWithdrawRequest(withdrawal\_id, WithdrawalRequestReason)
+
+Reject a pending withdrawal request
+
+    Reject a pending withdrawal request, providing a reason for the rejection. Note that this does not interact with any external systems; it simply updates the status of the withdrawal request in the ledger. Actual transfer of assets must be handled separately.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **withdrawal\_id** | **UUID**|  | [default to null] |
+| **WithdrawalRequestReason** | [**WithdrawalRequestReason**](../Models/WithdrawalRequestReason.md)|  | |
+
+### Return type
+
+[**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
 
 ### Authorization
 

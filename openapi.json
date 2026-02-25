@@ -6,16 +6,20 @@
   },
   "servers": [
     {
-      "url": "https://localhost:8084",
-      "description": "local DORA server"
+      "url": "https://staging.dora.co/",
+      "description": "DORA staging API server"
     },
     {
-      "url": "https://staging.dora.co",
-      "description": "DORA staging server"
+      "url": "wss://staging.dora.co/",
+      "description": "DORA staging Websocket API server"
     },
     {
-      "url": "ws://localhost:8085",
-      "description": "local DORA WebSocket server"
+      "url": "https://prod.dora.co/",
+      "description": "DORA production API server"
+    },
+    {
+      "url": "wss://prod.dora.co/",
+      "description": "DORA production Websocket API server"
     }
   ],
   "security": [
@@ -2469,6 +2473,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "description": "Withdraw assets from this user's account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user's available balance in the ledger. Actual transfer of assets must be handled separately.",
@@ -2516,11 +2528,183 @@
         }
       }
     },
+    "/v1/ledger/withdraw/requests": {
+      "get": {
+        "summary": "Get all withdrawal requests",
+        "operationId": "getAllWithdrawalRequests",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of withdrawal requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllWithdrawalInitiationsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/withdraw/requests/{user_id}": {
+      "get": {
+        "summary": "Get all pending withdrawal requests for this user",
+        "operationId": "getLedgerWithdrawRequestsByUserID",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pending withdrawal requests for this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllWithdrawalInitiationsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Initiate a withdrawal request for this user to the outside world",
+        "operationId": "ledgerWithdrawRequest",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Withdraw assets from this user's account to the outside world. Note that this does not interact with any external systems; it simply deducts the amount from the user's available balance in the ledger. Actual transfer of assets must be handled separately.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DefundUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Withdraw request initiation successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalInitiationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/ledger/withdraw/requests/self": {
       "get": {
         "summary": "Get all pending withdrawal requests for the logged in user",
         "operationId": "getLedgerWithdrawRequestsBySelf",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of pending withdrawal requests for the logged in user",
@@ -2566,7 +2750,7 @@
       },
       "post": {
         "summary": "Initiate a withdrawal request for the logged in user to the outside world",
-        "operationId": "ledgerWithdrawRequest",
+        "operationId": "ledgerWithdrawRequestSelf",
         "parameters": [
           {
             "name": "user_id",
@@ -2602,6 +2786,246 @@
           },
           "400": {
             "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/withdraw/requests/{withdrawal_id}/approve": {
+      "post": {
+        "summary": "Approve a pending withdrawal request",
+        "operationId": "approveLedgerWithdrawRequest",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalRequestReason"
+              }
+            }
+          }
+        },
+        "description": "Approve a pending withdrawal request, allowing the transfer of assets to the outside world to proceed. Note that this does not interact with any external systems; it simply updates the status of the withdrawal request in the ledger. Actual transfer of assets must be handled separately.",
+        "responses": {
+          "200": {
+            "description": "Withdrawal request approved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalInitiationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid withdrawal ID format or request is not in a pending state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal request not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, user does not have permission to approve this withdrawal request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/withdraw/requests/{withdrawal_id}/reject": {
+      "post": {
+        "summary": "Reject a pending withdrawal request",
+        "operationId": "rejectLedgerWithdrawRequest",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalRequestReason"
+              }
+            }
+          }
+        },
+        "description": "Reject a pending withdrawal request, providing a reason for the rejection. Note that this does not interact with any external systems; it simply updates the status of the withdrawal request in the ledger. Actual transfer of assets must be handled separately.",
+        "responses": {
+          "200": {
+            "description": "Withdrawal request rejected successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalInitiationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid withdrawal ID format or request is not in a pending state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal request not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, user does not have permission to reject this withdrawal request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/withdraw/requests/{withdrawal_id}/cancel": {
+      "post": {
+        "summary": "Cancel a pending withdrawal request",
+        "operationId": "cancelLedgerWithdrawRequest",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalRequestReason"
+              }
+            }
+          }
+        },
+        "description": "Cancel a pending withdrawal request, providing an optional reason for the cancellation.",
+        "responses": {
+          "200": {
+            "description": "Withdrawal request cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalInitiationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid withdrawal ID format or request is not in a pending state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal request not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, user does not have permission to cancel this withdrawal request",
             "content": {
               "application/json": {
                 "schema": {
@@ -2823,6 +3247,8 @@
       "post": {
         "summary": "Combines all isolated positions into a single global position",
         "operationId": "leverageUnite",
+        "deprecated": true,
+        "x-deprecated-reason": "Use close positions and transfer instead of unite",
         "description": "Combines all isolated positions into a single global position",
         "requestBody": {
           "required": true,
@@ -3372,6 +3798,14 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            }
+          },
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -7230,15 +7664,26 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
+            "$ref": "#/components/schemas/WithdrawalStatus"
           },
           "created_at": {
             "type": "string",
             "format": "date-time"
           },
+          "created_by": {
+            "type": "string",
+            "format": "uuid"
+          },
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
           }
         },
         "required": [
@@ -7249,7 +7694,10 @@
           "quantity",
           "status",
           "created_at",
-          "updated_at"
+          "created_by",
+          "updated_at",
+          "updated_by",
+          "reason"
         ]
       },
       "WithdrawalInitiationResponseEnvelope": {
@@ -7616,6 +8064,17 @@
       "CurrentLeverageAccruedInterestResponse": {
         "$ref": "#/components/schemas/CurrentLeverageAccruedInterestResponseEnvelope"
       },
+      "WithdrawalRequestReason": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
       "LiquidityRequest": {
         "type": "object",
         "properties": {
@@ -7764,6 +8223,15 @@
           "user_id",
           "admin_user_id",
           "order_side"
+        ]
+      },
+      "WithdrawalStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "COMPLETED",
+          "CANCELED",
+          "REJECTED"
         ]
       },
       "ListTransactionsResponseEnvelope": {

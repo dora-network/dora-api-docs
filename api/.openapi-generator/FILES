@@ -173,4 +173,6 @@ Models/WithdrawRequest.md
 Models/WithdrawResponseEnvelope.md
 Models/WithdrawalInitiation.md
 Models/WithdrawalInitiationResponseEnvelope.md
+Models/WithdrawalRequestReason.md
+Models/WithdrawalStatus.md
 README.md
