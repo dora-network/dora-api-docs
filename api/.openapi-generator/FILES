@@ -3,6 +3,8 @@ Apis/DefaultApi.md
 Models/APIKeyResponse.md
 Models/APIKeyResponseEnvelope.md
 Models/APIKeys.md
+Models/AllPositions.md
+Models/AllPositionsResponseEnvelope.md
 Models/AllWithdrawalInitiationsResponseEnvelope.md
 Models/Asset.md
 Models/AssetConfig.md
@@ -29,6 +31,9 @@ Models/CouponPayment.md
 Models/CreateAPIKeyData.md
 Models/CreateAPIKeyRequest.md
 Models/CreateAPIKeyResponseEnvelope.md
+Models/CreateConditionalOrderRequest.md
+Models/CreateConditionalOrderResponseEnvelope.md
+Models/CreateConditionalOrderResponseEnvelope_allOf_data.md
 Models/CreateIntegratorUserRequest.md
 Models/CreateOrUpdateUserResponse.md
 Models/CreateOrderRequest.md
@@ -42,6 +47,7 @@ Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
 Models/GetAssetByIDResponseEnvelope.md
 Models/GetAssetYTMByIDResponseEnvelope.md
+Models/GetRealizedPnlSettlementsResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
 Models/IsolateCollateralRequest.md
 Models/IsolateCollateralResponse.md
@@ -106,15 +112,20 @@ Models/Position.md
 Models/PositionAccount.md
 Models/PositionAsset.md
 Models/PositionResponse.md
+Models/PositionSide.md
 Models/PositionType.md
 Models/PriceLevel.md
+Models/RealizedPnlSettlement.md
+Models/RealizedPnlSettlements.md
 Models/ResponseEnvelope.md
 Models/ResponseEnvelopeOfListAssets.md
+Models/Restriction.md
 Models/RevokeAPIKeyData.md
 Models/RevokeAPIKeyResponseEnvelope.md
 Models/SettleLeverageAccruedInterest.md
 Models/SettleLeverageAccruedInterestRequest.md
 Models/SettleLeverageAccruedInterestResponseEnvelope.md
+Models/SettleRealizedPnlRecordResponseEnvelope.md
 Models/Side.md
 Models/StreamAssetsEntry.md
 Models/StreamCandlesEntry.md

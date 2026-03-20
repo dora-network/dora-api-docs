@@ -16,11 +16,13 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**closeIsolatedPosition**](Apis/DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 *DefaultApi* | [**createAPIKeyForUser**](Apis/DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 *DefaultApi* | [**createAPIKeyForUserID**](Apis/DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
+*DefaultApi* | [**createConditionalOrder**](Apis/DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 *DefaultApi* | [**createOrder**](Apis/DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 *DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
 *DefaultApi* | [**getAPIKeysForUserID**](Apis/DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user's api keys: admin or integrator only |
 *DefaultApi* | [**getAllAssetPrices**](Apis/DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
+*DefaultApi* | [**getAllPositions**](Apis/DefaultApi.md#getAllPositions) | **GET** /v1/ledger/positions | Get all users' positions |
 *DefaultApi* | [**getAllWithdrawalRequests**](Apis/DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
 *DefaultApi* | [**getAssetById**](Apis/DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 *DefaultApi* | [**getAssetPrice**](Apis/DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
@@ -49,6 +51,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getOrderbookTop**](Apis/DefaultApi.md#getOrderbookTop) | **GET** /v1/orderbooks/{order_book_id}/top | Get the top price levels for a specific orderbook (L1 market depth) |
 *DefaultApi* | [**getPLForSelfByAccount**](Apis/DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 *DefaultApi* | [**getPoolPrice**](Apis/DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
+*DefaultApi* | [**getRealizedPnlSettlements**](Apis/DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&L settlements with filters |
 *DefaultApi* | [**getTradeById**](Apis/DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 *DefaultApi* | [**getTransactionById**](Apis/DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
@@ -81,6 +84,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**revokeAPIKeyForUser**](Apis/DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 *DefaultApi* | [**revokeAPIKeyForUserID**](Apis/DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 *DefaultApi* | [**settleLeverageAccruedInterest**](Apis/DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
+*DefaultApi* | [**settleRealizedPnlRecord**](Apis/DefaultApi.md#settleRealizedPnlRecord) | **PUT** /v1/realized_pnl_settlements/{settlement_id} | Mark a realized P&L settlement as settled |
 *DefaultApi* | [**streamAssetPrices**](Apis/DefaultApi.md#streamAssetPrices) | **GET** /v1/prices/stream | Stream real-time asset prices as map objects |
 *DefaultApi* | [**streamCandleData**](Apis/DefaultApi.md#streamCandleData) | **GET** /v1/charts/{order_book_id}/candle/stream | Get a snapshot of candlestick data from date provided, and open a stream for real-time updates |
 *DefaultApi* | [**streamOrderBookBalances**](Apis/DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
@@ -99,6 +103,8 @@ All URIs are relative to *https://staging.dora.co*
  - [APIKeyResponse](./Models/APIKeyResponse.md)
  - [APIKeyResponseEnvelope](./Models/APIKeyResponseEnvelope.md)
  - [APIKeys](./Models/APIKeys.md)
+ - [AllPositions](./Models/AllPositions.md)
+ - [AllPositionsResponseEnvelope](./Models/AllPositionsResponseEnvelope.md)
  - [AllWithdrawalInitiationsResponseEnvelope](./Models/AllWithdrawalInitiationsResponseEnvelope.md)
  - [Asset](./Models/Asset.md)
  - [AssetConfig](./Models/AssetConfig.md)
@@ -125,6 +131,9 @@ All URIs are relative to *https://staging.dora.co*
  - [CreateAPIKeyData](./Models/CreateAPIKeyData.md)
  - [CreateAPIKeyRequest](./Models/CreateAPIKeyRequest.md)
  - [CreateAPIKeyResponseEnvelope](./Models/CreateAPIKeyResponseEnvelope.md)
+ - [CreateConditionalOrderRequest](./Models/CreateConditionalOrderRequest.md)
+ - [CreateConditionalOrderResponseEnvelope](./Models/CreateConditionalOrderResponseEnvelope.md)
+ - [CreateConditionalOrderResponseEnvelope_allOf_data](./Models/CreateConditionalOrderResponseEnvelope_allOf_data.md)
  - [CreateIntegratorUserRequest](./Models/CreateIntegratorUserRequest.md)
  - [CreateOrUpdateUserResponse](./Models/CreateOrUpdateUserResponse.md)
  - [CreateOrderRequest](./Models/CreateOrderRequest.md)
@@ -138,6 +147,7 @@ All URIs are relative to *https://staging.dora.co*
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
  - [GetAssetYTMByIDResponseEnvelope](./Models/GetAssetYTMByIDResponseEnvelope.md)
+ - [GetRealizedPnlSettlementsResponseEnvelope](./Models/GetRealizedPnlSettlementsResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
  - [IsolateCollateralRequest](./Models/IsolateCollateralRequest.md)
  - [IsolateCollateralResponse](./Models/IsolateCollateralResponse.md)
@@ -202,15 +212,20 @@ All URIs are relative to *https://staging.dora.co*
  - [PositionAccount](./Models/PositionAccount.md)
  - [PositionAsset](./Models/PositionAsset.md)
  - [PositionResponse](./Models/PositionResponse.md)
+ - [PositionSide](./Models/PositionSide.md)
  - [PositionType](./Models/PositionType.md)
  - [PriceLevel](./Models/PriceLevel.md)
+ - [RealizedPnlSettlement](./Models/RealizedPnlSettlement.md)
+ - [RealizedPnlSettlements](./Models/RealizedPnlSettlements.md)
  - [ResponseEnvelope](./Models/ResponseEnvelope.md)
  - [ResponseEnvelopeOfListAssets](./Models/ResponseEnvelopeOfListAssets.md)
+ - [Restriction](./Models/Restriction.md)
  - [RevokeAPIKeyData](./Models/RevokeAPIKeyData.md)
  - [RevokeAPIKeyResponseEnvelope](./Models/RevokeAPIKeyResponseEnvelope.md)
  - [SettleLeverageAccruedInterest](./Models/SettleLeverageAccruedInterest.md)
  - [SettleLeverageAccruedInterestRequest](./Models/SettleLeverageAccruedInterestRequest.md)
  - [SettleLeverageAccruedInterestResponseEnvelope](./Models/SettleLeverageAccruedInterestResponseEnvelope.md)
+ - [SettleRealizedPnlRecordResponseEnvelope](./Models/SettleRealizedPnlRecordResponseEnvelope.md)
  - [Side](./Models/Side.md)
  - [StreamAssetsEntry](./Models/StreamAssetsEntry.md)
  - [StreamCandlesEntry](./Models/StreamCandlesEntry.md)

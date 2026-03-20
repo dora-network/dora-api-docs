@@ -19,6 +19,10 @@
 | **show\_tutorial\_cards** | **Boolean** |  | [default to null] |
 | **notifications\_enabled** | **Boolean** |  | [default to null] |
 | **tenant\_id** | **String** |  | [default to null] |
+| **allow\_email\_notifications** | **Boolean** |  | [default to null] |
+| **allow\_liquidations\_notifications** | **Boolean** |  | [default to null] |
+| **allow\_deposit\_withdrawal\_notifications** | **Boolean** |  | [default to null] |
+| **allow\_orders\_notifications** | **Boolean** |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

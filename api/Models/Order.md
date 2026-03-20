@@ -13,7 +13,9 @@
 | **original\_quantity** | **String** | The original quantity of the order when it was created. | [default to null] |
 | **filled\_quantity** | **String** | Quantity that has been filled so far. | [default to null] |
 | **filled\_notional** | **String** | Quote quantity that has been filled so far. | [default to null] |
-| **last\_update\_at** | **Date** |  | [optional] [default to null] |
+| **locked\_quantity** | **BigDecimal** | Balance locked to ensure limit buy orders have sufficient balance to be fulfilled | [default to null] |
+| **impending\_borrows\_quantity** | **BigDecimal** | Borrows locked from the liquidity pool to ensure limit short sell orders have sufficient balance to be fulfilled | [default to null] |
+| **last\_update\_at** | **Date** |  | [default to null] |
 | **opened\_at** | **Date** |  | [default to null] |
 | **inverse\_leverage** | **String** |  | [default to null] |
 | **side** | [**Side**](Side.md) |  | [default to null] |

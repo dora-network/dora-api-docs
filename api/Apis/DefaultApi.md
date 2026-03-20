@@ -13,11 +13,13 @@ All URIs are relative to *https://staging.dora.co*
 | [**closeIsolatedPosition**](DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 | [**createAPIKeyForUser**](DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 | [**createAPIKeyForUserID**](DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
+| [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
 | [**getAllAssetPrices**](DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
+| [**getAllPositions**](DefaultApi.md#getAllPositions) | **GET** /v1/ledger/positions | Get all users&#39; positions |
 | [**getAllWithdrawalRequests**](DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
 | [**getAssetById**](DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 | [**getAssetPrice**](DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
@@ -46,6 +48,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getOrderbookTop**](DefaultApi.md#getOrderbookTop) | **GET** /v1/orderbooks/{order_book_id}/top | Get the top price levels for a specific orderbook (L1 market depth) |
 | [**getPLForSelfByAccount**](DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 | [**getPoolPrice**](DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
+| [**getRealizedPnlSettlements**](DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&amp;L settlements with filters |
 | [**getTradeById**](DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 | [**getTrades**](DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 | [**getTransactionById**](DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
@@ -78,6 +81,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**revokeAPIKeyForUser**](DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 | [**settleLeverageAccruedInterest**](DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
+| [**settleRealizedPnlRecord**](DefaultApi.md#settleRealizedPnlRecord) | **PUT** /v1/realized_pnl_settlements/{settlement_id} | Mark a realized P&amp;L settlement as settled |
 | [**streamAssetPrices**](DefaultApi.md#streamAssetPrices) | **GET** /v1/prices/stream | Stream real-time asset prices as map objects |
 | [**streamCandleData**](DefaultApi.md#streamCandleData) | **GET** /v1/charts/{order_book_id}/candle/stream | Get a snapshot of candlestick data from date provided, and open a stream for real-time updates |
 | [**streamOrderBookBalances**](DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
@@ -324,6 +328,31 @@ Create apikey for a user
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="createConditionalOrder"></a>
+# **createConditionalOrder**
+> CreateConditionalOrderResponseEnvelope createConditionalOrder(CreateConditionalOrderRequest)
+
+Create a new conditional orders
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateConditionalOrderRequest** | [**CreateConditionalOrderRequest**](../Models/CreateConditionalOrderRequest.md)|  | |
+
+### Return type
+
+[**CreateConditionalOrderResponseEnvelope**](../Models/CreateConditionalOrderResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="createOrder"></a>
 # **createOrder**
 > CreateOrderResponseEnvelope createOrder(CreateOrderRequest)
@@ -436,6 +465,28 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**ListAssetPriceResponseEnvelope**](../Models/ListAssetPriceResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getAllPositions"></a>
+# **getAllPositions**
+> AllPositionsResponseEnvelope getAllPositions()
+
+Get all users&#39; positions
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**AllPositionsResponseEnvelope**](../Models/AllPositionsResponseEnvelope.md)
 
 ### Authorization
 
@@ -1123,6 +1174,36 @@ Get the current price of a pool
 ### Return type
 
 [**PoolPriceResponseEnvelope**](../Models/PoolPriceResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getRealizedPnlSettlements"></a>
+# **getRealizedPnlSettlements**
+> GetRealizedPnlSettlementsResponseEnvelope getRealizedPnlSettlements(user\_id, tenant\_id, position\_id, created\_after, settled\_before, is\_settled)
+
+Get realized P&amp;L settlements with filters
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [optional] [default to null] |
+| **tenant\_id** | **UUID**|  | [optional] [default to null] |
+| **position\_id** | **UUID**|  | [optional] [default to null] |
+| **created\_after** | **Date**|  | [optional] [default to null] |
+| **settled\_before** | **Date**|  | [optional] [default to null] |
+| **is\_settled** | **Boolean**|  | [optional] [default to null] |
+
+### Return type
+
+[**GetRealizedPnlSettlementsResponseEnvelope**](../Models/GetRealizedPnlSettlementsResponseEnvelope.md)
 
 ### Authorization
 
@@ -1980,6 +2061,31 @@ Settle current accrued leverage interest for a specific user
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="settleRealizedPnlRecord"></a>
+# **settleRealizedPnlRecord**
+> SettleRealizedPnlRecordResponseEnvelope settleRealizedPnlRecord(settlement\_id)
+
+Mark a realized P&amp;L settlement as settled
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **settlement\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**SettleRealizedPnlRecordResponseEnvelope**](../Models/SettleRealizedPnlRecordResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 <a name="streamAssetPrices"></a>

@@ -1840,7 +1840,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Order cancelled successfully",
             "content": {
               "application/json": {
@@ -1872,6 +1872,64 @@
           },
           "404": {
             "description": "Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/conditional": {
+      "post": {
+        "summary": "Create a new conditional orders",
+        "operationId": "createConditionalOrder",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConditionalOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Conditional orders are created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateConditionalOrderResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
             "content": {
               "application/json": {
                 "schema": {
@@ -2055,6 +2113,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ledger/positions": {
+      "get": {
+        "summary": "Get all users' positions",
+        "operationId": "getAllPositions",
+        "responses": {
+          "200": {
+            "description": "User positions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllPositionsResponse"
                 }
               }
             }
@@ -5434,6 +5520,168 @@
           }
         }
       }
+    },
+    "/v1/realized_pnl_settlements": {
+      "get": {
+        "summary": "Get realized P&L settlements with filters",
+        "operationId": "getRealizedPnlSettlements",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "position_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "created_after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "settled_before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "is_settled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of realized P&L settlements with filters applied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRealizedPnlSettlementsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user is not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, user does not have access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/realized_pnl_settlements/{settlement_id}": {
+      "put": {
+        "summary": "Mark a realized P&L settlement as settled",
+        "operationId": "settleRealizedPnlRecord",
+        "parameters": [
+          {
+            "name": "settlement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The realized P&L settlement record has been marked as settled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettleRealizedPnlRecordResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user is not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, user does not have access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5527,8 +5775,7 @@
           },
           "max_leverage": {
             "type": "number",
-            "minimum": 0,
-            "maximum": 1
+            "minimum": 1
           },
           "leverage_interest_rate": {
             "type": "number",
@@ -6126,6 +6373,18 @@
           },
           "tenant_id": {
             "type": "string"
+          },
+          "allow_email_notifications": {
+            "type": "boolean"
+          },
+          "allow_liquidations_notifications": {
+            "type": "boolean"
+          },
+          "allow_deposit_withdrawal_notifications": {
+            "type": "boolean"
+          },
+          "allow_orders_notifications": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6136,7 +6395,11 @@
           "roles",
           "tenant_id",
           "show_tutorial_cards",
-          "notifications_enabled"
+          "notifications_enabled",
+          "allow_email_notifications",
+          "allow_liquidations_notifications",
+          "allow_deposit_withdrawal_notifications",
+          "allow_orders_notifications"
         ]
       },
       "UserConfig": {
@@ -6166,6 +6429,18 @@
           },
           "notifications_enabled": {
             "type": "boolean"
+          },
+          "allow_email_notifications": {
+            "type": "boolean"
+          },
+          "allow_liquidations_notifications": {
+            "type": "boolean"
+          },
+          "allow_deposit_withdrawal_notifications": {
+            "type": "boolean"
+          },
+          "allow_orders_notifications": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -6173,7 +6448,11 @@
           "created_at",
           "updated_at",
           "show_tutorial_cards",
-          "notifications_enabled"
+          "notifications_enabled",
+          "allow_email_notifications",
+          "allow_liquidations_notifications",
+          "allow_deposit_withdrawal_notifications",
+          "allow_orders_notifications"
         ]
       },
       "UpdateUserConfigRequest": {
@@ -6195,6 +6474,22 @@
           "notifications_enabled": {
             "$ref": "#/components/schemas/UpdateFieldBoolean",
             "description": "Optional: Whether to show the notifications."
+          },
+          "allow_email_notifications": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to allow email notifications."
+          },
+          "allow_liquidations_notifications": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to allow liquidations notifications."
+          },
+          "allow_deposit_withdrawal_notifications": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to allow deposit/withdrawal notifications."
+          },
+          "allow_orders_notifications": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to allow orders notifications."
           }
         },
         "required": [
@@ -6430,6 +6725,13 @@
           "MARKET"
         ]
       },
+      "PositionSide": {
+        "type": "string",
+        "enum": [
+          "LONG",
+          "SHORT"
+        ]
+      },
       "OrderStatus": {
         "type": "string",
         "enum": [
@@ -6502,6 +6804,16 @@
             "description": "Quote quantity that has been filled so far.",
             "type": "string"
           },
+          "locked_quantity": {
+            "description": "Balance locked to ensure limit buy orders have sufficient balance to be fulfilled",
+            "type": "string",
+            "format": "decimal"
+          },
+          "impending_borrows_quantity": {
+            "description": "Borrows locked from the liquidity pool to ensure limit short sell orders have sufficient balance to be fulfilled",
+            "type": "string",
+            "format": "decimal"
+          },
           "last_update_at": {
             "type": "string",
             "format": "date-time"
@@ -6568,7 +6880,9 @@
           "original_quantity",
           "filled_quantity",
           "filled_notional",
-          "last_updated_at",
+          "locked_quantity",
+          "impending_borrows_quantity",
+          "last_update_at",
           "opened_at",
           "inverse_leverage",
           "side",
@@ -6833,6 +7147,13 @@
           "take_profit_price": {
             "type": "string",
             "description": "Take profit price"
+          },
+          "restrictions": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Restriction"
+            },
+            "description": "Map of restriction keys to Restriction objects"
           }
         },
         "required": [
@@ -6844,6 +7165,82 @@
           "user_balance",
           "asset_id"
         ]
+      },
+      "Restriction": {
+        "type": "object",
+        "properties": {
+          "deposit_limit": {
+            "type": "string",
+            "description": "Maximum deposit allowed (decimal as string)"
+          }
+        }
+      },
+      "CreateConditionalOrderRequest": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "order_book_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required: the order book to submit the order to"
+          },
+          "position_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required: the position to submit the order to"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Required: the asset to submit the order to"
+          },
+          "stop_loss_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Stop loss price"
+          },
+          "take_profit_price": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Take profit price"
+          }
+        },
+        "required": [
+          "price",
+          "order_book_id",
+          "position_id",
+          "asset_id"
+        ]
+      },
+      "CreateConditionalOrderResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "properties": {
+                  "stop_loss_order_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "take_profit_order_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CreateConditionalOrderResponse": {
+        "$ref": "#/components/schemas/CreateConditionalOrderResponseEnvelope"
       },
       "OrderId": {
         "type": "object",
@@ -7015,6 +7412,44 @@
             "$ref": "#/components/schemas/TransformedAssets"
           }
         }
+      },
+      "AllPositions": {
+        "type": "object",
+        "properties": {
+          "all_positions": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/Position"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "all_positions"
+        ]
+      },
+      "AllPositionsResponseEnvelope": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AllPositions"
+              }
+            }
+          }
+        ]
+      },
+      "AllPositionsResponse": {
+        "$ref": "#/components/schemas/AllPositionsResponseEnvelope"
       },
       "PositionType": {
         "type": "string",
@@ -8036,6 +8471,12 @@
             "format": "uuid"
           },
           "current_accrued_interest_usd": {
+            "type": "string"
+          },
+          "asset_name": {
+            "type": "string"
+          },
+          "asset_symbol": {
             "type": "string"
           }
         },
@@ -9733,6 +10174,123 @@
       },
       "PLResponse": {
         "$ref": "#/components/schemas/PLResponseEnvelope"
+      },
+      "RealizedPnlSettlement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The ID of the realized PnL settlement",
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "description": "The ID of the user associated with the realized PnL settlement",
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "description": "The ID of the tenant associated with the realized PnL settlement",
+            "type": "string"
+          },
+          "position_id": {
+            "description": "The ID of the position associated with the realized PnL settlement",
+            "type": "string",
+            "format": "uuid"
+          },
+          "order_id": {
+            "description": "The ID of the position-closing order associated with the realized PnL settlement",
+            "type": "string",
+            "format": "uuid"
+          },
+          "realized_usd": {
+            "description": "The amount of realized PnL in USD",
+            "type": "string",
+            "format": "decimal"
+          },
+          "settled_at": {
+            "description": "The timestamp when the realized PnL settlement was settled",
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "description": "The timestamp when the realized PnL settlement was created",
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "tenant_id",
+          "position_id",
+          "order_id",
+          "realized_usd",
+          "created_at"
+        ]
+      },
+      "RealizedPnlSettlements": {
+        "type": "object",
+        "properties": {
+          "settlements": {
+            "type": "array",
+            "description": "A list of realized PnL settlements matching the query parameters of the request",
+            "items": {
+              "$ref": "#/components/schemas/RealizedPnlSettlement"
+            }
+          },
+          "user_totals": {
+            "type": "object",
+            "description": "A map of user IDs to their total realized PnL in USD across all settlements included in the response",
+            "additionalProperties": {
+              "type": "string",
+              "format": "decimal"
+            }
+          },
+          "tenant_totals": {
+            "type": "object",
+            "description": "A map of tenant IDs to their total realized PnL in USD across all settlements included in the response",
+            "additionalProperties": {
+              "type": "string",
+              "format": "decimal"
+            }
+          }
+        }
+      },
+      "GetRealizedPnlSettlementsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/RealizedPnlSettlements"
+              }
+            }
+          }
+        ]
+      },
+      "GetRealizedPnlSettlementsResponse": {
+        "$ref": "#/components/schemas/GetRealizedPnlSettlementsResponseEnvelope"
+      },
+      "SettleRealizedPnlRecordResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/RealizedPnlSettlement"
+              }
+            }
+          }
+        ]
+      },
+      "SettleRealizedPnlRecordResponse": {
+        "$ref": "#/components/schemas/SettleRealizedPnlRecordResponseEnvelope"
       }
     }
   }
