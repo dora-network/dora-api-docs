@@ -56,6 +56,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 *DefaultApi* | [**getTransactionById**](Apis/DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 *DefaultApi* | [**getTransactions**](Apis/DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
+*DefaultApi* | [**getTransactionsSettlements**](Apis/DefaultApi.md#getTransactionsSettlements) | **GET** /v1/transactions/settlements | Get transactions settlements with filters |
 *DefaultApi* | [**getUserById**](Apis/DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
 *DefaultApi* | [**getUserCouponPaymentsStream**](Apis/DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user's coupon payment accruals in real time |
 *DefaultApi* | [**getUserLedgerStream**](Apis/DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates |
@@ -85,6 +86,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**revokeAPIKeyForUserID**](Apis/DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 *DefaultApi* | [**settleLeverageAccruedInterest**](Apis/DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
 *DefaultApi* | [**settleRealizedPnlRecord**](Apis/DefaultApi.md#settleRealizedPnlRecord) | **PUT** /v1/realized_pnl_settlements/{settlement_id} | Mark a realized P&L settlement as settled |
+*DefaultApi* | [**settleTransactionsSettlements**](Apis/DefaultApi.md#settleTransactionsSettlements) | **PUT** /v1/transactions/settlements | Settle multiple transactions settlements in batch |
 *DefaultApi* | [**streamAssetPrices**](Apis/DefaultApi.md#streamAssetPrices) | **GET** /v1/prices/stream | Stream real-time asset prices as map objects |
 *DefaultApi* | [**streamCandleData**](Apis/DefaultApi.md#streamCandleData) | **GET** /v1/charts/{order_book_id}/candle/stream | Get a snapshot of candlestick data from date provided, and open a stream for real-time updates |
 *DefaultApi* | [**streamOrderBookBalances**](Apis/DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
@@ -132,8 +134,8 @@ All URIs are relative to *https://staging.dora.co*
  - [CreateAPIKeyRequest](./Models/CreateAPIKeyRequest.md)
  - [CreateAPIKeyResponseEnvelope](./Models/CreateAPIKeyResponseEnvelope.md)
  - [CreateConditionalOrderRequest](./Models/CreateConditionalOrderRequest.md)
+ - [CreateConditionalOrderResponseData](./Models/CreateConditionalOrderResponseData.md)
  - [CreateConditionalOrderResponseEnvelope](./Models/CreateConditionalOrderResponseEnvelope.md)
- - [CreateConditionalOrderResponseEnvelope_allOf_data](./Models/CreateConditionalOrderResponseEnvelope_allOf_data.md)
  - [CreateIntegratorUserRequest](./Models/CreateIntegratorUserRequest.md)
  - [CreateOrUpdateUserResponse](./Models/CreateOrUpdateUserResponse.md)
  - [CreateOrderRequest](./Models/CreateOrderRequest.md)
@@ -198,6 +200,7 @@ All URIs are relative to *https://staging.dora.co*
  - [OrderbookStats](./Models/OrderbookStats.md)
  - [OrderbookStatsResponseEnvelope](./Models/OrderbookStatsResponseEnvelope.md)
  - [PLAccount](./Models/PLAccount.md)
+ - [PLAccounts](./Models/PLAccounts.md)
  - [PLAsset](./Models/PLAsset.md)
  - [PLResponseEnvelope](./Models/PLResponseEnvelope.md)
  - [PLSummary](./Models/PLSummary.md)
@@ -210,6 +213,7 @@ All URIs are relative to *https://staging.dora.co*
  - [Portfolio](./Models/Portfolio.md)
  - [Position](./Models/Position.md)
  - [PositionAccount](./Models/PositionAccount.md)
+ - [PositionAccounts](./Models/PositionAccounts.md)
  - [PositionAsset](./Models/PositionAsset.md)
  - [PositionResponse](./Models/PositionResponse.md)
  - [PositionSide](./Models/PositionSide.md)
@@ -219,7 +223,6 @@ All URIs are relative to *https://staging.dora.co*
  - [RealizedPnlSettlements](./Models/RealizedPnlSettlements.md)
  - [ResponseEnvelope](./Models/ResponseEnvelope.md)
  - [ResponseEnvelopeOfListAssets](./Models/ResponseEnvelopeOfListAssets.md)
- - [Restriction](./Models/Restriction.md)
  - [RevokeAPIKeyData](./Models/RevokeAPIKeyData.md)
  - [RevokeAPIKeyResponseEnvelope](./Models/RevokeAPIKeyResponseEnvelope.md)
  - [SettleLeverageAccruedInterest](./Models/SettleLeverageAccruedInterest.md)
@@ -227,20 +230,30 @@ All URIs are relative to *https://staging.dora.co*
  - [SettleLeverageAccruedInterestResponseEnvelope](./Models/SettleLeverageAccruedInterestResponseEnvelope.md)
  - [SettleRealizedPnlRecordResponseEnvelope](./Models/SettleRealizedPnlRecordResponseEnvelope.md)
  - [Side](./Models/Side.md)
+ - [StreamAssetPricesResponse](./Models/StreamAssetPricesResponse.md)
  - [StreamAssetsEntry](./Models/StreamAssetsEntry.md)
+ - [StreamAssetsResponse](./Models/StreamAssetsResponse.md)
  - [StreamCandlesEntry](./Models/StreamCandlesEntry.md)
+ - [StreamCandlesResponse](./Models/StreamCandlesResponse.md)
  - [StreamEntry](./Models/StreamEntry.md)
  - [StreamOrderBookBalanceEntry](./Models/StreamOrderBookBalanceEntry.md)
+ - [StreamOrderBookBalancesResponse](./Models/StreamOrderBookBalancesResponse.md)
  - [StreamOrderUpdatesEntry](./Models/StreamOrderUpdatesEntry.md)
+ - [StreamOrderUpdatesResponse](./Models/StreamOrderUpdatesResponse.md)
  - [StreamOrdersEntry](./Models/StreamOrdersEntry.md)
+ - [StreamOrdersResponse](./Models/StreamOrdersResponse.md)
  - [StreamPositionsEntry](./Models/StreamPositionsEntry.md)
+ - [StreamPositionsResponse](./Models/StreamPositionsResponse.md)
  - [StreamTradesEntry](./Models/StreamTradesEntry.md)
+ - [StreamTradesResponse](./Models/StreamTradesResponse.md)
  - [StreamTransactionsEntry](./Models/StreamTransactionsEntry.md)
+ - [StreamTransactionsResponse](./Models/StreamTransactionsResponse.md)
  - [StreamUserCouponPaymentsEntry](./Models/StreamUserCouponPaymentsEntry.md)
  - [StreamUserCouponPaymentsResponse](./Models/StreamUserCouponPaymentsResponse.md)
  - [Supply](./Models/Supply.md)
  - [SupplyRequest](./Models/SupplyRequest.md)
  - [SupplyResponseEnvelope](./Models/SupplyResponseEnvelope.md)
+ - [TenantRestrictions](./Models/TenantRestrictions.md)
  - [Trade](./Models/Trade.md)
  - [TradeRequestError](./Models/TradeRequestError.md)
  - [TradeResponseEnvelope](./Models/TradeResponseEnvelope.md)
@@ -248,6 +261,10 @@ All URIs are relative to *https://staging.dora.co*
  - [TransactionKind](./Models/TransactionKind.md)
  - [TransactionRequestError](./Models/TransactionRequestError.md)
  - [TransactionResponseEnvelope](./Models/TransactionResponseEnvelope.md)
+ - [TransactionsSettlement](./Models/TransactionsSettlement.md)
+ - [TransactionsSettlementRequest](./Models/TransactionsSettlementRequest.md)
+ - [TransactionsSettlementsResponse](./Models/TransactionsSettlementsResponse.md)
+ - [TransactionsSettlementsResponseEnvelope](./Models/TransactionsSettlementsResponseEnvelope.md)
  - [TransferBalancesRequest](./Models/TransferBalancesRequest.md)
  - [TransferBalancesResponseEnvelope](./Models/TransferBalancesResponseEnvelope.md)
  - [TransformedAssets](./Models/TransformedAssets.md)

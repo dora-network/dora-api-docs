@@ -1968,6 +1968,7 @@
           {
             "name": "start",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "date-time"
@@ -1976,6 +1977,7 @@
           {
             "name": "end",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "string",
               "format": "date-time"
@@ -4001,6 +4003,162 @@
                 "schema": {
                   "$ref": "#/components/schemas/ResponseEnvelope"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/transactions/settlements": {
+      "get": {
+        "summary": "Get transactions settlements with filters",
+        "operationId": "getTransactionsSettlements",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Tenant ID to filter settlements"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "User ID to filter settlements"
+          },
+          {
+            "name": "position_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Position ID to filter settlements"
+          },
+          {
+            "name": "tx_kind",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Transaction kind to filter settlements"
+          },
+          {
+            "name": "created_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Filter settlements created after this time"
+          },
+          {
+            "name": "settled_before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Filter settlements settled before this time"
+          },
+          {
+            "name": "is_settled",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter settlements by settlement status"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of transaction settlements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsSettlementsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No settlements found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Settle multiple transactions settlements in batch",
+        "operationId": "settleTransactionsSettlements",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TransactionsSettlementRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settlements updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/TransactionsSettlementsResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ResponseEnvelope" }
+              }
+            }
+          },
+          "404": {
+            "description": "No transactions for settlement found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ResponseEnvelope" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ResponseEnvelope" }
               }
             }
           }
@@ -7149,11 +7307,11 @@
             "description": "Take profit price"
           },
           "restrictions": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Restriction"
-            },
-            "description": "Map of restriction keys to Restriction objects"
+            "$ref": "#/components/schemas/TenantRestrictions"
+          },
+          "initial_capital": {
+            "type": "string",
+            "description": "Initial capital value in USD only used to validate sells with leverage"
           }
         },
         "required": [
@@ -7166,14 +7324,30 @@
           "asset_id"
         ]
       },
-      "Restriction": {
+      "TenantRestrictions": {
         "type": "object",
         "properties": {
+          "tenant_id": {
+            "type": "string",
+            "description": "Tenant ID"
+          },
           "deposit_limit": {
             "type": "string",
-            "description": "Maximum deposit allowed (decimal as string)"
+            "format": "decimal",
+            "description": "Maximum allowed deposit for the tenant."
+          },
+          "trade_limit": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Maximum allowed trade amount for the tenant."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update timestamp for the restrictions."
           }
-        }
+        },
+        "required": ["tenant_id", "deposit_limit", "trade_limit", "updated_at"]
       },
       "CreateConditionalOrderRequest": {
         "type": "object",
@@ -7224,6 +7398,8 @@
             "type": "object",
             "properties": {
               "data": {
+                "title": "CreateConditionalOrderResponseData",
+                "type": "object",
                 "properties": {
                   "stop_loss_order_id": {
                     "type": "string",
@@ -8755,6 +8931,62 @@
       },
       "GetTransactionResponse": {
         "$ref": "#/components/schemas/TransactionResponseEnvelope"
+      },
+      "TransactionsSettlement": {
+        "type": "object",
+        "properties": {
+          "tx_id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "tenant_id": { "type": "string" },
+          "position_id": { "type": "string", "format": "uuid" },
+          "tx_kind": { "type": "string" },
+          "quantity_usd": { "type": "string", "format": "decimal" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "settled_at": { "type": "string", "format": "date-time", "nullable": true },
+          "settled_by": { "type": "string", "format": "uuid", "nullable": true }
+        },
+        "required": ["tx_id", "user_id", "tenant_id", "position_id", "tx_kind", "quantity_usd", "created_at"]
+      },
+      "TransactionsSettlementsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/TransactionsSettlementsResponse"
+              }
+            }
+          }
+        ]
+      },
+      "TransactionsSettlementsResponse": {
+        "type": "object",
+        "properties": {
+          "settlements": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TransactionsSettlement" }
+          },
+          "user_totals": {
+            "type": "object",
+            "additionalProperties": { "type": "string", "format": "decimal" }
+          },
+          "tenant_totals": {
+            "type": "object",
+            "additionalProperties": { "type": "string", "format": "decimal" }
+          }
+        }
+      },
+      "TransactionsSettlementRequest": {
+        "type": "object",
+        "properties": {
+          "tx_ids": {
+            "type": "array",
+            "items": { "type": "string", "format": "uuid" }
+          }
+        }
       },
       "ResponseEnvelope": {
         "type": "object",

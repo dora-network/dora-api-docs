@@ -18,7 +18,8 @@
 | **assets\_config** | [**List**](AssetConfig.md) | Configuration for the assets in the order | [optional] [default to null] |
 | **stop\_loss\_price** | **String** | Stop loss price | [optional] [default to null] |
 | **take\_profit\_price** | **String** | Take profit price | [optional] [default to null] |
-| **restrictions** | [**Map**](Restriction.md) | Map of restriction keys to Restriction objects | [optional] [default to null] |
+| **restrictions** | [**TenantRestrictions**](TenantRestrictions.md) |  | [optional] [default to null] |
+| **initial\_capital** | **String** | Initial capital value in USD only used to validate sells with leverage | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

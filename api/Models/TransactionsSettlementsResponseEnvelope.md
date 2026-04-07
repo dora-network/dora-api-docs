@@ -1,9 +1,9 @@
-# ListPositionAccountsResponseEnvelope
+# TransactionsSettlementsResponseEnvelope
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **data** | [**PositionAccounts**](PositionAccounts.md) |  | [optional] [default to null] |
+| **data** | [**TransactionsSettlementsResponse**](TransactionsSettlementsResponse.md) |  | [optional] [default to null] |
 | **error** | **String** | The error message. Present for error (non-2xx) responses. | [optional] [default to null] |
 | **metadata** | [**Metadata**](Metadata.md) | Metadata about the response, including status code and trace information. | [default to null] |
 

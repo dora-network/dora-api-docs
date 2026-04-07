@@ -53,6 +53,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getTrades**](DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 | [**getTransactionById**](DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 | [**getTransactions**](DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
+| [**getTransactionsSettlements**](DefaultApi.md#getTransactionsSettlements) | **GET** /v1/transactions/settlements | Get transactions settlements with filters |
 | [**getUserById**](DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
 | [**getUserCouponPaymentsStream**](DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user&#39;s coupon payment accruals in real time |
 | [**getUserLedgerStream**](DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user&#39;s ledger updates since a specific time, and opens a stream for further updates |
@@ -82,6 +83,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 | [**settleLeverageAccruedInterest**](DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
 | [**settleRealizedPnlRecord**](DefaultApi.md#settleRealizedPnlRecord) | **PUT** /v1/realized_pnl_settlements/{settlement_id} | Mark a realized P&amp;L settlement as settled |
+| [**settleTransactionsSettlements**](DefaultApi.md#settleTransactionsSettlements) | **PUT** /v1/transactions/settlements | Settle multiple transactions settlements in batch |
 | [**streamAssetPrices**](DefaultApi.md#streamAssetPrices) | **GET** /v1/prices/stream | Stream real-time asset prices as map objects |
 | [**streamCandleData**](DefaultApi.md#streamCandleData) | **GET** /v1/charts/{order_book_id}/candle/stream | Get a snapshot of candlestick data from date provided, and open a stream for real-time updates |
 | [**streamOrderBookBalances**](DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
@@ -599,7 +601,7 @@ No authorization required
 
 <a name="getAssetsStream"></a>
 # **getAssetsStream**
-> List getAssetsStream(since, until)
+> StreamAssetsResponse getAssetsStream(since, until)
 
 Get all inserts or updates for assets
 
@@ -612,7 +614,7 @@ Get all inserts or updates for assets
 
 ### Return type
 
-[**List**](../Models/StreamAssetsEntry.md)
+[**StreamAssetsResponse**](../Models/StreamAssetsResponse.md)
 
 ### Authorization
 
@@ -634,8 +636,8 @@ Get candlestick data for an orderbook
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **order\_book\_id** | **String**|  | [default to null] |
-| **start** | **Date**|  | [optional] [default to null] |
-| **end** | **Date**|  | [optional] [default to null] |
+| **start** | **Date**|  | [default to null] |
+| **end** | **Date**|  | [default to null] |
 | **resolution** | [**CandleResolution**](../Models/.md)|  | [optional] [default to null] [enum: 1m, 5m, 15m, 1h, 4h, 1d] |
 
 ### Return type
@@ -1326,6 +1328,37 @@ No authorization required
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getTransactionsSettlements"></a>
+# **getTransactionsSettlements**
+> TransactionsSettlementsResponseEnvelope getTransactionsSettlements(tenant\_id, user\_id, position\_id, tx\_kind, created\_after, settled\_before, is\_settled)
+
+Get transactions settlements with filters
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **tenant\_id** | **String**| Tenant ID to filter settlements | [optional] [default to null] |
+| **user\_id** | **UUID**| User ID to filter settlements | [optional] [default to null] |
+| **position\_id** | **UUID**| Position ID to filter settlements | [optional] [default to null] |
+| **tx\_kind** | **String**| Transaction kind to filter settlements | [optional] [default to null] |
+| **created\_after** | **Date**| Filter settlements created after this time | [optional] [default to null] |
+| **settled\_before** | **Date**| Filter settlements settled before this time | [optional] [default to null] |
+| **is\_settled** | **Boolean**| Filter settlements by settlement status | [optional] [default to null] |
+
+### Return type
+
+[**TransactionsSettlementsResponseEnvelope**](../Models/TransactionsSettlementsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getUserById"></a>
 # **getUserById**
 > UserEnvelope getUserById(user\_id)
@@ -1378,7 +1411,7 @@ Stream user&#39;s coupon payment accruals in real time
 
 <a name="getUserLedgerStream"></a>
 # **getUserLedgerStream**
-> List getUserLedgerStream(user\_id)
+> StreamPositionsResponse getUserLedgerStream(user\_id)
 
 Get a snapshot of user&#39;s ledger updates since a specific time, and opens a stream for further updates
 
@@ -1390,7 +1423,7 @@ Get a snapshot of user&#39;s ledger updates since a specific time, and opens a s
 
 ### Return type
 
-[**List**](../Models/StreamPositionsEntry.md)
+[**StreamPositionsResponse**](../Models/StreamPositionsResponse.md)
 
 ### Authorization
 
@@ -1403,7 +1436,7 @@ Get a snapshot of user&#39;s ledger updates since a specific time, and opens a s
 
 <a name="getUserOrderUpdatesStream"></a>
 # **getUserOrderUpdatesStream**
-> List getUserOrderUpdatesStream(user\_id, order\_book\_id, since)
+> StreamOrderUpdatesResponse getUserOrderUpdatesStream(user\_id, order\_book\_id, since)
 
 Get a snapshot of user&#39;s order updates for the given order book since a specific time, and opens a stream for further updates
 
@@ -1417,7 +1450,7 @@ Get a snapshot of user&#39;s order updates for the given order book since a spec
 
 ### Return type
 
-[**List**](../Models/StreamOrderUpdatesEntry.md)
+[**StreamOrderUpdatesResponse**](../Models/StreamOrderUpdatesResponse.md)
 
 ### Authorization
 
@@ -1430,7 +1463,7 @@ Get a snapshot of user&#39;s order updates for the given order book since a spec
 
 <a name="getUserOrdersUpdatesStreamAll"></a>
 # **getUserOrdersUpdatesStreamAll**
-> List getUserOrdersUpdatesStreamAll(user\_id, since)
+> StreamOrderUpdatesResponse getUserOrdersUpdatesStreamAll(user\_id, since)
 
 Get a snapshot of user&#39;s order updates across all order books since a specific time, and opens a stream for further updates
 
@@ -1443,7 +1476,7 @@ Get a snapshot of user&#39;s order updates across all order books since a specif
 
 ### Return type
 
-[**List**](../Models/StreamOrderUpdatesEntry.md)
+[**StreamOrderUpdatesResponse**](../Models/StreamOrderUpdatesResponse.md)
 
 ### Authorization
 
@@ -1478,7 +1511,7 @@ This endpoint does not need any parameter.
 
 <a name="getUserTransactionsStream"></a>
 # **getUserTransactionsStream**
-> List getUserTransactionsStream(user\_id, since)
+> StreamTransactionsResponse getUserTransactionsStream(user\_id, since)
 
 Get a snapshot of user&#39;s executed transactions since a specific time, and opens a stream for further updates
 
@@ -1491,7 +1524,7 @@ Get a snapshot of user&#39;s executed transactions since a specific time, and op
 
 ### Return type
 
-[**List**](../Models/StreamTransactionsEntry.md)
+[**StreamTransactionsResponse**](../Models/StreamTransactionsResponse.md)
 
 ### Authorization
 
@@ -2088,9 +2121,34 @@ Mark a realized P&amp;L settlement as settled
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="settleTransactionsSettlements"></a>
+# **settleTransactionsSettlements**
+> TransactionsSettlementsResponse settleTransactionsSettlements(TransactionsSettlementRequest)
+
+Settle multiple transactions settlements in batch
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **TransactionsSettlementRequest** | [**TransactionsSettlementRequest**](../Models/TransactionsSettlementRequest.md)|  | |
+
+### Return type
+
+[**TransactionsSettlementsResponse**](../Models/TransactionsSettlementsResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="streamAssetPrices"></a>
 # **streamAssetPrices**
-> Map streamAssetPrices(since, asset\_id)
+> StreamAssetPricesResponse streamAssetPrices(since, asset\_id)
 
 Stream real-time asset prices as map objects
 
@@ -2105,7 +2163,7 @@ Stream real-time asset prices as map objects
 
 ### Return type
 
-[**Map**](../Models/AssetPrice.md)
+[**StreamAssetPricesResponse**](../Models/StreamAssetPricesResponse.md)
 
 ### Authorization
 
@@ -2118,7 +2176,7 @@ No authorization required
 
 <a name="streamCandleData"></a>
 # **streamCandleData**
-> List streamCandleData(order\_book\_id, since, resolution)
+> StreamCandlesResponse streamCandleData(order\_book\_id, since, resolution)
 
 Get a snapshot of candlestick data from date provided, and open a stream for real-time updates
 
@@ -2132,7 +2190,7 @@ Get a snapshot of candlestick data from date provided, and open a stream for rea
 
 ### Return type
 
-[**List**](../Models/StreamCandlesEntry.md)
+[**StreamCandlesResponse**](../Models/StreamCandlesResponse.md)
 
 ### Authorization
 
@@ -2145,7 +2203,7 @@ No authorization required
 
 <a name="streamOrderBookBalances"></a>
 # **streamOrderBookBalances**
-> List streamOrderBookBalances(order\_book\_id, since)
+> StreamOrderBookBalancesResponse streamOrderBookBalances(order\_book\_id, since)
 
 Get a snapshot of base and quote balances for an order book and open a stream for real-time updates
 
@@ -2158,7 +2216,7 @@ Get a snapshot of base and quote balances for an order book and open a stream fo
 
 ### Return type
 
-[**List**](../Models/StreamOrderBookBalanceEntry.md)
+[**StreamOrderBookBalancesResponse**](../Models/StreamOrderBookBalancesResponse.md)
 
 ### Authorization
 
@@ -2197,7 +2255,7 @@ No authorization required
 
 <a name="streamTrades"></a>
 # **streamTrades**
-> List streamTrades(order\_book\_id, since)
+> StreamTradesResponse streamTrades(order\_book\_id, since)
 
 Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates
 
@@ -2210,7 +2268,7 @@ Get a snapshot of trades executed on the given order book from a specific date a
 
 ### Return type
 
-[**List**](../Models/StreamTradesEntry.md)
+[**StreamTradesResponse**](../Models/StreamTradesResponse.md)
 
 ### Authorization
 
