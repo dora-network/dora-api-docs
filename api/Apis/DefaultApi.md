@@ -1188,7 +1188,7 @@ Get the current price of a pool
 
 <a name="getRealizedPnlSettlements"></a>
 # **getRealizedPnlSettlements**
-> GetRealizedPnlSettlementsResponseEnvelope getRealizedPnlSettlements(user\_id, tenant\_id, position\_id, created\_after, settled\_before, is\_settled)
+> GetRealizedPnlSettlementsResponseEnvelope getRealizedPnlSettlements(user\_id, tenant\_id, position\_id, created\_after, created\_before, settled\_after, settled\_before, is\_settled)
 
 Get realized P&amp;L settlements with filters
 
@@ -1200,6 +1200,8 @@ Get realized P&amp;L settlements with filters
 | **tenant\_id** | **UUID**|  | [optional] [default to null] |
 | **position\_id** | **UUID**|  | [optional] [default to null] |
 | **created\_after** | **Date**|  | [optional] [default to null] |
+| **created\_before** | **Date**|  | [optional] [default to null] |
+| **settled\_after** | **Date**|  | [optional] [default to null] |
 | **settled\_before** | **Date**|  | [optional] [default to null] |
 | **is\_settled** | **Boolean**|  | [optional] [default to null] |
 

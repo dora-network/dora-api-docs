@@ -12,6 +12,7 @@
 | **completed** | **String** |  | [default to null] |
 | **started\_at** | **Date** |  | [default to null] |
 | **ended\_at** | **Date** |  | [default to null] |
+| **transaction\_id** | **UUID** |  | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

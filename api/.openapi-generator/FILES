@@ -27,6 +27,7 @@ Models/ClosePositionRequest.md
 Models/ClosePositionResp.md
 Models/ClosePositionResponseEnvelope.md
 Models/Collateral.md
+Models/CountryCode.md
 Models/CouponPayment.md
 Models/CreateAPIKeyData.md
 Models/CreateAPIKeyRequest.md

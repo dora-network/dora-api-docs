@@ -7,7 +7,9 @@
 | **closed\_at** | **Date** |  | [optional] [default to null] |
 | **disabled\_at** | **Date** |  | [optional] [default to null] |
 | **email** | **String** |  | [default to null] |
-| **name** | **String** |  | [default to null] |
+| **first\_name** | **String** |  | [default to null] |
+| **last\_name** | **String** |  | [default to null] |
+| **country\_of\_domicile** | [**CountryCode**](CountryCode.md) |  | [default to null] |
 | **native\_asset\_id** | **UUID** |  | [default to null] |
 | **photo\_url** | **String** |  | [optional] [default to null] |
 | **provider** | **String** |  | [optional] [default to null] |

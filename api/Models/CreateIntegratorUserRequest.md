@@ -4,7 +4,9 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **email** | **String** |  | [optional] [default to null] |
-| **name** | **String** |  | [optional] [default to null] |
+| **first\_name** | **String** |  | [optional] [default to null] |
+| **last\_name** | **String** |  | [optional] [default to null] |
+| **country\_of\_domicile** | [**CountryCode**](CountryCode.md) |  | [optional] [default to null] |
 | **native\_asset\_id** | **UUID** |  | [optional] [default to null] |
 | **photo\_url** | **String** |  | [optional] [default to null] |
 | **provider** | **String** |  | [optional] [default to null] |

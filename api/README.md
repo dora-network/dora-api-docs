@@ -129,6 +129,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ClosePositionResp](./Models/ClosePositionResp.md)
  - [ClosePositionResponseEnvelope](./Models/ClosePositionResponseEnvelope.md)
  - [Collateral](./Models/Collateral.md)
+ - [CountryCode](./Models/CountryCode.md)
  - [CouponPayment](./Models/CouponPayment.md)
  - [CreateAPIKeyData](./Models/CreateAPIKeyData.md)
  - [CreateAPIKeyRequest](./Models/CreateAPIKeyRequest.md)
