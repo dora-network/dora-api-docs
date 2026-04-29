@@ -5,15 +5,16 @@ All URIs are relative to *https://staging.dora.co*
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**approveLedgerWithdrawRequest**](DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
-| [**cancelAllOpenOrders**](DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user&#39;s orders on specific orderbook |
+| [**cancelAllOpenOrders**](DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user&#39;s orders on specific orderbook |
 | [**cancelLedgerWithdrawRequest**](DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 | [**cancelOrderById**](DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
-| [**checkUserEmailExists**](DefaultApi.md#checkUserEmailExists) | **GET** /v1/user/exists | Check whether a user email exists |
 | [**claimLeverageGetAccruedInterest**](DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
+| [**closeIsolatedAccountV2**](DefaultApi.md#closeIsolatedAccountV2) | **POST** /v2/accounts/close | Close an isolated account, repaying the borrowed |
 | [**closeIsolatedPosition**](DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 | [**createAPIKeyForUser**](DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 | [**createAPIKeyForUserID**](DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 | [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
+| [**createNewIsolatedAccountV2**](DefaultApi.md#createNewIsolatedAccountV2) | **POST** /v2/accounts/new_isolated | Create a new isolated account for a user transferring available assets into the account |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
@@ -30,6 +31,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getL1Depth**](DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
 | [**getL2Depth**](DefaultApi.md#getL2Depth) | **GET** /v1/orderbooks/{order_book_id}/L2 | Get the aggregated price levels for a specific orderbook (L2 market depth) |
 | [**getL3Depth**](DefaultApi.md#getL3Depth) | **GET** /v1/orderbooks/{order_book_id}/L3 | Get all open orders for a specific orderbook (L3 market depth) |
+| [**getLedgerAccountsSelfV2**](DefaultApi.md#getLedgerAccountsSelfV2) | **GET** /v2/ledger/accounts/self | Get your own accounts |
 | [**getLedgerBalancesSelf**](DefaultApi.md#getLedgerBalancesSelf) | **GET** /v1/ledger/balances/self | Get your own available, locked, and borrowed assets |
 | [**getLedgerInterestSelf**](DefaultApi.md#getLedgerInterestSelf) | **GET** /v1/ledger/interest/self | Get your own interest |
 | [**getLedgerModule**](DefaultApi.md#getLedgerModule) | **GET** /v1/ledger/module | Get the entire module object, including unborrowed leverage assets and total leverage trackers |
@@ -54,25 +56,30 @@ All URIs are relative to *https://staging.dora.co*
 | [**getTransactionById**](DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 | [**getTransactions**](DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
 | [**getTransactionsSettlements**](DefaultApi.md#getTransactionsSettlements) | **GET** /v1/transactions/settlements | Get transactions settlements with filters |
+| [**getTransactionsStream**](DefaultApi.md#getTransactionsStream) | **GET** /v1/transactions/stream | Get transactions since a specific time, and open a stream for further updates |
 | [**getUserById**](DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
 | [**getUserCouponPaymentsStream**](DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user&#39;s coupon payment accruals in real time |
 | [**getUserLedgerStream**](DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user&#39;s ledger updates since a specific time, and opens a stream for further updates |
+| [**getUserLeverageAccruedInterestStream**](DefaultApi.md#getUserLeverageAccruedInterestStream) | **GET** /v1/user/{user_id}/leverage/accrued_interest/stream | Stream user&#39;s current leverage accrued interest in real time |
 | [**getUserOrderUpdatesStream**](DefaultApi.md#getUserOrderUpdatesStream) | **GET** /v1/user/{user_id}/orders/{order_book_id}/updates/stream | Get a snapshot of user&#39;s order updates for the given order book since a specific time, and opens a stream for further updates |
 | [**getUserOrdersUpdatesStreamAll**](DefaultApi.md#getUserOrdersUpdatesStreamAll) | **GET** /v1/user/{user_id}/orders/all/updates/stream | Get a snapshot of user&#39;s order updates across all order books since a specific time, and opens a stream for further updates |
 | [**getUserSelf**](DefaultApi.md#getUserSelf) | **GET** /v1/user/self | Get user details for the authenticated user |
 | [**getUserTransactionsStream**](DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user&#39;s executed transactions since a specific time, and opens a stream for further updates |
+| [**getUsers**](DefaultApi.md#getUsers) | **GET** /v1/user | Get all users (admin only) |
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 | [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
 | [**ledgerWithdrawRequestSelf**](DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 | [**leverageGetAccruedInterestByUser**](DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
+| [**leverageGetInterestRate**](DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage interest rate for a specific asset |
 | [**leverageIsolateCollateral**](DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user&#39;s global collateral |
 | [**leverageSupply**](DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
 | [**leverageUnite**](DefaultApi.md#leverageUnite) | **POST** /v1/leverage/unite | Combines all isolated positions into a single global position |
 | [**leverageWithdraw**](DefaultApi.md#leverageWithdraw) | **POST** /v1/leverage/withdraw | Withdraw leverage for a specific asset |
 | [**liquidityAdd**](DefaultApi.md#liquidityAdd) | **POST** /v1/liquidity/pool/{pool_id}/add | Add liquidity to a pool |
 | [**liquiditySubtract**](DefaultApi.md#liquiditySubtract) | **POST** /v1/liquidity/pool/{pool_id}/remove | Subtract liquidity from a pool |
+| [**listAccountsSelfV2**](DefaultApi.md#listAccountsSelfV2) | **GET** /v2/user/self/accounts | List all accounts for the authenticated user |
 | [**listAssets**](DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
 | [**listOrderBooks**](DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
@@ -89,6 +96,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**streamOrderBookBalances**](DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
 | [**streamOrderbookOpenOrders**](DefaultApi.md#streamOrderbookOpenOrders) | **GET** /v1/orderbooks/{order_book_id}/open/stream | Get a snapshot of open orders in an order book and open a stream for real-time updates |
 | [**streamTrades**](DefaultApi.md#streamTrades) | **GET** /v1/trades/{order_book_id}/stream | Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates |
+| [**transferAccountBalancesV2**](DefaultApi.md#transferAccountBalancesV2) | **POST** /v2/accounts/transfer_balances | Transfer available balance between a user&#39;s accounts |
 | [**transferAvailableBalances**](DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user&#39;s accounts (e.g. global to isolated position) |
 | [**updateUserConfig**](DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 | [**updateUserConfigSelf**](DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
@@ -126,9 +134,9 @@ Approve a pending withdrawal request
 
 <a name="cancelAllOpenOrders"></a>
 # **cancelAllOpenOrders**
-> ListOrdersResponseEnvelope cancelAllOpenOrders(order\_book\_id, user\_id, order\_kind)
+> ListOrdersResponseEnvelope cancelAllOpenOrders(order\_book\_id, user\_id, account\_id, order\_kind)
 
-Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user&#39;s orders on specific orderbook
+Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user&#39;s orders on specific orderbook
 
 ### Parameters
 
@@ -136,6 +144,7 @@ Cancel all open orders, if user passes orderbook on query param it will cancel a
 |------------- | ------------- | ------------- | -------------|
 | **order\_book\_id** | **String**|  | [optional] [default to null] |
 | **user\_id** | **UUID**|  | [optional] [default to null] |
+| **account\_id** | **UUID**|  | [optional] [default to null] |
 | **order\_kind** | [**OrderKind**](../Models/.md)|  | [optional] [default to null] [enum: LIMIT, MARKET] |
 
 ### Return type
@@ -204,31 +213,6 @@ Cancel an order by ID
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
-<a name="checkUserEmailExists"></a>
-# **checkUserEmailExists**
-> EmailExistsResponseEnvelope checkUserEmailExists(email)
-
-Check whether a user email exists
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **email** | **String**|  | [default to null] |
-
-### Return type
-
-[**EmailExistsResponseEnvelope**](../Models/EmailExistsResponseEnvelope.md)
-
-### Authorization
-
-[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
 <a name="claimLeverageGetAccruedInterest"></a>
 # **claimLeverageGetAccruedInterest**
 > ClaimLeverageAccruedInterestResponseEnvelope claimLeverageGetAccruedInterest(ClaimLeverageAccruedInterestRequest)
@@ -244,6 +228,31 @@ Claim current accrued leverage interest for a specific user
 ### Return type
 
 [**ClaimLeverageAccruedInterestResponseEnvelope**](../Models/ClaimLeverageAccruedInterestResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="closeIsolatedAccountV2"></a>
+# **closeIsolatedAccountV2**
+> ClosePositionResponseEnvelope closeIsolatedAccountV2(CloseAccountRequest)
+
+Close an isolated account, repaying the borrowed
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CloseAccountRequest** | [**CloseAccountRequest**](../Models/CloseAccountRequest.md)|  | |
+
+### Return type
+
+[**ClosePositionResponseEnvelope**](../Models/ClosePositionResponseEnvelope.md)
 
 ### Authorization
 
@@ -345,6 +354,31 @@ Create a new conditional orders
 ### Return type
 
 [**CreateConditionalOrderResponseEnvelope**](../Models/CreateConditionalOrderResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="createNewIsolatedAccountV2"></a>
+# **createNewIsolatedAccountV2**
+> NewIsolatedAccountResponseV2Envelope createNewIsolatedAccountV2(NewIsolatedAccountRequestV2)
+
+Create a new isolated account for a user transferring available assets into the account
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **NewIsolatedAccountRequestV2** | [**NewIsolatedAccountRequestV2**](../Models/NewIsolatedAccountRequestV2.md)|  | |
+
+### Return type
+
+[**NewIsolatedAccountResponseV2Envelope**](../Models/NewIsolatedAccountResponseV2Envelope.md)
 
 ### Authorization
 
@@ -747,6 +781,28 @@ Get all open orders for a specific orderbook (L3 market depth)
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getLedgerAccountsSelfV2"></a>
+# **getLedgerAccountsSelfV2**
+> LedgerAccountsResponseV2Envelope getLedgerAccountsSelfV2()
+
+Get your own accounts
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**LedgerAccountsResponseV2Envelope**](../Models/LedgerAccountsResponseV2Envelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -1361,6 +1417,31 @@ Get transactions settlements with filters
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getTransactionsStream"></a>
+# **getTransactionsStream**
+> StreamTransactionsResponse getTransactionsStream(since)
+
+Get transactions since a specific time, and open a stream for further updates
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **since** | **Date**|  | [optional] [default to null] |
+
+### Return type
+
+[**StreamTransactionsResponse**](../Models/StreamTransactionsResponse.md)
+
+### Authorization
+
+[apiKeyAuthQuery](../README.md#apiKeyAuthQuery)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getUserById"></a>
 # **getUserById**
 > UserEnvelope getUserById(user\_id)
@@ -1426,6 +1507,31 @@ Get a snapshot of user&#39;s ledger updates since a specific time, and opens a s
 ### Return type
 
 [**StreamPositionsResponse**](../Models/StreamPositionsResponse.md)
+
+### Authorization
+
+[apiKeyAuthQuery](../README.md#apiKeyAuthQuery)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getUserLeverageAccruedInterestStream"></a>
+# **getUserLeverageAccruedInterestStream**
+> StreamCurrentLeverageAccruedInterestResponse getUserLeverageAccruedInterestStream(user\_id)
+
+Stream user&#39;s current leverage accrued interest in real time
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**StreamCurrentLeverageAccruedInterestResponse**](../Models/StreamCurrentLeverageAccruedInterestResponse.md)
 
 ### Authorization
 
@@ -1531,6 +1637,37 @@ Get a snapshot of user&#39;s executed transactions since a specific time, and op
 ### Authorization
 
 [apiKeyAuthQuery](../README.md#apiKeyAuthQuery)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getUsers"></a>
+# **getUsers**
+> ListUsersResponseEnvelope getUsers(id, limit, offset, email, first\_name, last\_name, country\_of\_domicile)
+
+Get all users (admin only)
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | **UUID**|  | [optional] [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **offset** | **Integer**|  | [optional] [default to 0] |
+| **email** | **String**|  | [optional] [default to null] |
+| **first\_name** | **String**|  | [optional] [default to null] |
+| **last\_name** | **String**|  | [optional] [default to null] |
+| **country\_of\_domicile** | [**CountryCode**](../Models/.md)|  | [optional] [default to null] [enum: AF, AX, AL, DZ, AS, AD, AO, AI, AQ, AG, AR, AM, AW, AU, AT, AZ, BS, BH, BD, BB, BY, BE, BZ, BJ, BM, BT, BO, BQ, BA, BW, BV, BR, IO, BN, BG, BF, BI, CV, KH, CM, CA, KY, CF, TD, CL, CN, CX, CC, CO, KM, CG, CD, CK, CR, CI, HR, CU, CW, CY, CZ, DK, DJ, DM, DO, EC, EG, SV, GQ, ER, EE, SZ, ET, FK, FO, FJ, FI, FR, GF, PF, TF, GA, GM, GE, DE, GH, GI, GR, GL, GD, GP, GU, GT, GG, GN, GW, GY, HT, HM, VA, HN, HK, HU, IS, IN, ID, IR, IQ, IE, IM, IL, IT, JM, JP, JE, JO, KZ, KE, KI, KP, KR, KW, KG, LA, LV, LB, LS, LR, LY, LI, LT, LU, MO, MG, MW, MY, MV, ML, MT, MH, MQ, MR, MU, YT, MX, FM, MD, MC, MN, ME, MS, MA, MZ, MM, NA, NR, NP, NL, NC, NZ, NI, NE, NG, NU, NF, MK, MP, NO, OM, PK, PW, PS, PA, PG, PY, PE, PH, PN, PL, PT, PR, QA, RE, RO, RU, RW, BL, SH, KN, LC, MF, PM, VC, WS, SM, ST, SA, SN, RS, SC, SL, SG, SX, SK, SI, SB, SO, ZA, GS, SS, ES, LK, SD, SR, SJ, SE, CH, SY, TW, TJ, TZ, TH, TL, TG, TK, TO, TT, TN, TR, TM, TC, TV, UG, UA, AE, GB, US, UM, UY, UZ, VU, VE, VN, VG, VI, WF, EH, YE, ZM, ZW] |
+
+### Return type
+
+[**ListUsersResponseEnvelope**](../Models/ListUsersResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -1698,6 +1835,33 @@ Get current accrued leverage interest for the user
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="leverageGetInterestRate"></a>
+# **leverageGetInterestRate**
+> LeverageInterestRateResponseEnvelope leverageGetInterestRate(asset\_id, start, end)
+
+Get leverage interest rate for a specific asset
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **asset\_id** | **UUID**|  | [default to null] |
+| **start** | **Date**|  | [optional] [default to null] |
+| **end** | **Date**|  | [optional] [default to null] |
+
+### Return type
+
+[**LeverageInterestRateResponseEnvelope**](../Models/LeverageInterestRateResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="leverageIsolateCollateral"></a>
 # **leverageIsolateCollateral**
 > IsolateCollateralResponse leverageIsolateCollateral(IsolateCollateralRequest)
@@ -1850,6 +2014,28 @@ Subtract liquidity from a pool
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="listAccountsSelfV2"></a>
+# **listAccountsSelfV2**
+> ListAccountsResponseV2Envelope listAccountsSelfV2()
+
+List all accounts for the authenticated user
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**ListAccountsResponseV2Envelope**](../Models/ListAccountsResponseV2Envelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 <a name="listAssets"></a>
@@ -2279,6 +2465,31 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="transferAccountBalancesV2"></a>
+# **transferAccountBalancesV2**
+> TransferAccountBalancesResponseEnvelope transferAccountBalancesV2(TransferAccountBalancesRequest)
+
+Transfer available balance between a user&#39;s accounts
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **TransferAccountBalancesRequest** | [**TransferAccountBalancesRequest**](../Models/TransferAccountBalancesRequest.md)|  | |
+
+### Return type
+
+[**TransferAccountBalancesResponseEnvelope**](../Models/TransferAccountBalancesResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="transferAvailableBalances"></a>

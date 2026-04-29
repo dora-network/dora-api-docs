@@ -3,6 +3,12 @@ Apis/DefaultApi.md
 Models/APIKeyResponse.md
 Models/APIKeyResponseEnvelope.md
 Models/APIKeys.md
+Models/AccountBalanceTransfer.md
+Models/AccountPortfolioResponseV2.md
+Models/AccountPortfolioV2.md
+Models/AccountSummaryV2.md
+Models/AccountV2.md
+Models/AccountsListV2.md
 Models/AllPositions.md
 Models/AllPositionsResponseEnvelope.md
 Models/AllWithdrawalInitiationsResponseEnvelope.md
@@ -23,6 +29,7 @@ Models/CandleResolution.md
 Models/ClaimLeverageAccruedInterest.md
 Models/ClaimLeverageAccruedInterestRequest.md
 Models/ClaimLeverageAccruedInterestResponseEnvelope.md
+Models/CloseAccountRequest.md
 Models/ClosePositionRequest.md
 Models/ClosePositionResp.md
 Models/ClosePositionResponseEnvelope.md
@@ -42,7 +49,6 @@ Models/CreateOrderResponseEnvelope.md
 Models/CurrentLeverageAccruedInterest.md
 Models/CurrentLeverageAccruedInterestResponseEnvelope.md
 Models/DefundUserRequest.md
-Models/EmailExistsResponseEnvelope.md
 Models/FundUser.md
 Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
@@ -54,9 +60,12 @@ Models/IsolateCollateralRequest.md
 Models/IsolateCollateralResponse.md
 Models/IsolatedCollateral.md
 Models/IsolatedPosition.md
+Models/LedgerAccountsResponseV2Envelope.md
 Models/LedgerModuleByAssetResponseEnvelope.md
 Models/LedgerModuleResponseEnvelope.md
 Models/LeverageBalanceResponse.md
+Models/LeverageInterestRate.md
+Models/LeverageInterestRateResponseEnvelope.md
 Models/LeverageModuleResponse.md
 Models/LeverageRequestError.md
 Models/LeverageType.md
@@ -64,6 +73,7 @@ Models/LiquidationTargetsResponseEnvelope.md
 Models/Liquidity.md
 Models/LiquidityRequest.md
 Models/LiquidityResponseEnvelope.md
+Models/ListAccountsResponseV2Envelope.md
 Models/ListAssetPriceResponseEnvelope.md
 Models/ListCandlesResponseEnvelope.md
 Models/ListCouponPaymentsResponseEnvelope.md
@@ -75,10 +85,13 @@ Models/ListPositionsResponse.md
 Models/ListTradeResponseEnvelope.md
 Models/ListTransactionsResponseEnvelope.md
 Models/ListUserCouponPaymentsResponseEnvelope.md
+Models/ListUsersResponseEnvelope.md
 Models/LiveOrderbook.md
 Models/Margin.md
 Models/Metadata.md
 Models/ModuleBalance.md
+Models/NewIsolatedAccountRequestV2.md
+Models/NewIsolatedAccountResponseV2Envelope.md
 Models/Order.md
 Models/OrderBook.md
 Models/OrderBookBalance.md
@@ -134,6 +147,7 @@ Models/StreamAssetsEntry.md
 Models/StreamAssetsResponse.md
 Models/StreamCandlesEntry.md
 Models/StreamCandlesResponse.md
+Models/StreamCurrentLeverageAccruedInterestResponse.md
 Models/StreamEntry.md
 Models/StreamOrderBookBalanceEntry.md
 Models/StreamOrderBookBalancesResponse.md
@@ -164,6 +178,8 @@ Models/TransactionsSettlement.md
 Models/TransactionsSettlementRequest.md
 Models/TransactionsSettlementsResponse.md
 Models/TransactionsSettlementsResponseEnvelope.md
+Models/TransferAccountBalancesRequest.md
+Models/TransferAccountBalancesResponseEnvelope.md
 Models/TransferBalancesRequest.md
 Models/TransferBalancesResponseEnvelope.md
 Models/TransformedAssets.md

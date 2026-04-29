@@ -11,7 +11,11 @@
 | **description** | **String** |  | [default to null] |
 | **liquidation\_weight** | **BigDecimal** |  | [default to null] |
 | **max\_supply** | **Integer** |  | [default to null] |
-| **max\_utilization** | **Integer** |  | [default to null] |
+| **max\_utilization** | **BigDecimal** |  | [default to null] |
+| **minimum\_rate** | **BigDecimal** |  | [default to null] |
+| **kink\_rate** | **BigDecimal** |  | [default to null] |
+| **maximum\_rate** | **BigDecimal** |  | [default to null] |
+| **kink\_utilization** | **BigDecimal** |  | [default to null] |
 | **name** | **String** |  | [default to null] |
 | **symbol** | **String** |  | [default to null] |
 | **kind** | [**AssetKind**](AssetKind.md) |  | [default to null] |

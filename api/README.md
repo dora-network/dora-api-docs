@@ -8,15 +8,16 @@ All URIs are relative to *https://staging.dora.co*
 | Class | Method | HTTP request | Description |
 |------------ | ------------- | ------------- | -------------|
 | *DefaultApi* | [**approveLedgerWithdrawRequest**](Apis/DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
-*DefaultApi* | [**cancelAllOpenOrders**](Apis/DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user's orders on specific orderbook |
+*DefaultApi* | [**cancelAllOpenOrders**](Apis/DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user's orders on specific orderbook |
 *DefaultApi* | [**cancelLedgerWithdrawRequest**](Apis/DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 *DefaultApi* | [**cancelOrderById**](Apis/DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
-*DefaultApi* | [**checkUserEmailExists**](Apis/DefaultApi.md#checkUserEmailExists) | **GET** /v1/user/exists | Check whether a user email exists |
 *DefaultApi* | [**claimLeverageGetAccruedInterest**](Apis/DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
+*DefaultApi* | [**closeIsolatedAccountV2**](Apis/DefaultApi.md#closeIsolatedAccountV2) | **POST** /v2/accounts/close | Close an isolated account, repaying the borrowed |
 *DefaultApi* | [**closeIsolatedPosition**](Apis/DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 *DefaultApi* | [**createAPIKeyForUser**](Apis/DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 *DefaultApi* | [**createAPIKeyForUserID**](Apis/DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 *DefaultApi* | [**createConditionalOrder**](Apis/DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
+*DefaultApi* | [**createNewIsolatedAccountV2**](Apis/DefaultApi.md#createNewIsolatedAccountV2) | **POST** /v2/accounts/new_isolated | Create a new isolated account for a user transferring available assets into the account |
 *DefaultApi* | [**createOrder**](Apis/DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 *DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
@@ -33,6 +34,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getL1Depth**](Apis/DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
 *DefaultApi* | [**getL2Depth**](Apis/DefaultApi.md#getL2Depth) | **GET** /v1/orderbooks/{order_book_id}/L2 | Get the aggregated price levels for a specific orderbook (L2 market depth) |
 *DefaultApi* | [**getL3Depth**](Apis/DefaultApi.md#getL3Depth) | **GET** /v1/orderbooks/{order_book_id}/L3 | Get all open orders for a specific orderbook (L3 market depth) |
+*DefaultApi* | [**getLedgerAccountsSelfV2**](Apis/DefaultApi.md#getLedgerAccountsSelfV2) | **GET** /v2/ledger/accounts/self | Get your own accounts |
 *DefaultApi* | [**getLedgerBalancesSelf**](Apis/DefaultApi.md#getLedgerBalancesSelf) | **GET** /v1/ledger/balances/self | Get your own available, locked, and borrowed assets |
 *DefaultApi* | [**getLedgerInterestSelf**](Apis/DefaultApi.md#getLedgerInterestSelf) | **GET** /v1/ledger/interest/self | Get your own interest |
 *DefaultApi* | [**getLedgerModule**](Apis/DefaultApi.md#getLedgerModule) | **GET** /v1/ledger/module | Get the entire module object, including unborrowed leverage assets and total leverage trackers |
@@ -57,25 +59,30 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getTransactionById**](Apis/DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 *DefaultApi* | [**getTransactions**](Apis/DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
 *DefaultApi* | [**getTransactionsSettlements**](Apis/DefaultApi.md#getTransactionsSettlements) | **GET** /v1/transactions/settlements | Get transactions settlements with filters |
+*DefaultApi* | [**getTransactionsStream**](Apis/DefaultApi.md#getTransactionsStream) | **GET** /v1/transactions/stream | Get transactions since a specific time, and open a stream for further updates |
 *DefaultApi* | [**getUserById**](Apis/DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
 *DefaultApi* | [**getUserCouponPaymentsStream**](Apis/DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user's coupon payment accruals in real time |
 *DefaultApi* | [**getUserLedgerStream**](Apis/DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates |
+*DefaultApi* | [**getUserLeverageAccruedInterestStream**](Apis/DefaultApi.md#getUserLeverageAccruedInterestStream) | **GET** /v1/user/{user_id}/leverage/accrued_interest/stream | Stream user's current leverage accrued interest in real time |
 *DefaultApi* | [**getUserOrderUpdatesStream**](Apis/DefaultApi.md#getUserOrderUpdatesStream) | **GET** /v1/user/{user_id}/orders/{order_book_id}/updates/stream | Get a snapshot of user's order updates for the given order book since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserOrdersUpdatesStreamAll**](Apis/DefaultApi.md#getUserOrdersUpdatesStreamAll) | **GET** /v1/user/{user_id}/orders/all/updates/stream | Get a snapshot of user's order updates across all order books since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserSelf**](Apis/DefaultApi.md#getUserSelf) | **GET** /v1/user/self | Get user details for the authenticated user |
 *DefaultApi* | [**getUserTransactionsStream**](Apis/DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates |
+*DefaultApi* | [**getUsers**](Apis/DefaultApi.md#getUsers) | **GET** /v1/user | Get all users (admin only) |
 *DefaultApi* | [**getUsersAPIKeys**](Apis/DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user's api keys |
 *DefaultApi* | [**ledgerDeposit**](Apis/DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user's account from the outside world |
 *DefaultApi* | [**ledgerWithdraw**](Apis/DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 *DefaultApi* | [**ledgerWithdrawRequest**](Apis/DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
 *DefaultApi* | [**ledgerWithdrawRequestSelf**](Apis/DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 *DefaultApi* | [**leverageGetAccruedInterestByUser**](Apis/DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
+*DefaultApi* | [**leverageGetInterestRate**](Apis/DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage interest rate for a specific asset |
 *DefaultApi* | [**leverageIsolateCollateral**](Apis/DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user's global collateral |
 *DefaultApi* | [**leverageSupply**](Apis/DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
 *DefaultApi* | [**leverageUnite**](Apis/DefaultApi.md#leverageUnite) | **POST** /v1/leverage/unite | Combines all isolated positions into a single global position |
 *DefaultApi* | [**leverageWithdraw**](Apis/DefaultApi.md#leverageWithdraw) | **POST** /v1/leverage/withdraw | Withdraw leverage for a specific asset |
 *DefaultApi* | [**liquidityAdd**](Apis/DefaultApi.md#liquidityAdd) | **POST** /v1/liquidity/pool/{pool_id}/add | Add liquidity to a pool |
 *DefaultApi* | [**liquiditySubtract**](Apis/DefaultApi.md#liquiditySubtract) | **POST** /v1/liquidity/pool/{pool_id}/remove | Subtract liquidity from a pool |
+*DefaultApi* | [**listAccountsSelfV2**](Apis/DefaultApi.md#listAccountsSelfV2) | **GET** /v2/user/self/accounts | List all accounts for the authenticated user |
 *DefaultApi* | [**listAssets**](Apis/DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
 *DefaultApi* | [**listOrderBooks**](Apis/DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 *DefaultApi* | [**listOrders**](Apis/DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
@@ -92,6 +99,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**streamOrderBookBalances**](Apis/DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
 *DefaultApi* | [**streamOrderbookOpenOrders**](Apis/DefaultApi.md#streamOrderbookOpenOrders) | **GET** /v1/orderbooks/{order_book_id}/open/stream | Get a snapshot of open orders in an order book and open a stream for real-time updates |
 *DefaultApi* | [**streamTrades**](Apis/DefaultApi.md#streamTrades) | **GET** /v1/trades/{order_book_id}/stream | Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates |
+*DefaultApi* | [**transferAccountBalancesV2**](Apis/DefaultApi.md#transferAccountBalancesV2) | **POST** /v2/accounts/transfer_balances | Transfer available balance between a user's accounts |
 *DefaultApi* | [**transferAvailableBalances**](Apis/DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user's accounts (e.g. global to isolated position) |
 *DefaultApi* | [**updateUserConfig**](Apis/DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 *DefaultApi* | [**updateUserConfigSelf**](Apis/DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
@@ -105,6 +113,12 @@ All URIs are relative to *https://staging.dora.co*
  - [APIKeyResponse](./Models/APIKeyResponse.md)
  - [APIKeyResponseEnvelope](./Models/APIKeyResponseEnvelope.md)
  - [APIKeys](./Models/APIKeys.md)
+ - [AccountBalanceTransfer](./Models/AccountBalanceTransfer.md)
+ - [AccountPortfolioResponseV2](./Models/AccountPortfolioResponseV2.md)
+ - [AccountPortfolioV2](./Models/AccountPortfolioV2.md)
+ - [AccountSummaryV2](./Models/AccountSummaryV2.md)
+ - [AccountV2](./Models/AccountV2.md)
+ - [AccountsListV2](./Models/AccountsListV2.md)
  - [AllPositions](./Models/AllPositions.md)
  - [AllPositionsResponseEnvelope](./Models/AllPositionsResponseEnvelope.md)
  - [AllWithdrawalInitiationsResponseEnvelope](./Models/AllWithdrawalInitiationsResponseEnvelope.md)
@@ -125,6 +139,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ClaimLeverageAccruedInterest](./Models/ClaimLeverageAccruedInterest.md)
  - [ClaimLeverageAccruedInterestRequest](./Models/ClaimLeverageAccruedInterestRequest.md)
  - [ClaimLeverageAccruedInterestResponseEnvelope](./Models/ClaimLeverageAccruedInterestResponseEnvelope.md)
+ - [CloseAccountRequest](./Models/CloseAccountRequest.md)
  - [ClosePositionRequest](./Models/ClosePositionRequest.md)
  - [ClosePositionResp](./Models/ClosePositionResp.md)
  - [ClosePositionResponseEnvelope](./Models/ClosePositionResponseEnvelope.md)
@@ -144,7 +159,6 @@ All URIs are relative to *https://staging.dora.co*
  - [CurrentLeverageAccruedInterest](./Models/CurrentLeverageAccruedInterest.md)
  - [CurrentLeverageAccruedInterestResponseEnvelope](./Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
  - [DefundUserRequest](./Models/DefundUserRequest.md)
- - [EmailExistsResponseEnvelope](./Models/EmailExistsResponseEnvelope.md)
  - [FundUser](./Models/FundUser.md)
  - [FundUserRequest](./Models/FundUserRequest.md)
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
@@ -156,9 +170,12 @@ All URIs are relative to *https://staging.dora.co*
  - [IsolateCollateralResponse](./Models/IsolateCollateralResponse.md)
  - [IsolatedCollateral](./Models/IsolatedCollateral.md)
  - [IsolatedPosition](./Models/IsolatedPosition.md)
+ - [LedgerAccountsResponseV2Envelope](./Models/LedgerAccountsResponseV2Envelope.md)
  - [LedgerModuleByAssetResponseEnvelope](./Models/LedgerModuleByAssetResponseEnvelope.md)
  - [LedgerModuleResponseEnvelope](./Models/LedgerModuleResponseEnvelope.md)
  - [LeverageBalanceResponse](./Models/LeverageBalanceResponse.md)
+ - [LeverageInterestRate](./Models/LeverageInterestRate.md)
+ - [LeverageInterestRateResponseEnvelope](./Models/LeverageInterestRateResponseEnvelope.md)
  - [LeverageModuleResponse](./Models/LeverageModuleResponse.md)
  - [LeverageRequestError](./Models/LeverageRequestError.md)
  - [LeverageType](./Models/LeverageType.md)
@@ -166,6 +183,7 @@ All URIs are relative to *https://staging.dora.co*
  - [Liquidity](./Models/Liquidity.md)
  - [LiquidityRequest](./Models/LiquidityRequest.md)
  - [LiquidityResponseEnvelope](./Models/LiquidityResponseEnvelope.md)
+ - [ListAccountsResponseV2Envelope](./Models/ListAccountsResponseV2Envelope.md)
  - [ListAssetPriceResponseEnvelope](./Models/ListAssetPriceResponseEnvelope.md)
  - [ListCandlesResponseEnvelope](./Models/ListCandlesResponseEnvelope.md)
  - [ListCouponPaymentsResponseEnvelope](./Models/ListCouponPaymentsResponseEnvelope.md)
@@ -177,10 +195,13 @@ All URIs are relative to *https://staging.dora.co*
  - [ListTradeResponseEnvelope](./Models/ListTradeResponseEnvelope.md)
  - [ListTransactionsResponseEnvelope](./Models/ListTransactionsResponseEnvelope.md)
  - [ListUserCouponPaymentsResponseEnvelope](./Models/ListUserCouponPaymentsResponseEnvelope.md)
+ - [ListUsersResponseEnvelope](./Models/ListUsersResponseEnvelope.md)
  - [LiveOrderbook](./Models/LiveOrderbook.md)
  - [Margin](./Models/Margin.md)
  - [Metadata](./Models/Metadata.md)
  - [ModuleBalance](./Models/ModuleBalance.md)
+ - [NewIsolatedAccountRequestV2](./Models/NewIsolatedAccountRequestV2.md)
+ - [NewIsolatedAccountResponseV2Envelope](./Models/NewIsolatedAccountResponseV2Envelope.md)
  - [Order](./Models/Order.md)
  - [OrderBook](./Models/OrderBook.md)
  - [OrderBookBalance](./Models/OrderBookBalance.md)
@@ -236,6 +257,7 @@ All URIs are relative to *https://staging.dora.co*
  - [StreamAssetsResponse](./Models/StreamAssetsResponse.md)
  - [StreamCandlesEntry](./Models/StreamCandlesEntry.md)
  - [StreamCandlesResponse](./Models/StreamCandlesResponse.md)
+ - [StreamCurrentLeverageAccruedInterestResponse](./Models/StreamCurrentLeverageAccruedInterestResponse.md)
  - [StreamEntry](./Models/StreamEntry.md)
  - [StreamOrderBookBalanceEntry](./Models/StreamOrderBookBalanceEntry.md)
  - [StreamOrderBookBalancesResponse](./Models/StreamOrderBookBalancesResponse.md)
@@ -266,6 +288,8 @@ All URIs are relative to *https://staging.dora.co*
  - [TransactionsSettlementRequest](./Models/TransactionsSettlementRequest.md)
  - [TransactionsSettlementsResponse](./Models/TransactionsSettlementsResponse.md)
  - [TransactionsSettlementsResponseEnvelope](./Models/TransactionsSettlementsResponseEnvelope.md)
+ - [TransferAccountBalancesRequest](./Models/TransferAccountBalancesRequest.md)
+ - [TransferAccountBalancesResponseEnvelope](./Models/TransferAccountBalancesResponseEnvelope.md)
  - [TransferBalancesRequest](./Models/TransferBalancesRequest.md)
  - [TransferBalancesResponseEnvelope](./Models/TransferBalancesResponseEnvelope.md)
  - [TransformedAssets](./Models/TransformedAssets.md)

@@ -3,6 +3,8 @@
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
+| **id** | **String** | The ID of the asset | [default to null] |
+| **kind** | [**AssetKind**](AssetKind.md) |  | [default to null] |
 | **symbol** | **String** | The symbol of the asset | [default to null] |
 | **side** | **String** | The side of the position (LONG or SHORT) | [default to null] |
 | **avg\_entry\_price** | **String** | The average entry price of the position | [default to null] |

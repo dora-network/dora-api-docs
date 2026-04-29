@@ -347,6 +347,90 @@
         }
       }
     },
+    "/v1/user": {
+      "get": {
+        "summary": "Get all users (admin only)",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "first_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "last_name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country_of_domicile",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CountryCode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUsersResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{user_id}": {
       "get": {
         "summary": "Get user by ID (admin only)",
@@ -1636,7 +1720,7 @@
         }
       },
       "delete": {
-        "summary": "Cancel all open orders, if user passes orderbook on query param it will cancel all orders on specific orderbook, admin can cancel user's orders on specific orderbook",
+        "summary": "Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user's orders on specific orderbook",
         "operationId": "cancelAllOpenOrders",
         "parameters": [
           {
@@ -1649,6 +1733,15 @@
           },
           {
             "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "account_id",
             "in": "query",
             "required": false,
             "schema": {
@@ -3230,6 +3323,95 @@
           },
           "401": {
             "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/leverage/interest_rate/{asset_id}": {
+      "get": {
+        "summary": "Get leverage interest rate for a specific asset",
+        "operationId": "leverageGetInterestRate",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Optional start time for the interest rate window. Must be paired with end."
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Optional end time for the interest rate window. Must be paired with start."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leverage interest rate retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeverageInterestRateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid/mismatched time parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No utilization data found for the selected window or asset not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5142,6 +5324,80 @@
         }
       }
     },
+    "/v1/user/{user_id}/leverage/accrued_interest/stream": {
+      "get": {
+        "summary": "Stream user's current leverage accrued interest in real time",
+        "operationId": "getUserLeverageAccruedInterestStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User's leverage accrued interest stream",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamCurrentLeverageAccruedInterestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found or no leverage accrued interest available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/{user_id}/transactions/stream": {
       "get": {
         "summary": "Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates",
@@ -5225,6 +5481,70 @@
         }
       }
     },
+    "/v1/transactions/stream": {
+      "get": {
+        "summary": "Get transactions since a specific time, and open a stream for further updates",
+        "operationId": "getTransactionsStream",
+        "security": [
+          {
+            "apiKeyAuthQuery": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transactions stream",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamTransactionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to these transactions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/assets/stream": {
       "get": {
         "summary": "Get all inserts or updates for assets",
@@ -5273,54 +5593,6 @@
           },
           "401": {
             "description": "Unauthorized, user not logged in or does not have access to this route",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/user/exists": {
-      "get": {
-        "summary": "Check whether a user email exists",
-        "operationId": "checkUserEmailExists",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "True if the email exists, false otherwise",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmailExistsResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, e.g. invalid path parameters",
             "content": {
               "application/json": {
                 "schema": {
@@ -5868,6 +6140,307 @@
           }
         }
       }
+    },
+    "/v2/ledger/accounts/self": {
+      "get": {
+        "summary": "Get your own accounts",
+        "operationId": "getLedgerAccountsSelfV2",
+        "responses": {
+          "200": {
+            "description": "User accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LedgerAccountsResponseV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/accounts/transfer_balances": {
+      "post": {
+        "summary": "Transfer available balance between a user's accounts",
+        "operationId": "transferAccountBalancesV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferAccountBalancesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferAccountBalancesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/accounts/close": {
+      "post": {
+        "summary": "Close an isolated account, repaying the borrowed",
+        "operationId": "closeIsolatedAccountV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloseAccountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated account closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseAccountResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, e.g. order_book or account not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/user/self/accounts": {
+      "get": {
+        "summary": "List all accounts for the authenticated user",
+        "operationId": "listAccountsSelfV2",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of accounts including the account id, the account name, and global account indicator",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAccountsResponseV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/accounts/new_isolated": {
+      "post": {
+        "summary": "Create a new isolated account for a user transferring available assets into the account",
+        "operationId": "createNewIsolatedAccountV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewIsolatedAccountRequestV2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Isolated account created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewIsolatedAccountResponseV2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5928,8 +6501,29 @@
             "minimum": 0
           },
           "max_utilization": {
-            "type": "integer",
-            "minimum": 0
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minimum_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "kink_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "maximum_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "kink_utilization": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           },
           "name": {
             "type": "string"
@@ -5982,6 +6576,10 @@
           "liquidation_weight",
           "max_supply",
           "max_utilization",
+          "minimum_rate",
+          "kink_rate",
+          "maximum_rate",
+          "kink_utilization",
           "name",
           "symbol",
           "kind",
@@ -6363,6 +6961,27 @@
           "TRADER",
           "INTEGRATOR"
         ]
+      },
+      "ListUsersResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ListUsersResponse": {
+        "$ref": "#/components/schemas/ListUsersResponseEnvelope"
       },
       "CreateIntegratorUserRequest": {
         "type": "object",
@@ -7835,24 +8454,6 @@
       "GetOrderbookStatsResponse": {
         "$ref": "#/components/schemas/OrderbookStatsResponseEnvelope"
       },
-      "EmailExistsResponseEnvelope": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ResponseEnvelope"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "data": {
-                "$ref": "#/components/schemas/UserExistsResponse"
-              }
-            }
-          }
-        ]
-      },
-      "EmailExistsResponse": {
-        "$ref": "#/components/schemas/EmailExistsResponseEnvelope"
-      },
       "CreateOrderResponseEnvelope": {
         "allOf": [
           {
@@ -8096,6 +8697,17 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserCouponPaymentAssetSummary"
+            }
+          }
+        }
+      },
+      "StreamCurrentLeverageAccruedInterestResponse": {
+        "type": "object",
+        "properties": {
+          "current_leverage_accrued_interest": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrentLeverageAccruedInterest"
             }
           }
         }
@@ -8397,7 +9009,7 @@
         },
         "required": [
           "global_position_id",
-          "transaction_id"
+          "transaction_ids"
         ]
       },
       "UnitePositionResponseEnvelope": {
@@ -8983,6 +9595,56 @@
       },
       "CurrentLeverageAccruedInterestResponse": {
         "$ref": "#/components/schemas/CurrentLeverageAccruedInterestResponseEnvelope"
+      },
+      "LeverageInterestRate": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "avg_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "interest_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "asset_id",
+          "avg_utilization",
+          "interest_rate",
+          "start_time",
+          "end_time"
+        ]
+      },
+      "LeverageInterestRateResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/LeverageInterestRate"
+              }
+            }
+          }
+        ]
+      },
+      "LeverageInterestRateResponse": {
+        "$ref": "#/components/schemas/LeverageInterestRateResponseEnvelope"
       },
       "WithdrawalRequestReason": {
         "type": "object",
@@ -10584,6 +11246,13 @@
       "PLAsset": {
         "type": "object",
         "properties": {
+          "id": {
+            "description": "The ID of the asset",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AssetKind"
+          },
           "symbol": {
             "description": "The symbol of the asset",
             "type": "string"
@@ -10888,6 +11557,315 @@
       },
       "SettleRealizedPnlRecordResponse": {
         "$ref": "#/components/schemas/SettleRealizedPnlRecordResponseEnvelope"
+      },
+      "AccountV2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the account. Used, for example, when creating an order from an account, or deciding collateral should be transferred from account A to account B.",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "seq": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "is_global": {
+            "type": "boolean"
+          },
+          "available": {
+            "type": "string",
+            "description": "The available balance in the account for this asset that are not locked, supplied, or used as collateral"
+          },
+          "locked": {
+            "type": "string",
+            "description": "The balance that has been reserved for a current order. If spent by the order, they are removed. If the order is cancelled, they are returned to the account's available balance."
+          },
+          "supplied": {
+            "type": "string",
+            "description": "The balance that user has supplied to the leverage module. The user remains entitled to these assets and can withdraw them into their available balance."
+          },
+          "borrowed": {
+            "type": "string",
+            "description": "The total amount of debt outstanding for this account. This account cannot be closed until all debt is fully repaid, i.e. borrowed = 0."
+          },
+          "impending_borrows": {
+            "type": "string",
+            "description": "The equivalent of locked balances, but for leveraged orders. If a user has an active order that would borrow assets as part of its input, then their borrow limit must be reduced until the order is executed or cancelled."
+          },
+          "avg_entry_price": {
+            "type": "string",
+            "description": "average cost per unit quantity that was paid (long accounts) or received (short accounts) for this asset."
+          },
+          "borrow_limit": {
+            "type": "string",
+            "description": "The borrow limit"
+          },
+          "liquidation_threshold": {
+            "type": "string",
+            "description": "The borrow limit"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pending_withdrawal": {
+            "type": "string",
+            "description": "The amount of asset that is pending withdrawal from the account."
+          },
+          "account_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "asset_id",
+          "seq",
+          "available",
+          "locked",
+          "supplied",
+          "borrowed",
+          "impending_borrows",
+          "avg_entry_price",
+          "borrow_limit",
+          "liquidation_threshold",
+          "created_at",
+          "account_name",
+          "pending_withdrawal"
+        ]
+      },
+      "AccountPortfolioV2": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/components/schemas/AccountV2"
+              }
+            }
+          },
+          "net_stablecoin_equivalence": {
+            "$ref": "#/components/schemas/TransformedAssets"
+          }
+        },
+        "required": [
+          "user_id",
+          "accounts",
+          "net_stablecoin_equivalence"
+        ]
+      },
+      "AccountPortfolioResponseV2": {
+        "type": "object",
+        "properties": {
+          "portfolio": {
+            "$ref": "#/components/schemas/AccountPortfolioV2"
+          }
+        }
+      },
+      "LedgerAccountsResponseV2Envelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AccountPortfolioResponseV2"
+              }
+            }
+          }
+        ]
+      },
+      "LedgerAccountsResponseV2": {
+        "$ref": "#/components/schemas/LedgerAccountsResponseV2Envelope"
+      },
+      "NewIsolatedAccountRequestV2": {
+        "type": "object",
+        "properties": {
+          "global_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "account_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "global_account_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "NewIsolatedAccountResponseV2Envelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AccountV2"
+              }
+            }
+          }
+        ]
+      },
+      "NewIsolatedAccountResponseV2": {
+        "$ref": "#/components/schemas/NewIsolatedAccountResponseV2Envelope"
+      },
+      "TransferAccountBalancesRequest": {
+        "type": "object",
+        "properties": {
+          "from_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal"
+          }
+        },
+        "required": [
+          "from_account_id",
+          "to_account_id",
+          "asset_id",
+          "quantity"
+        ]
+      },
+      "AccountBalanceTransfer": {
+        "type": "object",
+        "properties": {
+          "from_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "from_account_id",
+          "to_account_id",
+          "transaction_id"
+        ]
+      },
+      "TransferAccountBalancesResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AccountBalanceTransfer"
+              }
+            }
+          }
+        ]
+      },
+      "TransferAccountBalancesResponse": {
+        "$ref": "#/components/schemas/TransferAccountBalancesResponseEnvelope"
+      },
+      "CloseAccountRequest": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "order_book_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "account_id",
+          "order_book_id"
+        ]
+      },
+      "CloseAccountResponse": {
+        "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
+      },
+      "AccountSummaryV2": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "description": "The ID of the account",
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_name": {
+            "description": "The name of the account",
+            "type": "string"
+          },
+          "is_global": {
+            "description": "Whether the account is the global or an isolated account",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "account_id",
+          "account_name",
+          "is_global"
+        ]
+      },
+      "AccountsListV2": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AccountSummaryV2"
+        }
+      },
+      "ListAccountsResponseV2Envelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AccountsListV2"
+              }
+            }
+          }
+        ]
+      },
+      "ListAccountsResponseV2": {
+        "$ref": "#/components/schemas/ListAccountsResponseV2Envelope"
       }
     }
   }
