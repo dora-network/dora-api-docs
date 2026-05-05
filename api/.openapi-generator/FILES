@@ -56,6 +56,9 @@ Models/GetAssetByIDResponseEnvelope.md
 Models/GetAssetYTMByIDResponseEnvelope.md
 Models/GetRealizedPnlSettlementsResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
+Models/HistoricalLeverageInterestRate.md
+Models/HistoricalLeverageInterestRates.md
+Models/HistoricalLeverageInterestRatesResponseEnvelope.md
 Models/IsolateCollateralRequest.md
 Models/IsolateCollateralResponse.md
 Models/IsolatedCollateral.md

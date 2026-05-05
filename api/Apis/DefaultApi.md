@@ -72,6 +72,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
 | [**ledgerWithdrawRequestSelf**](DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 | [**leverageGetAccruedInterestByUser**](DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
+| [**leverageGetHistoricalInterestRates**](DefaultApi.md#leverageGetHistoricalInterestRates) | **GET** /v1/leverage/interest_rate/{asset_id}/historical | Get historical leverage interest rates for a specific asset |
 | [**leverageGetInterestRate**](DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage interest rate for a specific asset |
 | [**leverageIsolateCollateral**](DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user&#39;s global collateral |
 | [**leverageSupply**](DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
@@ -1388,7 +1389,7 @@ No authorization required
 
 <a name="getTransactionsSettlements"></a>
 # **getTransactionsSettlements**
-> TransactionsSettlementsResponseEnvelope getTransactionsSettlements(tenant\_id, user\_id, position\_id, tx\_kind, created\_after, settled\_before, is\_settled)
+> TransactionsSettlementsResponseEnvelope getTransactionsSettlements(tenant\_id, user\_id, position\_id, tx\_kind, created\_after, created\_before, settled\_after, settled\_before, is\_settled)
 
 Get transactions settlements with filters
 
@@ -1401,6 +1402,8 @@ Get transactions settlements with filters
 | **position\_id** | **UUID**| Position ID to filter settlements | [optional] [default to null] |
 | **tx\_kind** | **String**| Transaction kind to filter settlements | [optional] [default to null] |
 | **created\_after** | **Date**| Filter settlements created after this time | [optional] [default to null] |
+| **created\_before** | **Date**| Filter settlements created before this time | [optional] [default to null] |
+| **settled\_after** | **Date**| Filter settlements settled after this time | [optional] [default to null] |
 | **settled\_before** | **Date**| Filter settlements settled before this time | [optional] [default to null] |
 | **is\_settled** | **Boolean**| Filter settlements by settlement status | [optional] [default to null] |
 
@@ -1825,6 +1828,33 @@ Get current accrued leverage interest for the user
 ### Return type
 
 [**CurrentLeverageAccruedInterestResponseEnvelope**](../Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="leverageGetHistoricalInterestRates"></a>
+# **leverageGetHistoricalInterestRates**
+> HistoricalLeverageInterestRatesResponseEnvelope leverageGetHistoricalInterestRates(asset\_id, start, end)
+
+Get historical leverage interest rates for a specific asset
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **asset\_id** | **UUID**|  | [default to null] |
+| **start** | **Date**|  | [optional] [default to null] |
+| **end** | **Date**|  | [optional] [default to null] |
+
+### Return type
+
+[**HistoricalLeverageInterestRatesResponseEnvelope**](../Models/HistoricalLeverageInterestRatesResponseEnvelope.md)
 
 ### Authorization
 

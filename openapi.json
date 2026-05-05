@@ -3433,6 +3433,85 @@
         }
       }
     },
+    "/v1/leverage/interest_rate/{asset_id}/historical": {
+      "get": {
+        "summary": "Get historical leverage interest rates for a specific asset",
+        "operationId": "leverageGetHistoricalInterestRates",
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Optional start time for the historical window. If omitted (or if end is omitted), defaults to last 7 days."
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Optional end time for the historical window. If omitted (or if start is omitted), defaults to now."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historical leverage interest rates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalLeverageInterestRatesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid time parameter or end before/equal start",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, e.g. user not logged in or invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/leverage/isolate_collateral": {
       "post": {
         "summary": "Create an isolated position by transferring collateral to the position from the user's global collateral",
@@ -4238,6 +4317,24 @@
               "format": "date-time"
             },
             "description": "Filter settlements created after this time"
+          },
+          {
+            "name": "created_before",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Filter settlements created before this time"
+          },
+          {
+            "name": "settled_after",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Filter settlements settled after this time"
           },
           {
             "name": "settled_before",
@@ -9603,7 +9700,15 @@
             "type": "string",
             "format": "uuid"
           },
+          "utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
           "avg_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "avg_interest_rate": {
             "type": "string",
             "format": "decimal"
           },
@@ -9622,7 +9727,9 @@
         },
         "required": [
           "asset_id",
+          "utilization",
           "avg_utilization",
+          "avg_interest_rate",
           "interest_rate",
           "start_time",
           "end_time"
@@ -9645,6 +9752,105 @@
       },
       "LeverageInterestRateResponse": {
         "$ref": "#/components/schemas/LeverageInterestRateResponseEnvelope"
+      },
+      "HistoricalLeverageInterestRate": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "maximum_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "minimum_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "kink_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "maximum_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "kink_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "interest_rate": {
+            "type": "string",
+            "format": "decimal"
+          }
+        },
+        "required": [
+          "asset_id",
+          "updated_at",
+          "utilization",
+          "maximum_utilization",
+          "minimum_rate",
+          "kink_rate",
+          "maximum_rate",
+          "kink_utilization",
+          "interest_rate"
+        ]
+      },
+      "HistoricalLeverageInterestRates": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HistoricalLeverageInterestRate"
+            }
+          }
+        },
+        "required": [
+          "asset_id",
+          "start_time",
+          "end_time",
+          "rates"
+        ]
+      },
+      "HistoricalLeverageInterestRatesResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/HistoricalLeverageInterestRates"
+              }
+            }
+          }
+        ]
+      },
+      "HistoricalLeverageInterestRatesResponse": {
+        "$ref": "#/components/schemas/HistoricalLeverageInterestRatesResponseEnvelope"
       },
       "WithdrawalRequestReason": {
         "type": "object",
