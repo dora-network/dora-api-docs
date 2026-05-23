@@ -44,7 +44,7 @@
 
 ## Introduction
 
-The DORA platform provides a digital marketplace for trading fractionalized bonds
+The DORA platform (U.S. Patent 12,596,578) provides a digital marketplace for trading fractionalized bonds
 opening a new era of financial inclusion.
 
 The DORA API allows developers to interact with the platform programmatically,
@@ -68,7 +68,7 @@ You can then use this token to authenticate your API requests by including it in
 `Authorization` header as follows:
 
 ```html
-Authorization: Bearer <your-authentication-token>
+Authorization: Bearer <your-authentication-token></your-authentication-token>
 ```
 
 Authentication tokens are valid for a limited time and will need to be refreshed
@@ -125,11 +125,11 @@ If you receive an error response like this:
 
 ```json
 {
-  "error":"unauthorized: token has invalid claims: token is expired",
-  "metadata":{
-    "status_code":401,
-    "trace_id":"staging-019b9916-a6cb-7f12-a897-f1a7ca750ee7",
-    "request_id":"staging-019b9916-a6cb-7f15-89d5-0a7023e32dac"
+  "error": "unauthorized: token has invalid claims: token is expired",
+  "metadata": {
+    "status_code": 401,
+    "trace_id": "staging-019b9916-a6cb-7f12-a897-f1a7ca750ee7",
+    "request_id": "staging-019b9916-a6cb-7f15-89d5-0a7023e32dac"
   }
 }
 ```
@@ -355,7 +355,6 @@ To accomplish this, DORA have provided deposit and withdrawal endpoints to facil
 to and from DORA. For more details of the deposit and withdrawal workflows, please see the [Integrator Deposits and Withdrawals](./integrator-deposits-and-withdrawals.md)
 workflow document.
 
-
 ### Assets
 
 An asset is a tradable item on the DORA platform. It can be a currency, a bond, or other financial instrument. Each order book
@@ -442,16 +441,14 @@ This endpoint allows you to submit a new order to the specified order book. The 
 
 ```json
 {
-  "quantity": "100",  // number of units to buy/sell expressed as a string
+  "quantity": "100", // number of units to buy/sell expressed as a string
   "inverse_leverage": 1.0, // the inverse leverage for the order, this is a decimal value between 0 and 1.0
   "price": "100.0", // required for limit orders, decimal value expressed as a string
   "kind": "limit", // the kind of order, can be "market" or "limit"
   "side": "buy", // the side of the order, can be "buy" or "sell"
   "from_global_position": true, // whether to use the global position for the order or an isolated position
   "order_book_id": "some-orderbook-id", // this must be a uuid v7 id of the order book you want to place the order on
-  "order_modifiers": [
-    "MAX_BUY"
-  ], // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
+  "order_modifiers": ["MAX_BUY"], // optional order modifiers, can be used to modify the behavior of the order. Currently MAX_BUY is the only supported modifier.
   "good_till_date": "2024-12-31T23:59:59Z", // optional good till date for the order, expressed in ISO 8601 format
   "client_order_id": "my-custom-id", // optional custom order id from your own system
   "stop_loss_price": "99.0", // optional trigger price for a stop-loss conditional order
@@ -513,9 +510,9 @@ In addition to the usual badly formed request errors, some of the common reasons
 - Quantity on the order has more decimal places than the asset precision.
 - Order price for limit orders has more decimal places than the asset precision.
 - The requested leverage exceeds the leverage limit for the isolated position account.
-    The leverage limit is set when the position is first created. To set a different
-    leverage limit, the position must be closed, then opened with a new max leverage
-    limit that does not exceed the maximum allowed limit for the asset. See [below](#maximum-leverage)
+  The leverage limit is set when the position is first created. To set a different
+  leverage limit, the position must be closed, then opened with a new max leverage
+  limit that does not exceed the maximum allowed limit for the asset. See [below](#maximum-leverage)
 - The requested leverage exceeds the maximum allowed leverage for the asset. See [below](#maximum-leverage)
 - The user does not have enough balance to place the order.
 
@@ -676,13 +673,13 @@ the current version, the following rules apply:
 - Users cannot use leverage when trading through the global positions account.
 - Leverage can only be used within an isolated positions account.
 - An isolated positions account can only hold positions in the assets associated with the order book being traded with leverage.
-    For example, if a user creates an isolated account by trading BOND1/USD, the isolated account can only hold positions in BOND1 and USD.
+  For example, if a user creates an isolated account by trading BOND1/USD, the isolated account can only hold positions in BOND1 and USD.
 - A user can have multiple isolated accounts, each tied to the assets of the order book they created a leveraged order on.
 - Users cannot transfer bond asset balances between their global account and isolated accounts.
 - Users can transfer USD balances only between their isolated accounts.
 - Closing a position in an isolated account will automatically repay any borrows.
 - Balances transferred to an isolated account will stay in the isolated account until the user chooses to move the money
-    to another account.
+  to another account.
 
 #### Creating isolated accounts
 
@@ -758,7 +755,7 @@ a different leverage level.
 3. You check the maximum leverage for BOND2 using the `GET /v1/assets/{asset_id}` endpoint, and find that the maximum leverage is 5x.
 4. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`, and `inverse_leverage` to `0.25` (which represents 4x leverage).
 5. A new isolated account is created automatically for BOND2/USD, and the required USD funds are transferred from your global position account to the new isolated account
-    creating a new position for USD in the isolated account.
+   creating a new position for USD in the isolated account.
 6. The order is placed using the new isolated position with 4x leverage.
 7. The order is filled, the USD balance in the isolated account is reduced and a new position for BOND2 is created in the isolated account.
 8. You decide to change your leverage to 3x for the same asset.
