@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "DORA (U.S. Patent 12,596,578)",
+    "title": "DORA",
     "version": "1.0.0"
   },
   "servers": [
@@ -14,11 +14,11 @@
       "description": "DORA staging Websocket API server"
     },
     {
-      "url": "https://prod.dora.co/",
+      "url": "https://api.dora.co/",
       "description": "DORA production API server"
     },
     {
-      "url": "wss://prod.dora.co/",
+      "url": "wss://api.dora.co/",
       "description": "DORA production Websocket API server"
     }
   ],
@@ -841,7 +841,10 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/OrderBookStatus"
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OrderBookStatus"
+              }
             }
           },
           {
@@ -2107,6 +2110,92 @@
           },
           "404": {
             "description": "Orderbook not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/charts/{asset_id}/yield": {
+      "get": {
+        "summary": "Get yield chart data for an asset",
+        "operationId": "getAssetYieldData",
+        "security": [],
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/AssetYieldResolution"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Yield chart points",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAssetYieldResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Asset not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6969,7 +7058,11 @@
             "type": "string"
           }
         },
-        "required": ["asset_id", "pending", "completed"]
+        "required": [
+          "asset_id",
+          "pending",
+          "completed"
+        ]
       },
       "UserCouponPaymentsResponseData": {
         "type": "object",
@@ -7029,11 +7122,19 @@
       },
       "AssetKind": {
         "type": "string",
-        "enum": ["BOND", "CURRENCY", "INTEREST", "POOL_SHARE"]
+        "enum": [
+          "BOND",
+          "CURRENCY",
+          "INTEREST",
+          "POOL_SHARE"
+        ]
       },
       "BondKind": {
         "type": "string",
-        "enum": ["COUPON-PAYING", "PRINCIPAL-ONLY"]
+        "enum": [
+          "COUPON-PAYING",
+          "PRINCIPAL-ONLY"
+        ]
       },
       "UserRole": {
         "type": "string",
@@ -7404,7 +7505,9 @@
             "description": "Optional: Whether to allow orders notifications."
           }
         },
-        "required": ["timezone"]
+        "required": [
+          "timezone"
+        ]
       },
       "CreateOrUpdateUserResponse": {
         "type": "object",
@@ -7416,7 +7519,9 @@
             "description": "The ID of the created or updated user."
           }
         },
-        "required": ["id"]
+        "required": [
+          "id"
+        ]
       },
       "UpdateFieldString": {
         "type": "object",
@@ -7431,7 +7536,9 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateRolesString": {
         "type": "object",
@@ -7446,7 +7553,9 @@
             "$ref": "#/components/schemas/UserRole"
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "UpdateFieldBoolean": {
         "type": "object",
@@ -7461,7 +7570,9 @@
             "description": "The new value to set for the field."
           }
         },
-        "required": ["update"]
+        "required": [
+          "update"
+        ]
       },
       "CountryCode": {
         "type": "string",
@@ -7721,7 +7832,12 @@
       },
       "OrderBookStatus": {
         "type": "string",
-        "enum": ["CLOSED", "OPEN", "SUSPENDED"]
+        "enum": [
+          "CLOSED",
+          "OPEN",
+          "SUSPENDED",
+          "TESTING"
+        ]
       },
       "OrderBook": {
         "type": "object",
@@ -7874,27 +7990,48 @@
       },
       "OrderKind": {
         "type": "string",
-        "enum": ["LIMIT", "MARKET"]
+        "enum": [
+          "LIMIT",
+          "MARKET"
+        ]
       },
       "PositionSide": {
         "type": "string",
-        "enum": ["LONG", "SHORT"]
+        "enum": [
+          "LONG",
+          "SHORT"
+        ]
       },
       "OrderStatus": {
         "type": "string",
-        "enum": ["OPEN", "FILLED", "PARTIAL_FILL", "CANCELLED", "PENDING"]
+        "enum": [
+          "OPEN",
+          "FILLED",
+          "PARTIAL_FILL",
+          "CANCELLED",
+          "PENDING"
+        ]
       },
       "OrderModifierKind": {
         "type": "string",
-        "enum": ["LIQUIDATION", "MAX_BUY"]
+        "enum": [
+          "LIQUIDATION",
+          "MAX_BUY"
+        ]
       },
       "Side": {
         "type": "string",
-        "enum": ["BUY", "SELL"]
+        "enum": [
+          "BUY",
+          "SELL"
+        ]
       },
       "TriggerType": {
         "type": "string",
-        "enum": ["STOP_LOSS", "TAKE_PROFIT"]
+        "enum": [
+          "STOP_LOSS",
+          "TAKE_PROFIT"
+        ]
       },
       "Order": {
         "type": "object",
@@ -8267,7 +8404,10 @@
                   "type": "string"
                 }
               },
-              "required": ["asset_id", "price"]
+              "required": [
+                "asset_id",
+                "price"
+              ]
             }
           },
           "stop_loss_price": {
@@ -8319,7 +8459,12 @@
             "description": "Last update timestamp for the restrictions."
           }
         },
-        "required": ["tenant_id", "deposit_limit", "trade_limit", "updated_at"]
+        "required": [
+          "tenant_id",
+          "deposit_limit",
+          "trade_limit",
+          "updated_at"
+        ]
       },
       "CreateConditionalOrderRequest": {
         "type": "object",
@@ -8354,7 +8499,12 @@
             "description": "Take profit price"
           }
         },
-        "required": ["price", "order_book_id", "position_id", "asset_id"]
+        "required": [
+          "price",
+          "order_book_id",
+          "position_id",
+          "asset_id"
+        ]
       },
       "CreateConditionalOrderResponseEnvelope": {
         "allOf": [
@@ -8407,7 +8557,11 @@
             "type": "boolean"
           }
         },
-        "required": ["email_exists", "firebase_set", "should_create_user"]
+        "required": [
+          "email_exists",
+          "firebase_set",
+          "should_create_user"
+        ]
       },
       "ValidateSubmitOrderResponse": {
         "type": "object",
@@ -8550,7 +8704,9 @@
             }
           }
         },
-        "required": ["all_positions"]
+        "required": [
+          "all_positions"
+        ]
       },
       "AllPositionsResponseEnvelope": {
         "type": "object",
@@ -8845,7 +9001,10 @@
             }
           }
         },
-        "required": ["available", "value"]
+        "required": [
+          "available",
+          "value"
+        ]
       },
       "LeverageType": {
         "type": "string",
@@ -8870,7 +9029,9 @@
             }
           }
         },
-        "required": ["balances"]
+        "required": [
+          "balances"
+        ]
       },
       "ModuleBalance": {
         "type": "object",
@@ -8932,7 +9093,11 @@
             "type": "string"
           }
         },
-        "required": ["global_position_id", "asset_id", "quantity"]
+        "required": [
+          "global_position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "IsolatedCollateral": {
         "type": "object",
@@ -9010,7 +9175,9 @@
             "format": "uuid"
           }
         },
-        "required": ["global_position_id"]
+        "required": [
+          "global_position_id"
+        ]
       },
       "UnitedPosition": {
         "type": "object",
@@ -9027,7 +9194,10 @@
             }
           }
         },
-        "required": ["global_position_id", "transaction_ids"]
+        "required": [
+          "global_position_id",
+          "transaction_ids"
+        ]
       },
       "UnitePositionResponseEnvelope": {
         "allOf": [
@@ -9058,7 +9228,10 @@
             "type": "string"
           }
         },
-        "required": ["asset_id", "quantity"]
+        "required": [
+          "asset_id",
+          "quantity"
+        ]
       },
       "DefundUserRequest": {
         "type": "object",
@@ -9071,7 +9244,10 @@
             "type": "string"
           }
         },
-        "required": ["asset_id", "quantity"]
+        "required": [
+          "asset_id",
+          "quantity"
+        ]
       },
       "FundUser": {
         "type": "object",
@@ -9136,7 +9312,11 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Supply": {
         "type": "object",
@@ -9157,7 +9337,12 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "transaction_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "SupplyResponseEnvelope": {
         "allOf": [
@@ -9290,7 +9475,11 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "Withdraw": {
         "type": "object",
@@ -9311,7 +9500,12 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "transaction_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "WithdrawResponseEnvelope": {
         "allOf": [
@@ -9350,7 +9544,12 @@
             "type": "string"
           }
         },
-        "required": ["position_id", "transaction_id", "asset_id", "quantity"]
+        "required": [
+          "position_id",
+          "transaction_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "PayLeverageAccruedInterestRequest": {
         "type": "object",
@@ -9364,7 +9563,10 @@
             "format": "uuid"
           }
         },
-        "required": ["asset_id", "position_id"]
+        "required": [
+          "asset_id",
+          "position_id"
+        ]
       },
       "PayLeverageAccruedInterest": {
         "type": "object",
@@ -9422,7 +9624,10 @@
             "format": "uuid"
           }
         },
-        "required": ["asset_id", "position_id"]
+        "required": [
+          "asset_id",
+          "position_id"
+        ]
       },
       "ClaimLeverageAccruedInterest": {
         "type": "object",
@@ -9712,7 +9917,12 @@
             }
           }
         },
-        "required": ["asset_id", "start_time", "end_time", "rates"]
+        "required": [
+          "asset_id",
+          "start_time",
+          "end_time",
+          "rates"
+        ]
       },
       "HistoricalLeverageInterestRatesResponseEnvelope": {
         "allOf": [
@@ -9739,7 +9949,9 @@
             "type": "string"
           }
         },
-        "required": ["reason"]
+        "required": [
+          "reason"
+        ]
       },
       "LiquidityRequest": {
         "type": "object",
@@ -9752,7 +9964,11 @@
             "type": "string"
           }
         },
-        "required": ["order_book_id", "position_id", "quantity"]
+        "required": [
+          "order_book_id",
+          "position_id",
+          "quantity"
+        ]
       },
       "Liquidity": {
         "type": "object",
@@ -9889,7 +10105,12 @@
       },
       "WithdrawalStatus": {
         "type": "string",
-        "enum": ["PENDING", "COMPLETED", "CANCELED", "REJECTED"]
+        "enum": [
+          "PENDING",
+          "COMPLETED",
+          "CANCELED",
+          "REJECTED"
+        ]
       },
       "ListTransactionsResponseEnvelope": {
         "allOf": [
@@ -10093,7 +10314,9 @@
           }
         },
         "description": "Standard response envelope. For 2xx responses, 'data' is set. For errors, 'error' is set.",
-        "required": ["metadata"]
+        "required": [
+          "metadata"
+        ]
       },
       "StreamEntry": {
         "type": "object",
@@ -10108,7 +10331,10 @@
             "format": "date-time"
           }
         },
-        "required": ["Val", "Time"]
+        "required": [
+          "Val",
+          "Time"
+        ]
       },
       "Metadata": {
         "type": "object",
@@ -10127,11 +10353,31 @@
           }
         },
         "description": "Metadata about the response, including status code and tracing information.",
-        "required": ["status_code", "trace_id", "request_id"]
+        "required": [
+          "status_code",
+          "trace_id",
+          "request_id"
+        ]
       },
       "CandleResolution": {
         "type": "string",
-        "enum": ["1m", "5m", "15m", "1h", "4h", "1d"]
+        "enum": [
+          "1m",
+          "5m",
+          "15m",
+          "1h",
+          "4h",
+          "1d"
+        ]
+      },
+      "AssetYieldResolution": {
+        "type": "string",
+        "enum": [
+          "1h",
+          "1d",
+          "7d",
+          "30d"
+        ]
       },
       "Candle": {
         "type": "object",
@@ -10156,6 +10402,9 @@
           "close": {
             "type": "string"
           },
+          "ytm": {
+            "type": "string"
+          },
           "volume": {
             "type": "string"
           }
@@ -10167,6 +10416,7 @@
           "high",
           "low",
           "close",
+          "ytm",
           "volume"
         ]
       },
@@ -10309,7 +10559,11 @@
             "format": "date-time"
           }
         },
-        "required": ["asset_id", "price", "time"]
+        "required": [
+          "asset_id",
+          "price",
+          "time"
+        ]
       },
       "ListAssetPriceResponseEnvelope": {
         "allOf": [
@@ -10390,7 +10644,11 @@
             "format": "date-time"
           }
         },
-        "required": ["pool_id", "price", "timestamp"]
+        "required": [
+          "pool_id",
+          "price",
+          "timestamp"
+        ]
       },
       "PoolPriceResponseEnvelope": {
         "allOf": [
@@ -10475,7 +10733,10 @@
             "type": "string"
           }
         },
-        "required": ["price", "quantity"]
+        "required": [
+          "price",
+          "quantity"
+        ]
       },
       "LiveOrderbook": {
         "type": "object",
@@ -10495,7 +10756,10 @@
             "description": "sorted in asc order by price"
           }
         },
-        "required": ["bids", "asks"]
+        "required": [
+          "bids",
+          "asks"
+        ]
       },
       "OrderBookDepth": {
         "type": "object",
@@ -10521,7 +10785,12 @@
             "format": "date-time"
           }
         },
-        "required": ["order_book_id", "bids", "asks", "timestamp"]
+        "required": [
+          "order_book_id",
+          "bids",
+          "asks",
+          "timestamp"
+        ]
       },
       "ListOrderBookDepthResponseEnvelope": {
         "allOf": [
@@ -10559,7 +10828,12 @@
             "format": "date-time"
           }
         },
-        "required": ["order_book_id", "best_bid", "best_ask", "timestamp"]
+        "required": [
+          "order_book_id",
+          "best_bid",
+          "best_ask",
+          "timestamp"
+        ]
       },
       "GetTopOfBookResponseEnvelope": {
         "allOf": [
@@ -10717,6 +10991,60 @@
       },
       "ListCandlesResponse": {
         "$ref": "#/components/schemas/ListCandlesResponseEnvelope"
+      },
+      "AssetYield": {
+        "type": "object",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ytm": {
+            "type": "string"
+          },
+          "lending_yield": {
+            "type": "string"
+          },
+          "tvl": {
+            "type": "string"
+          },
+          "total_yield": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "timestamp",
+          "ytm",
+          "lending_yield",
+          "tvl",
+          "total_yield"
+        ]
+      },
+      "ListAssetYieldResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AssetYield"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ListAssetYieldResponse": {
+        "$ref": "#/components/schemas/ListAssetYieldResponseEnvelope"
       },
       "StreamCandlesEntry": {
         "type": "object",
@@ -10988,7 +11316,11 @@
             "format": "uuid"
           }
         },
-        "required": ["from_position_id", "to_position_id", "transaction_id"]
+        "required": [
+          "from_position_id",
+          "to_position_id",
+          "transaction_id"
+        ]
       },
       "TransferBalancesResponseEnvelope": {
         "allOf": [
@@ -11025,7 +11357,11 @@
             "type": "boolean"
           }
         },
-        "required": ["position_id", "position_name", "is_global"]
+        "required": [
+          "position_id",
+          "position_name",
+          "is_global"
+        ]
       },
       "PositionAccounts": {
         "type": "array",
@@ -11101,7 +11437,12 @@
             "type": "boolean"
           }
         },
-        "required": ["user_id", "key_id", "label", "is_active"]
+        "required": [
+          "user_id",
+          "key_id",
+          "label",
+          "is_active"
+        ]
       },
       "CreateAPIKeyRequest": {
         "type": "object",
@@ -11116,7 +11457,9 @@
             "description": "Date at which the api-key will expire"
           }
         },
-        "required": ["label"]
+        "required": [
+          "label"
+        ]
       },
       "CreateAPIKeyResponse": {
         "$ref": "#/components/schemas/CreateAPIKeyResponseEnvelope"
@@ -11149,7 +11492,11 @@
             "type": "string"
           }
         },
-        "required": ["key_id", "api_key", "label"]
+        "required": [
+          "key_id",
+          "api_key",
+          "label"
+        ]
       },
       "RevokeAPIKeyResponse": {
         "$ref": "#/components/schemas/RevokeAPIKeyResponseEnvelope"
@@ -11186,7 +11533,12 @@
             "type": "boolean"
           }
         },
-        "required": ["user_id", "key_id", "label", "is_active"]
+        "required": [
+          "user_id",
+          "key_id",
+          "label",
+          "is_active"
+        ]
       },
       "ClosePositionResponse": {
         "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
@@ -11203,7 +11555,10 @@
             "format": "uuid"
           }
         },
-        "required": ["position_id", "order_book_id"]
+        "required": [
+          "position_id",
+          "order_book_id"
+        ]
       },
       "ClosePositionResp": {
         "type": "object",
@@ -11245,7 +11600,11 @@
             "type": "string"
           }
         },
-        "required": ["available", "used", "remaining"]
+        "required": [
+          "available",
+          "used",
+          "remaining"
+        ]
       },
       "PLAsset": {
         "type": "object",
@@ -11264,7 +11623,10 @@
           "side": {
             "description": "The side of the position (LONG or SHORT)",
             "type": "string",
-            "enum": ["LONG", "SHORT"]
+            "enum": [
+              "LONG",
+              "SHORT"
+            ]
           },
           "avg_entry_price": {
             "description": "The average entry price of the position",
@@ -11360,7 +11722,13 @@
             "type": "string"
           }
         },
-        "required": ["leverage", "account_equity", "available", "health", "ltv"]
+        "required": [
+          "leverage",
+          "account_equity",
+          "available",
+          "health",
+          "ltv"
+        ]
       },
       "PLAccount": {
         "type": "object",
@@ -11653,7 +12021,11 @@
             "$ref": "#/components/schemas/TransformedAssets"
           }
         },
-        "required": ["user_id", "accounts", "net_stablecoin_equivalence"]
+        "required": [
+          "user_id",
+          "accounts",
+          "net_stablecoin_equivalence"
+        ]
       },
       "AccountPortfolioResponseV2": {
         "type": "object",
@@ -11700,7 +12072,11 @@
             "type": "string"
           }
         },
-        "required": ["global_account_id", "asset_id", "quantity"]
+        "required": [
+          "global_account_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "NewIsolatedAccountResponseV2Envelope": {
         "allOf": [
@@ -11740,7 +12116,12 @@
             "format": "decimal"
           }
         },
-        "required": ["from_account_id", "to_account_id", "asset_id", "quantity"]
+        "required": [
+          "from_account_id",
+          "to_account_id",
+          "asset_id",
+          "quantity"
+        ]
       },
       "AccountBalanceTransfer": {
         "type": "object",
@@ -11758,7 +12139,11 @@
             "format": "uuid"
           }
         },
-        "required": ["from_account_id", "to_account_id", "transaction_id"]
+        "required": [
+          "from_account_id",
+          "to_account_id",
+          "transaction_id"
+        ]
       },
       "TransferAccountBalancesResponseEnvelope": {
         "allOf": [
@@ -11790,7 +12175,10 @@
             "format": "uuid"
           }
         },
-        "required": ["account_id", "order_book_id"]
+        "required": [
+          "account_id",
+          "order_book_id"
+        ]
       },
       "CloseAccountResponse": {
         "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
@@ -11812,7 +12200,11 @@
             "type": "boolean"
           }
         },
-        "required": ["account_id", "account_name", "is_global"]
+        "required": [
+          "account_id",
+          "account_name",
+          "is_global"
+        ]
       },
       "AccountsListV2": {
         "type": "array",

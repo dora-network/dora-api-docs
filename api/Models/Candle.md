@@ -9,6 +9,7 @@
 | **high** | **String** |  | [default to null] |
 | **low** | **String** |  | [default to null] |
 | **close** | **String** |  | [default to null] |
+| **ytm** | **String** |  | [default to null] |
 | **volume** | **String** |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

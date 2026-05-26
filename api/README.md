@@ -28,6 +28,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getAssetById**](Apis/DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 *DefaultApi* | [**getAssetPrice**](Apis/DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
 *DefaultApi* | [**getAssetYTMById**](Apis/DefaultApi.md#getAssetYTMById) | **GET** /v1/assets/{asset_id}/ytm | Get annualized yield to maturity for a bond asset |
+*DefaultApi* | [**getAssetYieldData**](Apis/DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 *DefaultApi* | [**getAssetsStream**](Apis/DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 *DefaultApi* | [**getCandleData**](Apis/DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 *DefaultApi* | [**getCouponPaymentsByAssetId**](Apis/DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
@@ -130,6 +131,8 @@ All URIs are relative to *https://staging.dora.co*
  - [AssetPriceResponseEnvelope](./Models/AssetPriceResponseEnvelope.md)
  - [AssetRequestError](./Models/AssetRequestError.md)
  - [AssetYTM](./Models/AssetYTM.md)
+ - [AssetYield](./Models/AssetYield.md)
+ - [AssetYieldResolution](./Models/AssetYieldResolution.md)
  - [BalanceTransfer](./Models/BalanceTransfer.md)
  - [BalancesResponse](./Models/BalancesResponse.md)
  - [Bond](./Models/Bond.md)
@@ -189,6 +192,7 @@ All URIs are relative to *https://staging.dora.co*
  - [LiquidityResponseEnvelope](./Models/LiquidityResponseEnvelope.md)
  - [ListAccountsResponseV2Envelope](./Models/ListAccountsResponseV2Envelope.md)
  - [ListAssetPriceResponseEnvelope](./Models/ListAssetPriceResponseEnvelope.md)
+ - [ListAssetYieldResponseEnvelope](./Models/ListAssetYieldResponseEnvelope.md)
  - [ListCandlesResponseEnvelope](./Models/ListCandlesResponseEnvelope.md)
  - [ListCouponPaymentsResponseEnvelope](./Models/ListCouponPaymentsResponseEnvelope.md)
  - [ListOrderBookDepthResponseEnvelope](./Models/ListOrderBookDepthResponseEnvelope.md)

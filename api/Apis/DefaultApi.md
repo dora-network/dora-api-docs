@@ -25,6 +25,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getAssetById**](DefaultApi.md#getAssetById) | **GET** /v1/assets/{asset_id} | Get asset by ID |
 | [**getAssetPrice**](DefaultApi.md#getAssetPrice) | **GET** /v1/price/asset/{asset_id} | Get the current price of an asset |
 | [**getAssetYTMById**](DefaultApi.md#getAssetYTMById) | **GET** /v1/assets/{asset_id}/ytm | Get annualized yield to maturity for a bond asset |
+| [**getAssetYieldData**](DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 | [**getAssetsStream**](DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 | [**getCandleData**](DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 | [**getCouponPaymentsByAssetId**](DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
@@ -624,6 +625,34 @@ Get annualized yield to maturity for a bond asset
 ### Return type
 
 [**GetAssetYTMByIDResponseEnvelope**](../Models/GetAssetYTMByIDResponseEnvelope.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getAssetYieldData"></a>
+# **getAssetYieldData**
+> ListAssetYieldResponseEnvelope getAssetYieldData(asset\_id, start, end, resolution)
+
+Get yield chart data for an asset
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **asset\_id** | **UUID**|  | [default to null] |
+| **start** | **Date**|  | [default to null] |
+| **end** | **Date**|  | [default to null] |
+| **resolution** | [**AssetYieldResolution**](../Models/.md)|  | [default to null] [enum: 1h, 1d, 7d, 30d] |
+
+### Return type
+
+[**ListAssetYieldResponseEnvelope**](../Models/ListAssetYieldResponseEnvelope.md)
 
 ### Authorization
 
@@ -2112,7 +2141,7 @@ List order books
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **status** | [**OrderBookStatus**](../Models/.md)|  | [optional] [default to null] [enum: CLOSED, OPEN, SUSPENDED] |
+| **status** | [**List**](../Models/OrderBookStatus.md)|  | [optional] [default to null] |
 | **base\_asset\_id** | **UUID**|  | [optional] [default to null] |
 | **quote\_asset\_id** | **UUID**|  | [optional] [default to null] |
 | **page** | **Integer**|  | [optional] [default to 1] |

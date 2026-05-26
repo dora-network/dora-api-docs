@@ -19,6 +19,8 @@ Models/AssetPrice.md
 Models/AssetPriceResponseEnvelope.md
 Models/AssetRequestError.md
 Models/AssetYTM.md
+Models/AssetYield.md
+Models/AssetYieldResolution.md
 Models/BalanceTransfer.md
 Models/BalancesResponse.md
 Models/Bond.md
@@ -78,6 +80,7 @@ Models/LiquidityRequest.md
 Models/LiquidityResponseEnvelope.md
 Models/ListAccountsResponseV2Envelope.md
 Models/ListAssetPriceResponseEnvelope.md
+Models/ListAssetYieldResponseEnvelope.md
 Models/ListCandlesResponseEnvelope.md
 Models/ListCouponPaymentsResponseEnvelope.md
 Models/ListOrderBookDepthResponseEnvelope.md
