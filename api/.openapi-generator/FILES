@@ -177,6 +177,7 @@ Models/Trade.md
 Models/TradeRequestError.md
 Models/TradeResponseEnvelope.md
 Models/Transaction.md
+Models/TransactionInternalTransfer.md
 Models/TransactionKind.md
 Models/TransactionRequestError.md
 Models/TransactionResponseEnvelope.md

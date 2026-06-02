@@ -13,6 +13,7 @@
 | **user\_id** | **UUID** |  | [default to null] |
 | **admin\_user\_id** | **UUID** |  | [default to null] |
 | **order\_side** | [**Side**](Side.md) |  | [default to null] |
+| **internal\_transfer** | [**TransactionInternalTransfer**](TransactionInternalTransfer.md) |  | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

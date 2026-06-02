@@ -8432,8 +8432,7 @@
           "kind",
           "price",
           "inverse_leverage",
-          "user_balance",
-          "asset_id"
+          "user_balance"
         ]
       },
       "TenantRestrictions": {
@@ -9965,7 +9964,6 @@
           }
         },
         "required": [
-          "order_book_id",
           "position_id",
           "quantity"
         ]
@@ -10047,7 +10045,34 @@
           "UNITE_POSITION",
           "COLLATERALIZE",
           "DE-COLLATERALIZE",
-          "COUPON_PAYMENT"
+          "COUPON_PAYMENT",
+          "INTERNAL_TRANSFER"
+        ]
+      },
+      "TransactionInternalTransfer": {
+        "type": "object",
+        "properties": {
+          "from_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from_account_id",
+          "to_account_id",
+          "asset_id",
+          "quantity"
         ]
       },
       "Transaction": {
@@ -10088,6 +10113,9 @@
           },
           "order_side": {
             "$ref": "#/components/schemas/Side"
+          },
+          "internal_transfer": {
+            "$ref": "#/components/schemas/TransactionInternalTransfer"
           }
         },
         "required": [
@@ -10487,8 +10515,6 @@
           "transaction_id",
           "asset_0",
           "created_at",
-          "fee_asset_id",
-          "fee_quantity",
           "order_book_id",
           "order_id",
           "order_seq",

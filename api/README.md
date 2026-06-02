@@ -289,6 +289,7 @@ All URIs are relative to *https://staging.dora.co*
  - [TradeRequestError](./Models/TradeRequestError.md)
  - [TradeResponseEnvelope](./Models/TradeResponseEnvelope.md)
  - [Transaction](./Models/Transaction.md)
+ - [TransactionInternalTransfer](./Models/TransactionInternalTransfer.md)
  - [TransactionKind](./Models/TransactionKind.md)
  - [TransactionRequestError](./Models/TransactionRequestError.md)
  - [TransactionResponseEnvelope](./Models/TransactionResponseEnvelope.md)
