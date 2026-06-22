@@ -4,3 +4,5 @@ package-lock.json
 .vscode/
 
 node_modules/
+
+/dora-plex-readme.md
