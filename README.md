@@ -30,6 +30,13 @@ make gen
 
 Follow the getting started guide in the [Getting started guide](getting-started.md).
 
+
+## Multiplexed WebSocket Streams
+
+DORA also exposes a **multiplexed WebSocket** protocol at `wss://<environment_base_url>/plex`. A single connection carries requests, responses, and streamed notifications for multiple endpoints (currently `/prices` and `/trades`), so you don't have to open and manage a separate WebSocket per stream.
+
+For full documentation — protocol shape, request/response/notification semantics, and runnable examples in Go, Python, and TypeScript — see the [Multiplexed WebSocket Streams guide](./multiplex-websocket/README.md).
+
 ## AI Agent Integration
 
 This repository ships with a [Dora Network API Skill](../skills/dora-api/) designed for AI agent integration. The skill enables integrators and their users to interact with the Dora REST API using environment-specific base URLs and API keys.
