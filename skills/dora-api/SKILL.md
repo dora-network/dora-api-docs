@@ -1,7 +1,7 @@
 ---
 name: dora-api
-description: Interact with Dora Network API using environment-configured endpoints
-version: 1.9.0
+description: Interact with Dora Network API and multiplexed WebSocket (wsplex) using environment-configured endpoints
+version: 1.10.0
 author: Dora Network
 platforms: [linux, macos, windows]
 ---
@@ -186,6 +186,45 @@ WS_URL="${DORA_BASE_URL/https:/wss:}"
 wscat -c "$WS_URL/v1/orderbooks/123e4567-e89b-12d3-a456-426614174000/stats/stream?x-api-key=$DORA_API_KEY" \
      -H "User-Agent: DoraAPIClient/1.0"
 ```
+
+### Multiplexed WebSocket (`wsplex`) — preferred for new integrations
+
+DORA's multiplexed WebSocket protocol, `wsplex`, lets a single connection carry requests, responses, and server-pushed notifications for multiple endpoints (currently `/prices` and `/trades`) over one socket. Prefer it over the legacy per-stream endpoints above for new integrations.
+
+**Endpoint:** `wss://<environment_base_url>/plex` (e.g. `wss://staging.dora.co/plex`).
+
+**Auth:** the API key is sent as the standard HTTP header on the WebSocket upgrade request:
+```
+Authorization: ApiKey <key>
+```
+`Authorization: Bearer <token>` works identically.
+
+**Protocol shape (one connection, many paths):**
+- Request: `{"id": "<uuidv7>", "path": "/prices", "data": {...}}`. The `data` field is **required** — omitting it returns an error response and still consumes the request id.
+- Response: `{"id": ..., "kind": "response", "path": ..., "data": ...}` or `{"...", "error": "..."}`. Exactly one response per request, matched by `id`.
+- Notification (server-pushed): `{"id": ..., "kind": "notification", "path": ..., "data": ...}`.
+- Request ids are **single-use per connection** — generate a fresh UUIDv7 for every request, including retries. Reusing an id returns a duplicate-request error.
+
+**Quick test with `wscat`:**
+```bash
+# Subscribe to /prices for a specific asset
+WS_URL="${DORA_BASE_URL/https:/wss:}"
+wscat -c "$WS_URL/plex" \
+    -H "Authorization: ApiKey $DORA_API_KEY" \
+    -x '{"id":"00000000-0000-0000-0000-000000000001","path":"/prices","data":{"subscribe":["<asset-id>"]}}'
+```
+You should receive one response (matching `id`) followed by a stream of notifications on `/prices`.
+
+**Subscriptions on `/prices` follow a two-state model:**
+- A **subscribed list** of asset ids, mutated by `subscribe` (add) and `unsubscribe` (remove).
+- A `subscribed_to_all` **bypass flag** — when true, the list is ignored and every asset's prices stream.
+The list and the bypass flag are independent: `unsubscribe` mutates the list regardless of the flag; `unsubscribed_to_all` clears the flag (not the list). To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added.
+
+**Subscriptions on `/trades` follow the same two-state model per axis** (order-book and user). The all-mode toggles (`order_books_all`, `users_all`) are **connection-scoped** — once set to `true` they remain `true` for the lifetime of the connection. To fully clear `/trades` subscription state, close the connection.
+
+**Runnable examples in Go, Python, and TypeScript** are in the repo at `multiplex-websocket/examples/{go,python,typescript}/` (each has its own README). Prefer these over rolling your own client.
+
+For the full protocol reference, see `multiplex-websocket/README.md` in this repo.
 
 ## Error Handling
 The API returns standard HTTP status codes:
