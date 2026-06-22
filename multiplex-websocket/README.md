@@ -39,7 +39,7 @@ The multiplexed WebSocket is reached at `wss://<environment_base_url>/plex`. Aut
 
 `Authorization: ApiKey <your-api-key>`
 
-`Authorization: Bearer <token>` works identically. Authorization is evaluated **per route** — `/prices` is public; `/trades` requires the token to have access to the relevant order books and users.
+`Authorization: Bearer <token>` works identically. **The `Authorization` header is required on the WebSocket upgrade request** — without it the connection will not be accepted. Once the socket is open, the same header authorizes requests on every path the token can access (for example, a token without `/trades` scope will see an error response on every `/trades` request, but the connection itself stays open).
 
 ## Protocol message shapes
 
