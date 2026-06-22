@@ -97,6 +97,7 @@ func (c *Client) Request(ctx context.Context, path string, data any, onNotificat
 		c.cleanup(id)
 		return nil, ctx.Err()
 	case <-c.closeCh:
+		c.cleanup(id)
 		return nil, fmt.Errorf("wsplex: connection closed: %w", c.readErr)
 	}
 }
@@ -134,8 +135,11 @@ func (c *Client) readLoop() {
 		if err != nil {
 			c.mu.Lock()
 			c.readErr = err
+			if !c.closed {
+				c.closed = true
+				close(c.closeCh)
+			}
 			c.mu.Unlock()
-			close(c.closeCh)
 			return
 		}
 		var env envelope
