@@ -72,6 +72,11 @@ class PlexClient:
         finally:
             if self._read_task is not None:
                 self._read_task.cancel()
+            # Wake any callers still awaiting a response.
+            for fut in self._pending.values():
+                if not fut.done():
+                    fut.cancel()
+            self._pending.clear()
 
     async def _read_loop(self) -> None:
         try:

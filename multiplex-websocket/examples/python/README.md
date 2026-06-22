@@ -7,7 +7,7 @@ A small reusable client and a runnable demo for the [DORA multiplexed WebSocket 
 ```bash
 python3.14 -m venv .venv
 source .venv/bin/activate
-pip install 'websockets>=12.0'
+pip install 'websockets>=13.0'
 ```
 
 Requires Python 3.14+ (uses stdlib `uuid.uuid7()`).
