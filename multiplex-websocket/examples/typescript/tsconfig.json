@@ -10,7 +10,7 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
     "noEmit": true,
-    "lib": ["ES2022"]
+    "lib": ["ES2024"]
   },
   "include": ["client.ts", "demo.ts"]
 }
