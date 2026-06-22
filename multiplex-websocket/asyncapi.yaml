@@ -1,0 +1,642 @@
+asyncapi: 3.0.0
+
+info:
+  title: DORA Multiplexed WebSocket (`wsplex`)
+  version: 1.0.0
+  description: |
+    One WebSocket connection at `wss://<environment_base_url>/plex` carries requests,
+    responses, and server-pushed notifications for multiple paths (currently `/prices`
+    and `/trades`). Each message on the wire is a JSON object identified by a single-use
+    UUIDv7 request id (`id`) and a `path` discriminator.
+
+    # Overview
+
+    `wsplex` is a multiplexed JSON-over-WebSocket protocol. A single connection handles
+    many logical "paths" (analogous to REST endpoints). For each path the client can:
+
+    - send a request and await exactly one matching response (correlated by `id`),
+    - receive server-pushed notifications (also correlated by `id`, but routed by `path`),
+    - change its subscription state incrementally.
+
+    The protocol spec is documented in [`README.md`](./README.md) of this folder. This
+    document is the machine-readable companion that describes the same wire format.
+
+    # Authentication
+
+    The WebSocket upgrade request requires an `Authorization` header:
+
+    - `Authorization: ApiKey <your-api-key>`
+    - `Authorization: Bearer <token>`
+
+    Without it, the connection is not accepted. Per-path authorization (when the token
+    lacks scope for `/trades`, for example) is enforced via error responses on that path,
+    not by failing the upgrade.
+
+    # Channels
+
+    This document defines one channel per path. All channels share the same physical
+    WebSocket connection (the `plex` server). Each channel lists the four client-bound
+    `subscribe` / `unsubscribe` / `setAll` / `clearAll` operations and the two
+    server-bound messages: the per-request `response` and the streaming `notification`.
+
+    # Request id rule
+
+    Every client-bound request must carry a fresh `id` (UUIDv7 string). The id is
+    single-use per connection — reusing any id, even on a request that returned an error,
+    produces a duplicate-request error. The server uses the id to correlate the response
+    back to the request. Notifications also carry an `id` (often the id of the request
+    that set up the subscription), but clients should route notifications by `path`, not
+    by `id`.
+
+    # Required `data` field
+
+    Every client-bound request must include a non-empty `data` object. Omitting it
+    returns an error response and still consumes the request id.
+  contact:
+    name: Dora Network
+    url: https://dora.co
+  license:
+    name: Proprietary
+
+servers:
+  staging:
+    host: staging.dora.co
+    protocol: wss
+    pathname: /plex
+    description: |
+      Staging environment. The full URL is `wss://staging.dora.co/plex`. Requires an
+      API key with `Authorization: ApiKey <key>` on the upgrade request.
+    security:
+      - $ref: '#/components/securitySchemes/apiKey'
+  production:
+    host: dora.co
+    protocol: wss
+    pathname: /plex
+    description: |
+      Production environment. The full URL is `wss://dora.co/plex`. Requires an
+      API key with `Authorization: ApiKey <key>` on the upgrade request.
+    security:
+      - $ref: '#/components/securitySchemes/apiKey'
+
+defaultContentType: application/json
+
+channels:
+
+  prices:
+    address: /prices
+    description: |
+      Real-time price updates for one or more asset ids. See the protocol guide §6
+      for the two-state subscription model (subscribed list + `subscribed_to_all`
+      bypass flag, independent).
+    messages:
+      pricesRequest:
+        $ref: '#/components/messages/PricesRequest'
+      pricesResponse:
+        $ref: '#/components/messages/PricesResponse'
+      pricesNotification:
+        $ref: '#/components/messages/PricesNotification'
+
+  trades:
+    address: /trades
+    description: |
+      Real-time trade updates by order book, optionally filtered by user. See the
+      protocol guide §7 for the two-state subscription model per axis. Note:
+      `order_books_all` and `users_all` are **connection-scoped** — once set to
+      `true` they remain true for the lifetime of the connection; close the
+      connection to reset.
+    messages:
+      tradesRequest:
+        $ref: '#/components/messages/TradesRequest'
+      tradesResponse:
+        $ref: '#/components/messages/TradesResponse'
+      tradesNotification:
+        $ref: '#/components/messages/TradesNotification'
+
+operations:
+
+  pricesSubscribe:
+    action: send
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      Subscribe to price updates for the given asset ids, leaving any prior
+      subscriptions in place (additive).
+    messages:
+      - $ref: '#/channels/prices/messages/pricesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  pricesUnsubscribe:
+    action: send
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      Remove asset ids from the subscribed list. Even if `subscribed_to_all` is
+      currently `true`, the ids are still removed from the list (the list and the
+      bypass flag are independent).
+    messages:
+      - $ref: '#/channels/prices/messages/pricesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  pricesSetAll:
+    action: send
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      Turn the `subscribed_to_all` bypass flag on. From this point onward, every
+      asset's prices stream regardless of the subscribed list contents.
+    messages:
+      - $ref: '#/channels/prices/messages/pricesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  pricesClearAll:
+    action: send
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      Turn the `subscribed_to_all` bypass flag off. The stream reverts to the
+      current subscribed list (which is **not** cleared by this operation).
+    messages:
+      - $ref: '#/channels/prices/messages/pricesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  pricesReceiveResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      The single response matching a `/prices` request, correlated by `id`.
+    messages:
+      - $ref: '#/channels/prices/messages/pricesResponse'
+
+  pricesReceiveNotification:
+    action: receive
+    channel:
+      $ref: '#/channels/prices'
+    summary: |
+      Server-pushed price updates. Streamed indefinitely once at least one asset
+      is in the subscribed list or the bypass flag is on.
+    messages:
+      - $ref: '#/channels/prices/messages/pricesNotification'
+
+  tradesSubscribe:
+    action: send
+    channel:
+      $ref: '#/channels/trades'
+    summary: |
+      Add an `(order_book_id, user_id)` filter pair to the subscribed list. May
+      also include `order_books_all` or `users_all` to activate the
+      corresponding bypass flag.
+    messages:
+      - $ref: '#/channels/trades/messages/tradesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  tradesUnsubscribe:
+    action: send
+    channel:
+      $ref: '#/channels/trades'
+    summary: |
+      Remove an `(order_book_id, user_id)` filter pair from the subscribed list.
+      Pair removal is independent of the bypass flags.
+    messages:
+      - $ref: '#/channels/trades/messages/tradesRequest'
+    traits:
+      - $ref: '#/components/operationTraits/RequestEnvelope'
+
+  tradesReceiveResponse:
+    action: receive
+    channel:
+      $ref: '#/channels/trades'
+    summary: |
+      The single response matching a `/trades` request, correlated by `id`.
+    messages:
+      - $ref: '#/channels/trades/messages/tradesResponse'
+
+  tradesReceiveNotification:
+    action: receive
+    channel:
+      $ref: '#/channels/trades'
+    summary: |
+      Server-pushed trade updates. Streamed while at least one matching filter
+      is active for the connection.
+    messages:
+      - $ref: '#/channels/trades/messages/tradesNotification'
+
+components:
+
+  securitySchemes:
+    apiKey:
+      type: httpApiKey
+      in: header
+      name: Authorization
+      description: |
+        Either `Authorization: ApiKey <your-api-key>` or `Authorization: Bearer <token>`.
+        Required on the WebSocket upgrade request — without it the connection is not
+        accepted.
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Optional alternative to `apiKey`. Use `Authorization: Bearer <token>`.
+        Works identically to `ApiKey` for protocol purposes.
+
+  operationTraits:
+    RequestEnvelope:
+      description: |
+        All `/prices` and `/trades` requests share the same envelope shape.
+        `id` is a fresh UUIDv7 per request (single-use). `data` is required and
+        must match the path-specific request schema. The `Authorization` header
+        is sent on the WebSocket upgrade request (not per-message); all requests
+        on the same connection inherit that authorization.
+
+  messages:
+
+    PricesRequest:
+      name: PricesRequest
+      title: /prices request
+      summary: |
+        Subscription change for `/prices`. Each request carries exactly one
+        optional field of `subscribe`, `unsubscribe`, `subscribed_to_all`,
+        or `unsubscribed_to_all` (typically just one). Multiple fields can be
+        combined in a single request to mutate the list and the bypass flag
+        atomically.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PricesRequest'
+
+    PricesResponse:
+      name: PricesResponse
+      title: /prices response
+      summary: |
+        The single response matching a `/prices` request. Contains either
+        `data` (success) or `error` (failure).
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PricesResponse'
+
+    PricesNotification:
+      name: PricesNotification
+      title: /prices notification
+      summary: |
+        Server-pushed price updates. The `id` typically corresponds to the
+        most recent request that set up the subscription; clients should
+        route notifications by `path`, not by `id`.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/PricesNotification'
+
+    TradesRequest:
+      name: TradesRequest
+      title: /trades request
+      summary: |
+        Subscription change for `/trades`. Each change object inside
+        `subscribe` or `unsubscribe` may specify `order_book_ids` /
+        `order_books_all` on the order-book axis and `user_ids` / `users_all`
+        on the user axis. If neither `user_ids` nor `users_all` is set on
+        a change, the user axis defaults to `users_all=true` for that change.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TradesRequest'
+
+    TradesResponse:
+      name: TradesResponse
+      title: /trades response
+      summary: |
+        The single response matching a `/trades` request. Contains either
+        `data` (success) or `error` (failure).
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TradesResponse'
+
+    TradesNotification:
+      name: TradesNotification
+      title: /trades notification
+      summary: |
+        Server-pushed trade updates. Field names intentionally match the
+        legacy non-plex `/trades/{id}/stream` payload.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TradesNotification'
+
+  schemas:
+
+    # ----- common envelope fragments -----
+
+    RequestEnvelope:
+      type: object
+      required: [id, path, data]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: |
+            Single-use UUIDv7 identifier. Generate a fresh id for every
+            request, including retries after errors.
+          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        path:
+          type: string
+          description: |
+            Must start with `/`. Currently: `/prices`, `/trades`.
+          enum: ['/prices', '/trades']
+        data:
+          type: object
+          description: |
+            Required, non-empty. The shape is path-specific (see PricesRequest
+            and TradesRequest).
+
+    ResponseEnvelope:
+      type: object
+      required: [id, kind, path]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: |
+            Echoes the request id this response corresponds to.
+        kind:
+          type: string
+          enum: [response]
+        path:
+          type: string
+          enum: ['/prices', '/trades']
+        data:
+          description: |
+            Path-specific response payload. Present on success.
+        error:
+          type: string
+          description: |
+            Human-readable error string. Present on failure. Intended for
+            humans — do not pattern-match on its content.
+
+    NotificationEnvelope:
+      type: object
+      required: [kind, path, data]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: |
+            Server-pushed notification id. Often the id of the request that
+            set up the subscription, but clients should route notifications
+            by `path`, not `id`.
+        kind:
+          type: string
+          enum: [notification]
+        path:
+          type: string
+          enum: ['/prices', '/trades']
+        data:
+          description: |
+            Path-specific notification payload.
+
+    # ----- /prices -----
+
+    PricesRequest:
+      allOf:
+        - $ref: '#/components/schemas/RequestEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change. At least one field should be set per
+                request. The list and the bypass flag are independent.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds asset ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: |
+                    Depreciative — removes asset ids from the subscribed list.
+                    Mutates the list regardless of the bypass flag.
+                  items:
+                    type: string
+                    format: uuid
+                subscribed_to_all:
+                  type: boolean
+                  description: |
+                    When `true`, turns the bypass flag on. The stream emits
+                    every asset's prices regardless of list contents.
+                unsubscribed_to_all:
+                  type: boolean
+                  description: |
+                    When `true`, turns the bypass flag off. The stream
+                    reverts to the (already-mutated) subscribed list. Does
+                    NOT clear the list.
+              additionalProperties: false
+
+    PricesResponseData:
+      type: object
+      required: [subscribed, subscribed_to_all]
+      properties:
+        subscribed:
+          type: array
+          description: The current subscribed list after the change was applied.
+          items:
+            type: string
+            format: uuid
+        subscribed_to_all:
+          type: boolean
+          description: The current bypass flag state after the change was applied.
+
+    PricesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PricesResponseData'
+
+    PricesNotificationData:
+      type: object
+      required: [prices]
+      properties:
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Price'
+
+    Price:
+      type: object
+      required: [asset_id, price, ytm, time]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        price:
+          type: string
+          description: |
+            Decimal price, expressed as a string. Parse as a high-precision
+            decimal.
+          examples: ['0.717414207417403554']
+        ytm:
+          type: string
+          description: |
+            Yield to maturity as a string. `'0'` for non-bond assets.
+          examples: ['0']
+        time:
+          type: string
+          format: date-time
+
+    PricesNotification:
+      allOf:
+        - $ref: '#/components/schemas/NotificationEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PricesNotificationData'
+
+    # ----- /trades -----
+
+    TradesSubscriptionChange:
+      type: object
+      description: |
+        One filter pair. At least one of `order_book_ids` / `order_books_all`
+        and one of `user_ids` / `users_all` should be set on each change.
+      properties:
+        order_book_ids:
+          type: array
+          description: Specific order book ids to filter on.
+          items:
+            type: string
+            format: uuid
+        order_books_all:
+          type: boolean
+          description: |
+            When `true`, the order-book-axis bypass flag is activated. Overrides
+            `order_book_ids` in the same change object.
+        user_ids:
+          type: array
+          description: Specific user ids to filter on.
+          items:
+            type: string
+            format: uuid
+        users_all:
+          type: boolean
+          description: |
+            When `true`, the user-axis bypass flag is activated. Overrides
+            `user_ids` in the same change object. Defaults to `true` if
+            neither field is set on a change.
+      additionalProperties: false
+
+    TradesRequest:
+      allOf:
+        - $ref: '#/components/schemas/RequestEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds filter pairs to the subscribed list.
+                  items:
+                    $ref: '#/components/schemas/TradesSubscriptionChange'
+                unsubscribe:
+                  type: array
+                  description: |
+                    Depreciative — removes filter pairs from the subscribed list.
+                    Mutates the list regardless of the bypass flags.
+                  items:
+                    $ref: '#/components/schemas/TradesSubscriptionChange'
+              additionalProperties: false
+
+    TradesResponseData:
+      type: object
+      required: [subscriptions]
+      properties:
+        subscriptions:
+          type: array
+          description: |
+            The canonicalized effective subscription after the change was
+            applied (server canonicalizes overlapping changes to the broadest
+            effective subscription).
+          items:
+            $ref: '#/components/schemas/TradesSubscriptionChange'
+
+    TradesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ResponseEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TradesResponseData'
+
+    Trade:
+      type: object
+      description: |
+        One trade. Field names intentionally match the legacy
+        non-plex `/trades/{id}/stream` payload.
+      required:
+        - transaction_id
+        - asset_0
+        - created_at
+        - order_book_id
+        - order_id
+        - order_seq
+        - price
+        - quantity_0
+        - user_id
+        - side
+        - aggressor_indicator
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        asset_0:
+          type: string
+          format: uuid
+          description: The base asset id.
+        created_at:
+          type: string
+          format: date-time
+        order_book_id:
+          type: string
+          format: uuid
+        order_id:
+          type: string
+          format: uuid
+          description: Unique per trade (each leg gets its own id).
+        order_seq:
+          type: integer
+        price:
+          type: string
+          examples: ['0.717414207417403554']
+        quantity_0:
+          type: string
+          examples: ['591.3390000000000000']
+        user_id:
+          type: string
+          format: uuid
+        side:
+          type: string
+          enum: [BUY, SELL]
+        aggressor_indicator:
+          type: boolean
+          description: "`true` for taker, `false` for maker."
+
+    TradesNotificationData:
+      type: object
+      required: [trades]
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trade'
+
+    TradesNotification:
+      allOf:
+        - $ref: '#/components/schemas/NotificationEnvelope'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TradesNotificationData'

@@ -309,7 +309,7 @@ Two consequences:
 
 ## Examples
 
-Runnable demos and reusable helpers:
+Machine-readable protocol spec ([AsyncAPI 3.0](./asyncapi.yaml)) and runnable demos in three languages:
 
 - [Go](./examples/go/README.md) — uses [`coder/websocket`](https://github.com/coder/websocket).
 - [Python](./examples/python/README.md) — uses the [`websockets`](https://pypi.org/project/websockets/) package.
