@@ -55,12 +55,12 @@ Exits 0 if the demo and helper compile cleanly. No live server is contacted.
 ## Use the helper in your own code
 
 ```go
-import "github.com/dora-network/dora-api-docs/multiplex-websocket/examples/go"
+import plex "github.com/dora-network/dora-api-docs/multiplex-websocket/examples/go"
 
 func main() {
-    client, _ := go.Connect(go.Options{URL: "wss://staging.dora.co/plex", AuthHeader: "ApiKey xxx"})
+    client, _ := plex.Connect(context.Background(), plex.Options{URL: "wss://staging.dora.co/plex", AuthHeader: "ApiKey xxx"})
     defer client.Close()
-    data, _ := client.Request("/prices", map[string]any{"subscribe": []string{"<asset-id>"}}, nil)
+    data, _ := client.Request(context.Background(), "/prices", map[string]any{"subscribe": []string{"<asset-id>"}}, nil)
     _ = data
 }
 ```
