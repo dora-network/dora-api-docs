@@ -7,3 +7,6 @@ node_modules/
 
 /dora-plex-readme.md
 docs/superpowers/
+.superpowers
+__pycache__
+
