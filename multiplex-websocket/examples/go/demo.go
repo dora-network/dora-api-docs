@@ -84,7 +84,6 @@ func main() {
 		fmt.Printf("[resp /trades unsubscribe] %s\n", string(resp))
 	}
 
-	_ = cancel
 }
 
 func pickBaseURLAndKey() (string, string) {

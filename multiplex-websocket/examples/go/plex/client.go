@@ -1,5 +1,5 @@
 // Package plex provides a small reusable client for the DORA wsplex
-// multiplexed WebSocket protocol, plus a runnable demo (see demo.go).
+// multiplexed WebSocket protocol.
 //
 // The Client is intentionally minimal: connect, send one request at a time,
 // dispatch the matching response, and let callers handle notifications by
