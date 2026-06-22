@@ -62,7 +62,7 @@ func (c *Client) Request(ctx context.Context, path string, data any, onNotificat
 	if data == nil {
 		return nil, errors.New("wsplex: request data is required")
 	}
-	id := uuid.New().String()
+	id := uuid.Must(uuid.NewV7()).String()
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("wsplex: marshal data: %w", err)
