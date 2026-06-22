@@ -55,7 +55,7 @@ Exits 0 if the demo and helper compile cleanly. No live server is contacted.
 ## Use the helper in your own code
 
 ```go
-import plex "github.com/dora-network/dora-api-docs/multiplex-websocket/examples/go"
+import plex "github.com/dora-network/dora-api-docs/multiplex-websocket/examples/go/plex"
 
 func main() {
     client, _ := plex.Connect(context.Background(), plex.Options{URL: "wss://staging.dora.co/plex", AuthHeader: "ApiKey xxx"})
@@ -65,4 +65,4 @@ func main() {
 }
 ```
 
-The helper takes the request `data` as a `map[string]any` (or any JSON-marshalable type) and returns the response `data` as `json.RawMessage`. See [`client.go`](./client.go) for full method signatures.
+The helper takes the request `data` as a `map[string]any` (or any JSON-marshalable type) and returns the response `data` as `json.RawMessage`. See [`client.go`](./plex/client.go) for full method signatures.
