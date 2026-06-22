@@ -69,11 +69,11 @@ servers:
     security:
       - $ref: '#/components/securitySchemes/apiKey'
   production:
-    host: dora.co
+    host: api.dora.co
     protocol: wss
     pathname: /plex
     description: |
-      Production environment. The full URL is `wss://dora.co/plex`. Requires an
+      Production environment. The full URL is `wss://api.dora.co/plex`. Requires an
       API key with `Authorization: ApiKey <key>` on the upgrade request.
     security:
       - $ref: '#/components/securitySchemes/apiKey'
