@@ -33,6 +33,7 @@ class PlexClient:
         self._notifs: dict[str, NotificationHandler] = {}
         self._read_task: Optional[asyncio.Task[None]] = None
         self._closed = False
+        self._lock = asyncio.Lock()
 
     @classmethod
     async def connect(cls, opts: PlexOptions) -> "PlexClient":
@@ -53,30 +54,44 @@ class PlexClient:
         request_id = str(uuid7())
         payload = {"id": request_id, "path": path, "data": data}
         fut: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
-        self._pending[request_id] = fut
+        async with self._lock:
+            if self._closed:
+                raise RuntimeError("wsplex: client is closed")
+            self._pending[request_id] = fut
         if on_notification is not None:
             self._notifs[path] = on_notification
-        await self._conn.send(json.dumps(payload))
-        response = await fut
-        self._pending.pop(request_id, None)
+        try:
+            await self._conn.send(json.dumps(payload))
+        except Exception:
+            # If the send fails, surface that to the caller instead of hanging.
+            async with self._lock:
+                self._pending.pop(request_id, None)
+            raise
+        try:
+            response = await fut
+        finally:
+            async with self._lock:
+                self._pending.pop(request_id, None)
         if "error" in response:
             raise RuntimeError(f"wsplex: response error: {response['error']}")
         return response.get("data", {})
 
     async def close(self) -> None:
-        if self._closed:
-            return
-        self._closed = True
+        async with self._lock:
+            if self._closed:
+                return
+            self._closed = True
         try:
             await self._conn.close()
         finally:
             if self._read_task is not None:
                 self._read_task.cancel()
             # Wake any callers still awaiting a response.
-            for fut in self._pending.values():
-                if not fut.done():
-                    fut.cancel()
-            self._pending.clear()
+            async with self._lock:
+                for fut in self._pending.values():
+                    if not fut.done():
+                        fut.cancel()
+                self._pending.clear()
 
     async def _read_loop(self) -> None:
         try:
@@ -91,16 +106,20 @@ class PlexClient:
                 rid = msg.get("id")
                 if rid is None:
                     continue
-                fut = self._pending.get(rid)
-                if fut is not None and not fut.done():
-                    fut.set_result(msg)
+                async with self._lock:
+                    fut = self._pending.get(rid)
+                    if fut is not None and not fut.done():
+                        fut.set_result(msg)
+                        # Drop from the map so close()/except don't double-finalize.
+                        self._pending.pop(rid, None)
         except Exception as exc:
             # If the read loop dies unexpectedly, fail any callers still awaiting a
             # response so they don't hang forever. `close()` cancels them itself
             # first, so a CancelledError reaching this point is harmless.
-            if not self._closed:
-                err = ConnectionError(f"wsplex: connection lost: {exc!r}")
-                for fut in self._pending.values():
-                    if not fut.done():
-                        fut.set_exception(err)
-                self._pending.clear()
+            async with self._lock:
+                if not self._closed:
+                    err = ConnectionError(f"wsplex: connection lost: {exc!r}")
+                    for fut in self._pending.values():
+                        if not fut.done():
+                            fut.set_exception(err)
+                    self._pending.clear()
