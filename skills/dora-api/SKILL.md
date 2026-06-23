@@ -224,7 +224,7 @@ The flag overrides the list: setting `subscribed_to_all: true` or `unsubscribed_
 
 **Runnable examples in Go, Python, and TypeScript** are in the repo at `multiplex-websocket/examples/{go,python,typescript}/` (each has its own README). Prefer these over rolling your own client.
 
-For the full protocol reference, see `multiplex-websocket/README.md` in this repo.
+For the full protocol reference, see `multiplex-websocket/README.md` in this repo. The AsyncAPI specification is bundled at `skill_view(name='dora-api', file_path='references/asyncapi.yaml')`. When building wsplex requests, use `yq` to extract the specific channel or schema you need (see `### AsyncAPI Specification` in the Reference section).
 
 ## Error Handling
 The API returns standard HTTP status codes:
@@ -282,6 +282,36 @@ jq -r '.paths[] | .[] | .operationId' <skill_dir>/references/openapi.json | sort
 jq '.components.schemas.UserCreatedResponse' <skill_dir>/references/openapi.json
 ```
 
+Replace `<skill_dir>` with the resolved path from `skill_view`.
+
+### AsyncAPI Specification
+The full AsyncAPI 3.x specification for the wsplex protocol is bundled as a YAML file. Resolve the skill directory path via `skill_view(name='dora-api')` (which returns `skill_dir`), then use `yq` to extract only the section you need. **Do not load the whole file** — these one-shot queries return just the relevant slice:
+
+```bash
+# List available channels
+yq -o=json '.channels | keys' <skill_dir>/references/asyncapi.yaml
+
+# Map a channel name to its wire address
+yq -o=json '.channels.prices.address' <skill_dir>/references/asyncapi.yaml   # "/prices"
+
+# Get a full channel definition (messages, operations, etc.)
+yq -o=json '.channels.prices' <skill_dir>/references/asyncapi.yaml
+
+# Get a schema for a specific message or DTO
+yq -o=json '.components.schemas.PricesRequest' <skill_dir>/references/asyncapi.yaml
+yq -o=json '.components.schemas.Price'         <skill_dir>/references/asyncapi.yaml
+
+# Drill into a single field's description
+yq -o=json '.components.schemas.Price.properties.price.description' <skill_dir>/references/asyncapi.yaml
+```
+
+`yq -o=json` outputs valid JSON, so you can pipe to `jq` for further filtering.
+
+**Fallback** — if `yq` is not available, use the harness's `search` and `read` tools to fetch a specific line range instead of loading the whole file:
+```bash
+search "PricesRequest" <skill_dir>/references/asyncapi.yaml   # find the line range
+read   <skill_dir>/references/asyncapi.yaml:<start>-<end>     # read just those lines
+```
 Replace `<skill_dir>` with the resolved path from `skill_view`.
 
 ### Additional References
