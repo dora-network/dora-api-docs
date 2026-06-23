@@ -85,8 +85,10 @@ channels:
     address: /prices
     description: |
       Real-time price updates for one or more asset ids. See the protocol guide §6
-      for the two-state subscription model (subscribed list + `subscribed_to_all`
-      bypass flag, independent).
+      for the subscription model: a `subscribed` list of asset ids and a
+      `subscribed_to_all` flag. Toggling `subscribed_to_all` on or off resets the
+      list to `null`. `subscribe` is a no-op while all-mode is on; `unsubscribe`
+      is not allowed while all-mode is on and returns an error response.
     messages:
       pricesRequest:
         $ref: "#/components/messages/PricesRequest"
@@ -99,10 +101,10 @@ channels:
     address: /trades
     description: |
       Real-time trade updates by order book, optionally filtered by user. See the
-      protocol guide §7 for the two-state subscription model per axis. Note:
-      `order_books_all` and `users_all` are **connection-scoped** — once set to
-      `true` they remain true for the lifetime of the connection; close the
-      connection to reset.
+      protocol guide §7 for the two-axis subscription model. `users_all: true` is
+      the implicit default for the user axis when a change omits both `user_ids`
+      and `users_all`. All-mode is not connection-scoped — `unsubscribe` can clear
+      `order_books_all` / `users_all` without closing the connection.
     messages:
       tradesRequest:
         $ref: "#/components/messages/TradesRequest"
@@ -114,11 +116,9 @@ channels:
 operations:
   pricesSubscribe:
     action: send
-    channel:
-      $ref: "#/channels/prices"
     summary: |
-      Subscribe to price updates for the given asset ids, leaving any prior
-      subscriptions in place (additive).
+      Add asset ids to the subscribed list. No-op while `subscribed_to_all` is
+      `true` (the list is `null` in that state).
     messages:
       - $ref: "#/channels/prices/messages/pricesRequest"
     traits:
@@ -130,8 +130,8 @@ operations:
       $ref: "#/channels/prices"
     summary: |
       Remove asset ids from the subscribed list. Returns an error response when
-      `subscribed_to_all` is currently `true` — `unsubscribe` is only allowed
-      when the bypass flag is `false`.
+      `subscribed_to_all` is currently `true` — `unsubscribe` is not allowed in
+      all-mode.
     messages:
       - $ref: "#/channels/prices/messages/pricesRequest"
     traits:
@@ -142,8 +142,8 @@ operations:
     channel:
       $ref: "#/channels/prices"
     summary: |
-      Turn the `subscribed_to_all` bypass flag on. From this point onward, every
-      asset's prices stream regardless of the subscribed list contents.
+      Turn the `subscribed_to_all` flag on. From this point onward, every asset's
+      prices stream. **The subscribed list is reset to `null`** by this operation.
     messages:
       - $ref: "#/channels/prices/messages/pricesRequest"
     traits:
@@ -154,8 +154,10 @@ operations:
     channel:
       $ref: "#/channels/prices"
     summary: |
-      Turn the `subscribed_to_all` bypass flag off. The stream reverts to the
-      current subscribed list (which is **not** cleared by this operation).
+      Turn the `subscribed_to_all` flag off. The stream reverts to the subscribed
+      list. **The subscribed list is reset to `null`** by this operation; any
+      ids added before all-mode was enabled are gone. Re-send `subscribe` to
+      rebuild the list.
     messages:
       - $ref: "#/channels/prices/messages/pricesRequest"
     traits:
@@ -167,6 +169,8 @@ operations:
       $ref: "#/channels/prices"
     summary: |
       The single response matching a `/prices` request, correlated by `id`.
+      `subscribed` is `null` when the list has been reset (e.g. all-mode is on
+      or was just toggled).
     messages:
       - $ref: "#/channels/prices/messages/pricesResponse"
 
@@ -175,8 +179,8 @@ operations:
     channel:
       $ref: "#/channels/prices"
     summary: |
-      Server-pushed price updates. Streamed indefinitely once at least one asset
-      is in the subscribed list or the bypass flag is on.
+      Server-pushed price updates. Streamed while `subscribed_to_all` is `true`
+      or the subscribed list is non-empty.
     messages:
       - $ref: "#/channels/prices/messages/pricesNotification"
 
@@ -198,11 +202,10 @@ operations:
     channel:
       $ref: "#/channels/trades"
     summary: |
-      Remove an `(order_book_id, user_id)` filter pair from the subscribed list.
-      Returns an error response on any axis whose `*_all` bypass flag is
-      currently `true`. Because `/trades` all-mode is connection-scoped, an
-      axis that has been switched to all-mode cannot be unsubscribed from for
-      the lifetime of the connection — close the connection to reset.
+      Remove filter pairs from the subscribed list. To clear an all-mode axis,
+      unsubscribe the all-mode entry (e.g., `{"unsubscribe":[{"order_books_all":true}]}`
+      returns `{"subscriptions":[]}`). All-mode is not connection-scoped and can
+      be cleared without closing the connection.
     messages:
       - $ref: "#/channels/trades/messages/tradesRequest"
     traits:
@@ -403,7 +406,10 @@ components:
               type: object
               description: |
                 Subscription change. At least one field should be set per
-                request. The list and the bypass flag are independent.
+                request. The flag overrides the list: toggling all-mode on or
+                off resets the list to `null`. `subscribe` is a no-op while
+                all-mode is on; `unsubscribe` is not allowed and returns an
+                error response.
               properties:
                 subscribe:
                   type: array
@@ -424,12 +430,13 @@ components:
                   description: |
                     When `true`, turns the bypass flag on. The stream emits
                     every asset's prices regardless of list contents.
+                    **Resets the subscribed list to `null`.**
                 unsubscribed_to_all:
                   type: boolean
                   description: |
-                    When `true`, turns the bypass flag off. The stream
-                    reverts to the (already-mutated) subscribed list. Does
-                    NOT clear the list.
+                    When `true`, turns the bypass flag off. The list stays
+                    `null` — it is **not** restored to its pre-all-mode
+                    contents.
               additionalProperties: false
 
     PricesResponseData:
@@ -437,8 +444,10 @@ components:
       required: [subscribed, subscribed_to_all]
       properties:
         subscribed:
-          type: array
-          description: The current subscribed list after the change was applied.
+          type: [array, "null"]
+          description: |
+            The current subscribed list after the change. `null` when the list
+            has been cleared (e.g. all-mode is on or was just toggled).
           items:
             type: string
             format: uuid
@@ -543,8 +552,10 @@ components:
                   type: array
                   description: |
                     Subtractive — removes filter pairs from the subscribed list.
-                    Returns an error response on an axis whose `*_all` bypass
-                    flag is `true`.
+                    All-mode axes can be cleared by unsubscribing the
+                    corresponding all-mode entry (e.g.,
+                    `{"unsubscribe":[{"order_books_all":true}]}` returns
+                    `{"subscriptions":[]}`).
                   items:
                     $ref: "#/components/schemas/TradesSubscriptionChange"
               additionalProperties: false

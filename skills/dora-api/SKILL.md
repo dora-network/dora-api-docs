@@ -215,12 +215,12 @@ wscat -c "$WS_URL/plex" \
 ```
 You should receive one response (matching `id`) followed by a stream of notifications on `/prices`.
 
-**Subscriptions on `/prices` follow a two-state model:**
+**Subscriptions on `/prices` follow a flag-overrides-list model:**
 - A **subscribed list** of asset ids, mutated by `subscribe` (add) and `unsubscribe` (remove).
-- A `subscribed_to_all` **bypass flag** — when true, the list is ignored and every asset's prices stream.
-The list and the bypass flag are independent: `subscribe` mutates the list regardless of the flag, and `unsubscribe` is only allowed when the flag is `false` (calling it in `subscribed_to_all` mode returns an error response). `unsubscribed_to_all` clears the flag (not the list). To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added — but only while `subscribed_to_all` is `false`.
+- A `subscribed_to_all` **flag** — when true, every asset's prices stream and the list is reset to `null`.
+The flag overrides the list: setting `subscribed_to_all: true` or `unsubscribed_to_all: true` resets the list to `null`. `subscribe` is a no-op while `subscribed_to_all` is `true`. `unsubscribe` in `subscribed_to_all` mode returns an error. After toggling all-mode off, re-send `subscribe` to rebuild the list.
 
-**Subscriptions on `/trades` follow the same two-state model per axis** (order-book and user). The all-mode toggles (`order_books_all`, `users_all`) are **connection-scoped** — once set to `true` they remain `true` for the lifetime of the connection. To fully clear `/trades` subscription state, close the connection.
+**Subscriptions on `/trades` follow the same flag-overrides-list model per axis** (order-book and user). `users_all: true` is implicit when neither user field is set. All-mode axes can be cleared via `unsubscribe` (e.g., `{"unsubscribe":[{"order_books_all":true}]}` returns `[]`). There is no need to close the connection to reset.
 
 **Runnable examples in Go, Python, and TypeScript** are in the repo at `multiplex-websocket/examples/{go,python,typescript}/` (each has its own README). Prefer these over rolling your own client.
 

@@ -154,52 +154,58 @@ Subscribe to real-time price updates for selected assets or for all assets.
 
 ### Mental model
 
-The server keeps two independent pieces of state for `/prices`:
+The server has two pieces of state for `/prices`: a **subscribed list** of asset ids (initially empty) and a **subscribed_to_all** flag (initially `false`). The list is meaningful only while all-mode is off. Toggling all-mode on or off **resets the list to `null`**: any ids previously added are gone, and you must resubscribe after toggling all-mode off if you want a list again.
 
-- A **subscribed list** — a set of asset ids. `subscribe` adds ids, `unsubscribe` removes them.
-- A **`subscribed_to_all` bypass flag** — when `true`, the bypass flag overrides the subscribed list and notifications are sent for every asset.
-
-These two pieces of state are **independent**: `subscribe` mutates the list regardless of the bypass flag; the bypass flag controls only whether the list is used as a filter. `unsubscribe` is allowed only when `subscribed_to_all` is `false` — calling it in `subscribed_to_all` mode returns an error response.
+- `subscribe` adds ids to the list. While all-mode is `true`, `subscribe` is a no-op (the list is `null` and stays `null`).
+- `unsubscribe` removes ids from the list. While all-mode is `true`, `unsubscribe` is not meaningful (the list is `null`) and returns an error response.
+- `subscribed_to_all: true` turns all-mode on **and** resets the list to `null`.
+- `unsubscribed_to_all: true` turns all-mode off **and** resets the list to `null`. It does **not** restore any list that was there before all-mode was enabled.
 
 | Field | Type | Notes |
 |---|---|---|
-| `subscribe` | `string[]` (asset ids) | Additive — adds to the subscribed list. |
-| `unsubscribe` | `string[]` (asset ids) | Subtractive — removes from the subscribed list. Returns an error in subscribed_to_all mode. |
-| `subscribed_to_all` | `bool` | Sets the bypass flag. When `true`, stream emits every asset. |
-| `unsubscribed_to_all` | `bool` | Clears the bypass flag. When `false` (after being `true`), the stream filters by the already-mutated subscribed list. **Does not clear the list itself.** |
+| `subscribe` | `string[]` (asset ids) | Additive — adds to the subscribed list. **No-op while `subscribed_to_all` is `true`.** |
+| `unsubscribe` | `string[]` (asset ids) | Subtractive — removes from the subscribed list. Returns an error while `subscribed_to_all` is `true`. |
+| `subscribed_to_all` | `bool` | Sets all-mode on. Also resets the subscribed list to `null`. |
+| `unsubscribed_to_all` | `bool` | Sets all-mode off. Also resets the subscribed list to `null`. |
 
 ### Worked example
 
-Assume the subscribed list starts empty and the bypass flag starts off.
+Assume the subscribed list starts empty and all-mode starts off.
 
 ```mermaid
 flowchart TD
-    L["subscribed list"] -->|subscribe A,B| L1["list = A, B"]
-    L1 -->|subscribed_to_all: true| L2["list = A, B"]
-    L2 -->|unsubscribe A| L3["error: not allowed in subscribed_to_all mode"]
-    L2 -->|unsubscribed_to_all: true| L4["list = A, B"]
-    L4 -->|unsubscribe A| L5["list = B"]
+    L["subscribed list = (empty)"] -->|subscribe A,B| L1["list = [A, B]"]
+    L1 -->|subscribed_to_all: true| L2["list = null"]
+    L2 -->|subscribe C| L3["list = null (no-op in all-mode)"]
+    L2 -->|unsubscribed_to_all: true| L4["list = null"]
+    L4 -->|subscribe A,B again| L5["list = [A, B]"]
+    L5 -->|unsubscribe A| L6["list = [B]"]
 
-    B["bypass flag = off"] -->|subscribed_to_all: true| B1["bypass = on"]
-    B1 -->|unsubscribed_to_all: true| B2["bypass = off"]
+    B["all-mode = off"] -->|subscribed_to_all: true| B1["all-mode = on"]
+    B1 -->|unsubscribed_to_all: true| B2["all-mode = off"]
 ```
 
-Notifications at each step:
+Notifications at each step (the list in the `subscribed` column reflects the server's response):
 
-| 1 | `{ subscribe: [A, B] }` | `[A, B]` | off | A, B |
-| 2 | `{ subscribed_to_all: true }` | `[A, B]` | on | A, B, and every other asset |
-| 3 | `{ unsubscribed_to_all: true }` | `[A, B]` | off | A, B (reverts to the already-mutated list) |
-| 4 | `{ unsubscribe: [A] }` | `[B]` | off | B |
-| 5 | `{ subscribed_to_all: true, unsubscribe: [A] }` | `[B]` | off | Returns an error — `unsubscribe` is not allowed in `subscribed_to_all` mode. The list and bypass flag are unchanged. |
+| Step | Request sent | `subscribed` after | `subscribed_to_all` after | Notifications received |
+|---|---|---|---|---|
+| 1 | `{ subscribe: [A, B] }` | `[A, B]` | `false` | A, B |
+| 2 | `{ subscribed_to_all: true }` | `null` | `true` | A, B, and every other asset (list is null; all-mode is on) |
+| 3 | `{ subscribe: [C] }` | `null` | `true` | No change — `subscribe` is a no-op while all-mode is on |
+| 4 | `{ unsubscribed_to_all: true }` | `null` | `false` | None — the list was null when all-mode was turned on, and `unsubscribed_to_all` does not restore it |
+| 5 | `{ subscribe: [A, B] }` | `[A, B]` | `false` | A, B (subscribed again) |
+| 6 | `{ unsubscribe: [A] }` | `[B]` | `false` | B |
 
-> Because the list and the bypass flag are independent, `unsubscribed_to_all` is **not** a list-clear. To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added.
+> All-mode is **destructive**: turning it on or off clears the list. To get back to a list-filtered subscription after toggling all-mode, re-send `subscribe` with the ids you want.
 
 ### Response data
 
+The response carries the post-change state. `subscribed` is `null` when all-mode is on or has just been toggled (the list is not meaningful in that state) and an array of asset ids otherwise:
+
 ```json
 {
-  "subscribed": ["019ed211-7b09-7789-8f00-50b7cc90863d"],
-  "subscribed_to_all": false
+  "subscribed": null,
+  "subscribed_to_all": true
 }
 ```
 
@@ -224,27 +230,18 @@ Subscribe to real-time trade updates by order book, optionally filtered by user.
 
 ### Mental model
 
-Same two-piece state model as `/prices`, applied to **two axes**:
+`/trades` has two independent axes:
 
-- **Order-book axis** — a subscribed list of `order_book_ids`, plus an `order_books_all` bypass flag.
-- **User axis** — a subscribed list of `user_ids`, plus a `users_all` bypass flag.
+- **Order-book axis** — a list of `order_book_ids`, plus an `order_books_all` flag.
+- **User axis** — a list of `user_ids`, plus a `users_all` flag.
 
-If neither `user_ids` nor `users_all` is set on a request, the user axis defaults to `users_all=true` for that request.
+`users_all: true` is the implicit default: if a change object omits both `user_ids` and `users_all`, the server treats the user axis as `users_all: true` for that change. The canonicalized subscription in the response always reflects this — `users_all: true` will appear even when the request did not set it.
 
-Both axes are independent of each other and of the request payload's other fields. `unsubscribe` is only allowed when the corresponding axis's `*_all` bypass flag is `false`; calling `unsubscribe` on an axis that is in all-mode returns an error response. Because `/trades` all-mode is connection-scoped (see below), once any axis is set to all-mode, that axis can no longer be unsubscribed from for the lifetime of the connection.
+`unsubscribe` is a full state edit (not just a list-edit). Sending `unsubscribe: [{order_books_all: true}]` clears the `order_books_all` flag and the response shows an empty `subscriptions` array, so all-mode is not connection-scoped — it can be cleared without closing the connection.
 
-### Promote-to-max
+### Clearing subscriptions
 
-When a single change object contains both an id-list and the corresponding `*_all` flag, the `*_all` flag wins:
-
-- `order_books_all=true` overrides `order_book_ids` in the same change.
-- `users_all=true` overrides `user_ids` in the same change.
-
-When two different subscription changes overlap (sent in different requests), the server canonicalizes to the **broadest** effective subscription: combining `{"order_book_ids": [...],"users_all": true}` with `{"order_books_all": true,"user_ids": [...]}` is treated as a global all-users subscription.
-
-### Important: connection-scoped all-mode
-
-On `/trades`, `order_books_all=true` and `users_all=true` are **connection-scoped**: there is no `order_books_all: false` or `users_all: false` field, so once set, the bypass flag remains `true` for the lifetime of the connection. The cleanest way to fully clear subscription state on `/trades` is to close the connection.
+To fully clear subscription state on `/trades`, send `unsubscribe` with the changes you want to remove. For example, `unsubscribe: [{order_books_all: true, users_all: true}]` returns `subscriptions: []`. There is no need to close the connection to reset.
 
 ### Request data
 
