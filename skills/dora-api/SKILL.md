@@ -1,7 +1,7 @@
 ---
 name: dora-api
-description: Interact with Dora Network API using environment-configured endpoints
-version: 1.9.0
+description: Interact with Dora Network API and multiplexed WebSocket (wsplex) using environment-configured endpoints
+version: 1.10.0
 author: Dora Network
 platforms: [linux, macos, windows]
 ---
@@ -187,6 +187,45 @@ wscat -c "$WS_URL/v1/orderbooks/123e4567-e89b-12d3-a456-426614174000/stats/strea
      -H "User-Agent: DoraAPIClient/1.0"
 ```
 
+### Multiplexed WebSocket (`wsplex`) — preferred for new integrations
+
+DORA's multiplexed WebSocket protocol, `wsplex`, lets a single connection carry requests, responses, and server-pushed notifications for multiple endpoints (currently `/prices` and `/trades`) over one socket. Prefer it over the legacy per-stream endpoints above for new integrations.
+
+**Endpoint:** `wss://<environment_base_url>/plex` (e.g. `wss://staging.dora.co/plex`).
+
+**Auth:** the API key is sent as the standard HTTP header on the WebSocket upgrade request:
+```
+Authorization: ApiKey <key>
+```
+`Authorization: Bearer <token>` works identically.
+
+**Protocol shape (one connection, many paths):**
+- Request: `{"id": "<uuidv7>", "path": "/prices", "data": {...}}`. The `data` field is **required** — omitting it returns an error response and still consumes the request id.
+- Response: `{"id": ..., "kind": "response", "path": ..., "data": ...}` or `{"id": ..., "kind": "response", "path": ..., "error": "..."}`. Exactly one response per request, matched by `id`; an error response keeps the same envelope shape and swaps `data` for `error`.
+- Notification (server-pushed): `{"id": ..., "kind": "notification", "path": ..., "data": ...}`.
+- Request ids are **single-use per connection** — generate a fresh UUIDv7 for every request, including retries. Reusing an id returns a duplicate-request error.
+
+**Quick test with `wscat`:**
+```bash
+# Subscribe to /prices for a specific asset
+WS_URL="${DORA_BASE_URL/https:/wss:}"
+wscat -c "$WS_URL/plex" \
+    -H "Authorization: ApiKey $DORA_API_KEY" \
+    -x '{"id":"019ed20f-cfcb-7167-a318-4b42d0582517","path":"/prices","data":{"subscribe":["<asset-id>"]}}'
+```
+You should receive one response (matching `id`) followed by a stream of notifications on `/prices`.
+
+**Subscriptions on `/prices` follow a flag-overrides-list model:**
+- A **subscribed list** of asset ids, mutated by `subscribe` (add) and `unsubscribe` (remove).
+- A `subscribed_to_all` **flag** — when true, every asset's prices stream and the list is reset to `null`.
+The flag overrides the list: setting `subscribed_to_all: true` or `unsubscribed_to_all: true` resets the list to `null`. `subscribe` is a no-op while `subscribed_to_all` is `true`. `unsubscribe` in `subscribed_to_all` mode returns an error. After toggling all-mode off, re-send `subscribe` to rebuild the list.
+
+**Subscriptions on `/trades` follow the same flag-overrides-list model per axis** (order-book and user). `users_all: true` is implicit when neither user field is set. All-mode axes can be cleared via `unsubscribe` (e.g., `{"unsubscribe":[{"order_books_all":true}]}` returns `[]`). There is no need to close the connection to reset.
+
+**Runnable examples in Go, Python, and TypeScript** are in the repo at `multiplex-websocket/examples/{go,python,typescript}/` (each has its own README). Prefer these over rolling your own client.
+
+For the full protocol reference, see `multiplex-websocket/README.md` in this repo. The AsyncAPI specification is bundled at `skill_view(name='dora-api', file_path='references/asyncapi.yaml')`. When building wsplex requests, use `yq` to extract the specific channel or schema you need (see `### AsyncAPI Specification` in the Reference section).
+
 ## Error Handling
 The API returns standard HTTP status codes:
 - 200: Success
@@ -243,6 +282,36 @@ jq -r '.paths[] | .[] | .operationId' <skill_dir>/references/openapi.json | sort
 jq '.components.schemas.UserCreatedResponse' <skill_dir>/references/openapi.json
 ```
 
+Replace `<skill_dir>` with the resolved path from `skill_view`.
+
+### AsyncAPI Specification
+The full AsyncAPI 3.x specification for the wsplex protocol is bundled as a YAML file. Resolve the skill directory path via `skill_view(name='dora-api')` (which returns `skill_dir`), then use `yq` to extract only the section you need. **Do not load the whole file** — these one-shot queries return just the relevant slice:
+
+```bash
+# List available channels
+yq -o=json '.channels | keys' <skill_dir>/references/asyncapi.yaml
+
+# Map a channel name to its wire address
+yq -o=json '.channels.prices.address' <skill_dir>/references/asyncapi.yaml   # "/prices"
+
+# Get a full channel definition (messages, operations, etc.)
+yq -o=json '.channels.prices' <skill_dir>/references/asyncapi.yaml
+
+# Get a schema for a specific message or DTO
+yq -o=json '.components.schemas.PricesRequest' <skill_dir>/references/asyncapi.yaml
+yq -o=json '.components.schemas.Price'         <skill_dir>/references/asyncapi.yaml
+
+# Drill into a single field's description
+yq -o=json '.components.schemas.Price.properties.price.description' <skill_dir>/references/asyncapi.yaml
+```
+
+`yq -o=json` outputs valid JSON, so you can pipe to `jq` for further filtering.
+
+**Fallback** — if `yq` is not available, use the harness's `search` and `read` tools to fetch a specific line range instead of loading the whole file:
+```bash
+search "PricesRequest" <skill_dir>/references/asyncapi.yaml   # find the line range
+read   <skill_dir>/references/asyncapi.yaml:<start>-<end>     # read just those lines
+```
 Replace `<skill_dir>` with the resolved path from `skill_view`.
 
 ### Additional References

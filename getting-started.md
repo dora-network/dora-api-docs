@@ -318,6 +318,8 @@ you can use the endpoint: `GET /v1/price/asset/{asset_id}`.
 quote asset of the order book. The balances provide a view of the current liquidity available in the underlying liquidity pool
 associated with the order book.
 
+> **Multiplexed alternative:** for a single connection that carries requests, responses, and notifications for many streams at once, see the [Multiplexed WebSocket (`wsplex`) guide](./multiplex-websocket/README.md). The legacy per-stream endpoints above continue to work and are not deprecated.
+
 ### User Specific Data
 
 `GET /v1/user/{user_id}/orders/all/stream?[since=YYYY-MM-DDTHH:mm:ssZZZ]` provides updates on all orders placed by a specific user.
