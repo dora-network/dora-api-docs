@@ -76,8 +76,8 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**ledgerWithdrawRequest**](Apis/DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
 *DefaultApi* | [**ledgerWithdrawRequestSelf**](Apis/DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 *DefaultApi* | [**leverageGetAccruedInterestByUser**](Apis/DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
-*DefaultApi* | [**leverageGetHistoricalInterestRates**](Apis/DefaultApi.md#leverageGetHistoricalInterestRates) | **GET** /v1/leverage/interest_rate/{asset_id}/historical | Get historical leverage interest rates for a specific asset |
-*DefaultApi* | [**leverageGetInterestRate**](Apis/DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage interest rate for a specific asset |
+*DefaultApi* | [**leverageGetHistoricalInterestRates**](Apis/DefaultApi.md#leverageGetHistoricalInterestRates) | **GET** /v1/leverage/interest_rate/{asset_id}/historical | Get historical leverage borrowing and lending yields for a specific asset |
+*DefaultApi* | [**leverageGetInterestRate**](Apis/DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage borrowing and lending yields for a specific asset |
 *DefaultApi* | [**leverageIsolateCollateral**](Apis/DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user's global collateral |
 *DefaultApi* | [**leverageSupply**](Apis/DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
 *DefaultApi* | [**leverageUnite**](Apis/DefaultApi.md#leverageUnite) | **POST** /v1/leverage/unite | Combines all isolated positions into a single global position |

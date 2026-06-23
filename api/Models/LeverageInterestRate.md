@@ -6,8 +6,11 @@
 | **asset\_id** | **UUID** |  | [default to null] |
 | **utilization** | **BigDecimal** |  | [default to null] |
 | **avg\_utilization** | **BigDecimal** |  | [default to null] |
-| **avg\_interest\_rate** | **BigDecimal** |  | [default to null] |
-| **interest\_rate** | **BigDecimal** |  | [default to null] |
+| **avg\_borrowing\_yield\_rate** | **BigDecimal** |  | [default to null] |
+| **avg\_lending\_yield\_rate** | **BigDecimal** |  | [default to null] |
+| **borrowing\_yield\_rate** | **BigDecimal** |  | [default to null] |
+| **lending\_yield\_rate** | **BigDecimal** |  | [default to null] |
+| **yield\_to\_maturity** | **BigDecimal** |  | [default to null] |
 | **start\_time** | **Date** |  | [default to null] |
 | **end\_time** | **Date** |  | [default to null] |
 
