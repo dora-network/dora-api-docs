@@ -201,7 +201,7 @@ Authorization: ApiKey <key>
 
 **Protocol shape (one connection, many paths):**
 - Request: `{"id": "<uuidv7>", "path": "/prices", "data": {...}}`. The `data` field is **required** — omitting it returns an error response and still consumes the request id.
-- Response: `{"id": ..., "kind": "response", "path": ..., "data": ...}` or `{"...", "error": "..."}`. Exactly one response per request, matched by `id`.
+- Response: `{"id": ..., "kind": "response", "path": ..., "data": ...}` or `{"id": ..., "kind": "response", "path": ..., "error": "..."}`. Exactly one response per request, matched by `id`; an error response keeps the same envelope shape and swaps `data` for `error`.
 - Notification (server-pushed): `{"id": ..., "kind": "notification", "path": ..., "data": ...}`.
 - Request ids are **single-use per connection** — generate a fresh UUIDv7 for every request, including retries. Reusing an id returns a duplicate-request error.
 
@@ -211,14 +211,14 @@ Authorization: ApiKey <key>
 WS_URL="${DORA_BASE_URL/https:/wss:}"
 wscat -c "$WS_URL/plex" \
     -H "Authorization: ApiKey $DORA_API_KEY" \
-    -x '{"id":"00000000-0000-0000-0000-000000000001","path":"/prices","data":{"subscribe":["<asset-id>"]}}'
+    -x '{"id":"019ed20f-cfcb-7167-a318-4b42d0582517","path":"/prices","data":{"subscribe":["<asset-id>"]}}'
 ```
 You should receive one response (matching `id`) followed by a stream of notifications on `/prices`.
 
 **Subscriptions on `/prices` follow a two-state model:**
 - A **subscribed list** of asset ids, mutated by `subscribe` (add) and `unsubscribe` (remove).
 - A `subscribed_to_all` **bypass flag** — when true, the list is ignored and every asset's prices stream.
-The list and the bypass flag are independent: `unsubscribe` mutates the list regardless of the flag; `unsubscribed_to_all` clears the flag (not the list). To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added.
+The list and the bypass flag are independent: `subscribe` mutates the list regardless of the flag, and `unsubscribe` is only allowed when the flag is `false` (calling it in `subscribed_to_all` mode returns an error response). `unsubscribed_to_all` clears the flag (not the list). To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added — but only while `subscribed_to_all` is `false`.
 
 **Subscriptions on `/trades` follow the same two-state model per axis** (order-book and user). The all-mode toggles (`order_books_all`, `users_all`) are **connection-scoped** — once set to `true` they remain `true` for the lifetime of the connection. To fully clear `/trades` subscription state, close the connection.
 

@@ -6,6 +6,7 @@
 // path. There is no automatic reconnect, no subscription registry, and no
 // retry logic. Integrators compose higher-level behavior on top.
 package plex
+
 import (
 	"context"
 	"encoding/json"

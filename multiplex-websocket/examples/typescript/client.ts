@@ -48,6 +48,9 @@ export class PlexClient {
     data: Record<string, unknown>,
     onNotification?: NotificationHandler,
   ): Promise<T> {
+    if (this.closed) {
+      return Promise.reject(new Error("wsplex: client is closed"));
+    }
     if (data === null || data === undefined) {
       return Promise.reject(new Error("wsplex: request data is required"));
     }
@@ -76,6 +79,11 @@ export class PlexClient {
   close(): Promise<void> {
     if (this.closed) return Promise.resolve();
     this.closed = true;
+    // Reject any in-flight requests so callers don't hang on a closed client.
+    for (const resolver of this.pending.values()) {
+      resolver({ error: "wsplex: client closed" });
+    }
+    this.pending.clear();
     const { promise, resolve } = Promise.withResolvers<void>();
     this.ws.once("close", () => resolve());
     this.ws.close();

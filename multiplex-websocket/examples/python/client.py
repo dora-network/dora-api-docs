@@ -52,7 +52,7 @@ class PlexClient:
             raise ValueError("wsplex: request data is required")
         request_id = str(uuid7())
         payload = {"id": request_id, "path": path, "data": data}
-        fut: asyncio.Future[dict[str, Any]] = asyncio.get_event_loop().create_future()
+        fut: asyncio.Future[dict[str, Any]] = asyncio.get_running_loop().create_future()
         self._pending[request_id] = fut
         if on_notification is not None:
             self._notifs[path] = on_notification
@@ -94,5 +94,13 @@ class PlexClient:
                 fut = self._pending.get(rid)
                 if fut is not None and not fut.done():
                     fut.set_result(msg)
-        except Exception:
-            pass
+        except Exception as exc:
+            # If the read loop dies unexpectedly, fail any callers still awaiting a
+            # response so they don't hang forever. `close()` cancels them itself
+            # first, so a CancelledError reaching this point is harmless.
+            if not self._closed:
+                err = ConnectionError(f"wsplex: connection lost: {exc!r}")
+                for fut in self._pending.values():
+                    if not fut.done():
+                        fut.set_exception(err)
+                self._pending.clear()

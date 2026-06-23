@@ -132,18 +132,18 @@ sequenceDiagram
     C->>S: connect wss://.../plex
     S-->>C: (open)
 
-    C->>S: {id: A, path: "/prices",  data: {subscribe: [...]}}
-    C->>S: {id: B, path: "/trades",  data: {subscribe: [{order_book_ids: [...]}]}}
+    C->>S: {id: "019ed20f-cfcb-7167-a318-4b42d0582517", path: "/prices",  data: {subscribe: [...]}}
+    C->>S: {id: "019ed20f-cfcb-7167-a318-4b42d0582531", path: "/trades",  data: {subscribe: [{order_book_ids: [...]}]}}
 
-    S-->>C: {id: B, kind: "response", path: "/trades",  data: {subscriptions: [...]}}
-    S-->>C: {id: A, kind: "response", path: "/prices", data: {subscribed: [...]}}
+    S-->>C: {id: "019ed20f-cfcb-7167-a318-4b42d0582531", kind: "response", path: "/trades",  data: {subscriptions: [...]}}
+    S-->>C: {id: "019ed20f-cfcb-7167-a318-4b42d0582517", kind: "response", path: "/prices", data: {subscribed: [...]}}
 
-    S-->>C: {id: -1, kind: "notification", path: "/prices", data: {prices: [...]}}
-    S-->>C: {id: -2, kind: "notification", path: "/trades", data: {trades: [...]}}
-    S-->>C: {id: -3, kind: "notification", path: "/prices", data: {prices: [...]}}
+    S-->>C: {id: "019ed211-7b09-7789-8f00-50b7cc90863d", kind: "notification", path: "/prices", data: {prices: [...]}}
+    S-->>C: {id: "019ed212-2b3c-7d4e-9f5a-6b7c8d9e0f1a", kind: "notification", path: "/trades", data: {trades: [...]}}
+    S-->>C: {id: "019ed213-3c4d-7e5f-9a6b-7c8d9e0f1a2b", kind: "notification", path: "/prices", data: {prices: [...]}}
 
-    C->>S: {id: C, path: "/prices", data: {unsubscribe: [...]}}
-    S-->>C: {id: C, kind: "response", path: "/prices", data: {subscribed: []}}
+    C->>S: {id: "019ed214-4d5e-7f60-9a7b-8c9d0e1f2a3b", path: "/prices", data: {unsubscribe: [...]}}
+    S-->>C: {id: "019ed214-4d5e-7f60-9a7b-8c9d0e1f2a3b", kind: "response", path: "/prices", data: {subscribed: []}}
 ```
 
 Responses and notifications can arrive in any order; the client correlates responses by `id` and routes notifications by `path`.
@@ -159,12 +159,12 @@ The server keeps two independent pieces of state for `/prices`:
 - A **subscribed list** — a set of asset ids. `subscribe` adds ids, `unsubscribe` removes them.
 - A **`subscribed_to_all` bypass flag** — when `true`, the bypass flag overrides the subscribed list and notifications are sent for every asset.
 
-These two pieces of state are **independent**: `subscribe` and `unsubscribe` mutate the list regardless of the bypass flag; the bypass flag controls only whether the list is used as a filter.
+These two pieces of state are **independent**: `subscribe` mutates the list regardless of the bypass flag; the bypass flag controls only whether the list is used as a filter. `unsubscribe` is allowed only when `subscribed_to_all` is `false` — calling it in `subscribed_to_all` mode returns an error response.
 
 | Field | Type | Notes |
 |---|---|---|
 | `subscribe` | `string[]` (asset ids) | Additive — adds to the subscribed list. |
-| `unsubscribe` | `string[]` (asset ids) | Depreciative — removes from the subscribed list. Mutates the list even while the bypass flag is on. |
+| `unsubscribe` | `string[]` (asset ids) | Subtractive — removes from the subscribed list. Returns an error in subscribed_to_all mode. |
 | `subscribed_to_all` | `bool` | Sets the bypass flag. When `true`, stream emits every asset. |
 | `unsubscribed_to_all` | `bool` | Clears the bypass flag. When `false` (after being `true`), the stream filters by the already-mutated subscribed list. **Does not clear the list itself.** |
 
@@ -176,8 +176,9 @@ Assume the subscribed list starts empty and the bypass flag starts off.
 flowchart TD
     L["subscribed list"] -->|subscribe A,B| L1["list = A, B"]
     L1 -->|subscribed_to_all: true| L2["list = A, B"]
-    L2 -->|unsubscribe A| L3["list = B"]
-    L3 -->|unsubscribed_to_all: true| L4["list = B"]
+    L2 -->|unsubscribe A| L3["error: not allowed in subscribed_to_all mode"]
+    L2 -->|unsubscribed_to_all: true| L4["list = A, B"]
+    L4 -->|unsubscribe A| L5["list = B"]
 
     B["bypass flag = off"] -->|subscribed_to_all: true| B1["bypass = on"]
     B1 -->|unsubscribed_to_all: true| B2["bypass = off"]
@@ -185,12 +186,11 @@ flowchart TD
 
 Notifications at each step:
 
-| Step | Request sent | List after | Bypass after | Notifications received |
-|---|---|---|---|---|
 | 1 | `{ subscribe: [A, B] }` | `[A, B]` | off | A, B |
 | 2 | `{ subscribed_to_all: true }` | `[A, B]` | on | A, B, and every other asset |
-| 3 | `{ unsubscribe: [A] }` | `[B]` | on | B, and every other asset (A is gone from the list but bypass is still on) |
-| 4 | `{ unsubscribed_to_all: true }` | `[B]` | off | B only |
+| 3 | `{ unsubscribed_to_all: true }` | `[A, B]` | off | A, B (reverts to the already-mutated list) |
+| 4 | `{ unsubscribe: [A] }` | `[B]` | off | B |
+| 5 | `{ subscribed_to_all: true, unsubscribe: [A] }` | `[B]` | off | Returns an error — `unsubscribe` is not allowed in `subscribed_to_all` mode. The list and bypass flag are unchanged. |
 
 > Because the list and the bypass flag are independent, `unsubscribed_to_all` is **not** a list-clear. To fully tear down a `/prices` subscription, send an explicit `unsubscribe` for every id you originally added.
 
@@ -231,7 +231,7 @@ Same two-piece state model as `/prices`, applied to **two axes**:
 
 If neither `user_ids` nor `users_all` is set on a request, the user axis defaults to `users_all=true` for that request.
 
-Both axes are independent of each other and of the request payload's other fields. `unsubscribe` mutates the list regardless of the bypass flag.
+Both axes are independent of each other and of the request payload's other fields. `unsubscribe` is only allowed when the corresponding axis's `*_all` bypass flag is `false`; calling `unsubscribe` on an axis that is in all-mode returns an error response. Because `/trades` all-mode is connection-scoped (see below), once any axis is set to all-mode, that axis can no longer be unsubscribed from for the lifetime of the connection.
 
 ### Promote-to-max
 
