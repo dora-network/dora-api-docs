@@ -73,8 +73,8 @@ All URIs are relative to *https://staging.dora.co*
 | [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
 | [**ledgerWithdrawRequestSelf**](DefaultApi.md#ledgerWithdrawRequestSelf) | **POST** /v1/ledger/withdraw/requests/self | Initiate a withdrawal request for the logged in user to the outside world |
 | [**leverageGetAccruedInterestByUser**](DefaultApi.md#leverageGetAccruedInterestByUser) | **GET** /v1/leverage/accrued_interest/self | Get current accrued leverage interest for the user |
-| [**leverageGetHistoricalInterestRates**](DefaultApi.md#leverageGetHistoricalInterestRates) | **GET** /v1/leverage/interest_rate/{asset_id}/historical | Get historical leverage interest rates for a specific asset |
-| [**leverageGetInterestRate**](DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage interest rate for a specific asset |
+| [**leverageGetHistoricalInterestRates**](DefaultApi.md#leverageGetHistoricalInterestRates) | **GET** /v1/leverage/interest_rate/{asset_id}/historical | Get historical leverage borrowing and lending yields for a specific asset |
+| [**leverageGetInterestRate**](DefaultApi.md#leverageGetInterestRate) | **GET** /v1/leverage/interest_rate/{asset_id} | Get leverage borrowing and lending yields for a specific asset |
 | [**leverageIsolateCollateral**](DefaultApi.md#leverageIsolateCollateral) | **POST** /v1/leverage/isolate_collateral | Create an isolated position by transferring collateral to the position from the user&#39;s global collateral |
 | [**leverageSupply**](DefaultApi.md#leverageSupply) | **POST** /v1/leverage/supply | Supply leverage for a specific asset |
 | [**leverageUnite**](DefaultApi.md#leverageUnite) | **POST** /v1/leverage/unite | Combines all isolated positions into a single global position |
@@ -1467,7 +1467,7 @@ Get transactions since a specific time, and open a stream for further updates
 
 ### Authorization
 
-[apiKeyAuthQuery](../README.md#apiKeyAuthQuery)
+No authorization required
 
 ### HTTP request headers
 
@@ -1871,7 +1871,7 @@ Get current accrued leverage interest for the user
 # **leverageGetHistoricalInterestRates**
 > HistoricalLeverageInterestRatesResponseEnvelope leverageGetHistoricalInterestRates(asset\_id, start, end)
 
-Get historical leverage interest rates for a specific asset
+Get historical leverage borrowing and lending yields for a specific asset
 
 ### Parameters
 
@@ -1898,7 +1898,7 @@ Get historical leverage interest rates for a specific asset
 # **leverageGetInterestRate**
 > LeverageInterestRateResponseEnvelope leverageGetInterestRate(asset\_id, start, end)
 
-Get leverage interest rate for a specific asset
+Get leverage borrowing and lending yields for a specific asset
 
 ### Parameters
 
@@ -2395,7 +2395,7 @@ Settle multiple transactions settlements in batch
 
 <a name="streamAssetPrices"></a>
 # **streamAssetPrices**
-> StreamAssetPricesResponse streamAssetPrices(since, asset\_id)
+> StreamAssetPricesResponse streamAssetPrices(asset\_id)
 
 Stream real-time asset prices as map objects
 
@@ -2405,7 +2405,6 @@ Stream real-time asset prices as map objects
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **since** | **Date**|  | [optional] [default to null] |
 | **asset\_id** | **UUID**|  | [optional] [default to null] |
 
 ### Return type

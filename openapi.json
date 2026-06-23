@@ -3435,7 +3435,7 @@
     },
     "/v1/leverage/interest_rate/{asset_id}": {
       "get": {
-        "summary": "Get leverage interest rate for a specific asset",
+        "summary": "Get leverage borrowing and lending yields for a specific asset",
         "operationId": "leverageGetInterestRate",
         "parameters": [
           {
@@ -3470,7 +3470,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Leverage interest rate retrieved successfully",
+            "description": "Leverage borrowing and lending yields retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3524,7 +3524,7 @@
     },
     "/v1/leverage/interest_rate/{asset_id}/historical": {
       "get": {
-        "summary": "Get historical leverage interest rates for a specific asset",
+        "summary": "Get historical leverage borrowing and lending yields for a specific asset",
         "operationId": "leverageGetHistoricalInterestRates",
         "parameters": [
           {
@@ -3559,7 +3559,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Historical leverage interest rates retrieved successfully",
+            "description": "Historical leverage borrowing and lending yields retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -5135,15 +5135,6 @@
         "description": "Opens a WebSocket stream for real-time asset price updates. First message contains all current prices, subsequent messages contain only changed prices. Data is sent as JSON objects keyed by asset ID.",
         "parameters": [
           {
-            "name": "since",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
             "name": "asset_id",
             "in": "query",
             "required": false,
@@ -5671,11 +5662,7 @@
       "get": {
         "summary": "Get transactions since a specific time, and open a stream for further updates",
         "operationId": "getTransactionsStream",
-        "security": [
-          {
-            "apiKeyAuthQuery": []
-          }
-        ],
+        "security": [],
         "parameters": [
           {
             "name": "since",
@@ -5700,16 +5687,6 @@
           },
           "400": {
             "description": "Bad request, e.g. invalid query parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized, user not logged in or does not have access to these transactions",
             "content": {
               "application/json": {
                 "schema": {
@@ -7396,6 +7373,9 @@
           },
           "allow_orders_notifications": {
             "type": "boolean"
+          },
+          "allow_copy_trading": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7412,7 +7392,8 @@
           "allow_email_notifications",
           "allow_liquidations_notifications",
           "allow_deposit_withdrawal_notifications",
-          "allow_orders_notifications"
+          "allow_orders_notifications",
+          "allow_copy_trading"
         ]
       },
       "UserConfig": {
@@ -7454,6 +7435,9 @@
           },
           "allow_orders_notifications": {
             "type": "boolean"
+          },
+          "allow_copy_trading": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7465,7 +7449,8 @@
           "allow_email_notifications",
           "allow_liquidations_notifications",
           "allow_deposit_withdrawal_notifications",
-          "allow_orders_notifications"
+          "allow_orders_notifications",
+          "allow_copy_trading"
         ]
       },
       "UpdateUserConfigRequest": {
@@ -7503,6 +7488,10 @@
           "allow_orders_notifications": {
             "$ref": "#/components/schemas/UpdateFieldBoolean",
             "description": "Optional: Whether to allow orders notifications."
+          },
+          "allow_copy_trading": {
+            "$ref": "#/components/schemas/UpdateFieldBoolean",
+            "description": "Optional: Whether to allow copy trading."
           }
         },
         "required": [
@@ -9797,11 +9786,23 @@
             "type": "string",
             "format": "decimal"
           },
-          "avg_interest_rate": {
+          "avg_borrowing_yield_rate": {
             "type": "string",
             "format": "decimal"
           },
-          "interest_rate": {
+          "avg_lending_yield_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "borrowing_yield_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "lending_yield_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "yield_to_maturity": {
             "type": "string",
             "format": "decimal"
           },
@@ -9818,8 +9819,11 @@
           "asset_id",
           "utilization",
           "avg_utilization",
-          "avg_interest_rate",
-          "interest_rate",
+          "avg_borrowing_yield_rate",
+          "avg_lending_yield_rate",
+          "borrowing_yield_rate",
+          "lending_yield_rate",
+          "yield_to_maturity",
           "start_time",
           "end_time"
         ]
@@ -9877,7 +9881,15 @@
             "type": "string",
             "format": "decimal"
           },
-          "interest_rate": {
+          "borrowing_yield_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "lending_yield_rate": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "yield_to_maturity": {
             "type": "string",
             "format": "decimal"
           }
@@ -9891,7 +9903,9 @@
           "kink_rate",
           "maximum_rate",
           "kink_utilization",
-          "interest_rate"
+          "borrowing_yield_rate",
+          "lending_yield_rate",
+          "yield_to_maturity"
         ]
       },
       "HistoricalLeverageInterestRates": {
@@ -10419,22 +10433,46 @@
             "format": "date-time"
           },
           "open": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           },
           "high": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           },
           "low": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           },
           "close": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           },
           "ytm": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal",
+            "description": "DEPRECATED: Use close_ytm instead.",
+            "deprecated": true
+          },
+          "open_ytm": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "close_ytm": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "high_ytm": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "low_ytm": {
+            "type": "string",
+            "format": "decimal"
           },
           "volume": {
-            "type": "string"
+            "type": "string",
+            "format": "decimal"
           }
         },
         "required": [
@@ -10444,7 +10482,10 @@
           "high",
           "low",
           "close",
-          "ytm",
+          "open_ytm",
+          "high_ytm",
+          "low_ytm",
+          "close_ytm",
           "volume"
         ]
       },
@@ -11032,7 +11073,13 @@
           "ytm": {
             "type": "string"
           },
-          "lending_yield": {
+          "borrowing_yield_rate": {
+            "type": "string"
+          },
+          "lending_yield_rate": {
+            "type": "string"
+          },
+          "price": {
             "type": "string"
           },
           "tvl": {
@@ -11046,7 +11093,9 @@
           "asset_id",
           "timestamp",
           "ytm",
-          "lending_yield",
+          "borrowing_yield_rate",
+          "lending_yield_rate",
+          "price",
           "tvl",
           "total_yield"
         ]
