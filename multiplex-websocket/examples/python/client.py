@@ -24,6 +24,7 @@ NotificationHandler = Callable[[dict[str, Any]], None]
 class PlexOptions:
     url: str
     auth_header: str  # e.g. "ApiKey xxx"
+    user_agent: str = ""  # e.g. "MyClient/1.0"; defaults to "DORA-wsplex-client/1.0" if empty
 
 
 class PlexClient:
@@ -38,6 +39,7 @@ class PlexClient:
     @classmethod
     async def connect(cls, opts: PlexOptions) -> "PlexClient":
         headers = {"Authorization": opts.auth_header}
+        headers["User-Agent"] = opts.user_agent or "DORA-wsplex-client/1.0"
         conn = await websockets.connect(opts.url, additional_headers=headers)
         client = cls(conn)
         client._read_task = asyncio.create_task(client._read_loop())

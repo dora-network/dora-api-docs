@@ -48,6 +48,7 @@ import { PlexClient, PlexOptions } from "./client.js";
 const client = await PlexClient.connect({
   url: "wss://staging.dora.co/plex",
   authHeader: "ApiKey xxx",
+  userAgent: "MyClient/1.0",
 } satisfies PlexOptions);
 const data = await client.request("/prices", { subscribe: ["<asset-id>"] });
 await client.close();

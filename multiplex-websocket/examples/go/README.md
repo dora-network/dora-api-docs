@@ -58,7 +58,7 @@ Exits 0 if the demo and helper compile cleanly. No live server is contacted.
 import plex "github.com/dora-network/dora-api-docs/multiplex-websocket/examples/go/plex"
 
 func main() {
-    client, _ := plex.Connect(context.Background(), plex.Options{URL: "wss://staging.dora.co/plex", AuthHeader: "ApiKey xxx"})
+    client, _ := plex.Connect(context.Background(), plex.Options{URL: "wss://staging.dora.co/plex", AuthHeader: "ApiKey xxx", UserAgent: "MyClient/1.0"})
     defer client.Close()
     data, _ := client.Request(context.Background(), "/prices", map[string]any{"subscribe": []string{"<asset-id>"}}, nil)
     _ = data

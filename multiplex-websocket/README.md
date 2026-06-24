@@ -41,6 +41,8 @@ The multiplexed WebSocket is reached at `wss://<environment_base_url>/plex`. Aut
 
 `Authorization: Bearer <token>` works identically. **The `Authorization` header is required on the WebSocket upgrade request** — without it the connection will not be accepted. Once the socket is open, the same header authorizes requests on every path the token can access (for example, a token without `/trades` scope will see an error response on every `/trades` request, but the connection itself stays open).
 
+A `User-Agent` header is **also required** on the WebSocket upgrade request. Send any non-empty string that identifies your client (for example, `MyDoraClient/1.0`). **Without it the server rejects the upgrade with HTTP `403`.** This header is only checked on the initial upgrade request; it is not needed on individual `wsplex` messages afterward.
+
 ## Protocol message shapes
 
 Every message on the wire is a JSON object. There are three kinds.

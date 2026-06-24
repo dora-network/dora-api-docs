@@ -12,6 +12,7 @@ export type NotificationHandler = (data: unknown) => void;
 export interface PlexOptions {
   url: string; // e.g. "wss://staging.dora.co/plex"
   authHeader: string; // e.g. "ApiKey xxx" — sent verbatim
+  userAgent?: string; // e.g. "MyClient/1.0"; defaults to "DORA-wsplex-client/1.0"
 }
 
 interface Envelope {
@@ -36,7 +37,7 @@ export class PlexClient {
   static connect(opts: PlexOptions): Promise<PlexClient> {
     const { promise, resolve, reject } = Promise.withResolvers<PlexClient>();
     const ws = new WebSocket(opts.url, {
-      headers: { Authorization: opts.authHeader },
+      headers: { Authorization: opts.authHeader, "User-Agent": opts.userAgent ?? "DORA-wsplex-client/1.0" },
     });
     ws.once("open", () => resolve(new PlexClient(ws)));
     ws.once("error", (err) => reject(new Error(`wsplex: dial: ${err.message}`)));

@@ -23,6 +23,7 @@ import (
 type Options struct {
 	URL        string // e.g. "wss://staging.dora.co/plex"
 	AuthHeader string // e.g. "ApiKey xxx" — sent verbatim as the Authorization header
+	UserAgent  string // e.g. "MyClient/1.0"; defaults to "DORA-wsplex-client/1.0" if empty
 }
 
 // Client is a multiplexed WebSocket client for wsplex.
@@ -42,6 +43,11 @@ type Client struct {
 func Connect(ctx context.Context, opts Options) (*Client, error) {
 	hdr := http.Header{}
 	hdr.Set("Authorization", opts.AuthHeader)
+	ua := opts.UserAgent
+	if ua == "" {
+		ua = "DORA-wsplex-client/1.0"
+	}
+	hdr.Set("User-Agent", ua)
 	conn, _, err := websocket.Dial(ctx, opts.URL, &websocket.DialOptions{HTTPHeader: hdr})
 	if err != nil {
 		return nil, fmt.Errorf("wsplex: dial: %w", err)

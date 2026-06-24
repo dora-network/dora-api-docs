@@ -52,6 +52,7 @@ async def main():
     client = await PlexClient.connect(PlexOptions(
         url="wss://staging.dora.co/plex",
         auth_header="ApiKey xxx",
+        user_agent="MyClient/1.0",
     ))
     data = await client.request("/prices", {"subscribe": ["<asset-id>"]})
     await client.close()
