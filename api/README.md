@@ -55,6 +55,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getPLForSelfByAccount**](Apis/DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 *DefaultApi* | [**getPoolPrice**](Apis/DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
 *DefaultApi* | [**getRealizedPnlSettlements**](Apis/DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&L settlements with filters |
+*DefaultApi* | [**getTopTradersByPnL**](Apis/DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 *DefaultApi* | [**getTradeById**](Apis/DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 *DefaultApi* | [**getTransactionById**](Apis/DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
@@ -149,6 +150,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ClosePositionResponseEnvelope](./Models/ClosePositionResponseEnvelope.md)
  - [Collateral](./Models/Collateral.md)
  - [CountryCode](./Models/CountryCode.md)
+ - [CouponKind](./Models/CouponKind.md)
  - [CouponPayment](./Models/CouponPayment.md)
  - [CreateAPIKeyData](./Models/CreateAPIKeyData.md)
  - [CreateAPIKeyRequest](./Models/CreateAPIKeyRequest.md)
@@ -168,6 +170,7 @@ All URIs are relative to *https://staging.dora.co*
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
  - [GetAssetYTMByIDResponseEnvelope](./Models/GetAssetYTMByIDResponseEnvelope.md)
+ - [GetPnLRankingResponse](./Models/GetPnLRankingResponse.md)
  - [GetRealizedPnlSettlementsResponseEnvelope](./Models/GetRealizedPnlSettlementsResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
  - [HistoricalLeverageInterestRate](./Models/HistoricalLeverageInterestRate.md)
@@ -237,6 +240,7 @@ All URIs are relative to *https://staging.dora.co*
  - [PayLeverageAccruedInterest](./Models/PayLeverageAccruedInterest.md)
  - [PayLeverageAccruedInterestRequest](./Models/PayLeverageAccruedInterestRequest.md)
  - [PayLeverageAccruedInterestResponseEnvelope](./Models/PayLeverageAccruedInterestResponseEnvelope.md)
+ - [PnLRankingResponse](./Models/PnLRankingResponse.md)
  - [PoolPrice](./Models/PoolPrice.md)
  - [PoolPriceResponseEnvelope](./Models/PoolPriceResponseEnvelope.md)
  - [PoolRequestError](./Models/PoolRequestError.md)

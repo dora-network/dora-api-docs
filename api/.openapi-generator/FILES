@@ -37,6 +37,7 @@ Models/ClosePositionResp.md
 Models/ClosePositionResponseEnvelope.md
 Models/Collateral.md
 Models/CountryCode.md
+Models/CouponKind.md
 Models/CouponPayment.md
 Models/CreateAPIKeyData.md
 Models/CreateAPIKeyRequest.md
@@ -56,6 +57,7 @@ Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
 Models/GetAssetByIDResponseEnvelope.md
 Models/GetAssetYTMByIDResponseEnvelope.md
+Models/GetPnLRankingResponse.md
 Models/GetRealizedPnlSettlementsResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
 Models/HistoricalLeverageInterestRate.md
@@ -125,6 +127,7 @@ Models/PLSummary.md
 Models/PayLeverageAccruedInterest.md
 Models/PayLeverageAccruedInterestRequest.md
 Models/PayLeverageAccruedInterestResponseEnvelope.md
+Models/PnLRankingResponse.md
 Models/PoolPrice.md
 Models/PoolPriceResponseEnvelope.md
 Models/PoolRequestError.md

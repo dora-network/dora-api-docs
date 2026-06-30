@@ -4,7 +4,9 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **id** | **UUID** |  | [default to null] |
-| **kind** | [**BondKind**](BondKind.md) |  | [default to null] |
+| **kind** | [**CouponKind**](CouponKind.md) |  | [default to null] |
+| **coupon\_kind** | [**CouponKind**](CouponKind.md) |  | [optional] [default to null] |
+| **bond\_kind** | [**BondKind**](BondKind.md) |  | [optional] [default to null] |
 | **coupon\_start\_at** | **Date** |  | [optional] [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
 | **final\_coupon\_at** | **Date** |  | [optional] [default to null] |

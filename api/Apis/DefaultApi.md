@@ -52,6 +52,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getPLForSelfByAccount**](DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 | [**getPoolPrice**](DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
 | [**getRealizedPnlSettlements**](DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&amp;L settlements with filters |
+| [**getTopTradersByPnL**](DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 | [**getTradeById**](DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 | [**getTrades**](DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
 | [**getTransactionById**](DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
@@ -1304,6 +1305,33 @@ Get realized P&amp;L settlements with filters
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getTopTradersByPnL"></a>
+# **getTopTradersByPnL**
+> GetPnLRankingResponse getTopTradersByPnL(start, end, limit)
+
+Get top traders by PnL
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **start** | **Date**|  | [default to null] |
+| **end** | **Date**|  | [default to null] |
+| **limit** | **Integer**|  | [optional] [default to null] |
+
+### Return type
+
+[**GetPnLRankingResponse**](../Models/GetPnLRankingResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getTradeById"></a>
 # **getTradeById**
 > TradeResponseEnvelope getTradeById(trade\_id)
@@ -2162,7 +2190,7 @@ List order books
 
 <a name="listOrders"></a>
 # **listOrders**
-> ListOrdersResponseEnvelope listOrders(order\_book\_id, kind, status, side, from, to, page, limit)
+> ListOrdersResponseEnvelope listOrders(user\_id, order\_book\_id, kind, status, side, from, to, page, limit)
 
 List all orders
 
@@ -2170,6 +2198,7 @@ List all orders
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**| Filter by user ID (only allowed if the user has copy trading enabled) | [optional] [default to null] |
 | **order\_book\_id** | [**List**](../Models/UUID.md)|  | [optional] [default to null] |
 | **kind** | [**List**](../Models/OrderKind.md)|  | [optional] [default to null] |
 | **status** | [**List**](../Models/OrderStatus.md)|  | [optional] [default to null] |
