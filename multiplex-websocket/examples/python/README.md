@@ -19,7 +19,9 @@ Requires Python 3.14+ (uses stdlib `uuid.uuid7()`).
 | `DORA_STAGING_BASE_URL` *or* `DORA_PROD_BASE_URL` | yes | — | e.g. `https://staging.dora.co` |
 | `DORA_STAGING_API_KEY` *or* `DORA_PROD_API_KEY` | yes | — | your API key |
 | `DORA_DEMO_PRICE_ASSET_IDS` | no | `019c3401-9737-7106-b3d3-b7a6e6eef0e6,019c4d37-311e-7a2f-8d58-f17c39170865` | comma-separated asset ids |
-| `DORA_DEMO_ORDER_BOOK_ID` | no | `019c3420-5cd7-7a88-8fe6-a5a622e01ad9` | order book id |
+| `DORA_DEMO_ORDER_BOOK_ID` | no | `019c3420-5cd7-7a88-8fe6-a5a622e01ad9` | order book id for `/trades`, `/orderbook/stats`, `/charts/candles` |
+| `DORA_DEMO_USER_ID` | no | `019c4d37-311e-7a2f-8d58-f17c39170865` | user id for `/accounts/balance` and `/orders/byuser` |
+| `DORA_DEMO_ASSET_ID` | no | `019c3401-9737-7106-b3d3-b7a6e6eef0e6` | asset id echoed in the `/debug/notify` payload |
 
 ```bash
 export DORA_STAGING_BASE_URL=https://staging.dora.co
@@ -32,7 +34,11 @@ export DORA_STAGING_API_KEY=your-key
 python demo.py
 ```
 
-Connects, subscribes to `/prices` and `/trades`, logs responses and notifications for ~10 seconds, then sends explicit unsubscribes and closes.
+Connects, subscribes to every documented path (`/`, `/prices`, `/trades`, `/assets`, `/orderbook/stats`, `/charts/candles`, `/accounts/balance`, `/pools/balance`, `/orders/byuser`, `/debug/notify`), logs responses and notifications for ~10 seconds, then sends explicit unsubscribes and closes.
+
+> `/prices` notifications carry `prices` as a **map keyed by asset id**, not an array. The demo prints the raw JSON; see the [protocol guide](../../README.md#path-prices) for the shape.
+
+> `/accounts/balance` and `/orders/byuser` require an authorized token. If your key lacks scope, those requests return an error response but the connection stays open.
 
 ## Verify syntax
 

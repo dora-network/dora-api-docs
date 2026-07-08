@@ -5,9 +5,9 @@ info:
   version: 1.0.0
   description: |
     One WebSocket connection at `wss://<environment_base_url>/plex` carries requests,
-    responses, and server-pushed notifications for multiple paths (currently `/prices`
-    and `/trades`). Each message on the wire is a JSON object identified by a single-use
-    UUIDv7 request id (`id`) and a `path` discriminator.
+    responses, and server-pushed notifications for multiple paths. Each message on the
+    wire is a JSON object identified by a single-use UUIDv7 request id (`id`) and a
+    `path` discriminator.
 
     # Overview
 
@@ -29,15 +29,16 @@ info:
     - `Authorization: Bearer <token>`
 
     Without it, the connection is not accepted. Per-path authorization (when the token
-    lacks scope for `/trades`, for example) is enforced via error responses on that path,
-    not by failing the upgrade.
+    lacks scope for a path, e.g. `/trades` or `/accounts/balance`) is enforced via error
+    responses on that path, not by failing the upgrade. A `User-Agent` header is also
+    required on the upgrade request or the server rejects it with HTTP `403`.
 
     # Channels
 
     This document defines one channel per path. All channels share the same physical
-    WebSocket connection (the `plex` server). Each channel lists the four client-bound
-    `subscribe` / `unsubscribe` / `setAll` / `clearAll` operations and the two
-    server-bound messages: the per-request `response` and the streaming `notification`.
+    WebSocket connection (the `plex` server). Each channel lists the client-bound
+    `request` operation and the two server-bound messages: the per-request `response`
+    and the streaming `notification`.
 
     # Request id rule
 
@@ -51,7 +52,8 @@ info:
     # Required `data` field
 
     Every client-bound request must include a non-empty `data` object. Omitting it
-    returns an error response and still consumes the request id.
+    returns an error response and still consumes the request id. Unknown JSON fields in
+    `data` are rejected; an unknown `path` returns an error listing available routes.
   contact:
     name: Dora Network
     url: https://dora.co
@@ -81,14 +83,24 @@ servers:
 defaultContentType: application/json
 
 channels:
+  root:
+    address: /
+    description: |
+      List all available wsplex routes. No subscription state; returns one response.
+    messages:
+      rootRequest:
+        $ref: "#/components/messages/RootRequest"
+      rootResponse:
+        $ref: "#/components/messages/RootResponse"
+
   prices:
     address: /prices
     description: |
-      Real-time price updates for one or more asset ids. See the protocol guide §6
-      for the subscription model: a `subscribed` list of asset ids and a
-      `subscribed_to_all` flag. Toggling `subscribed_to_all` on or off resets the
-      list to `null`. `subscribe` is a no-op while all-mode is on; `unsubscribe`
-      is not allowed while all-mode is on and returns an error response.
+      Real-time price updates for one or more asset ids, or for all assets. The server
+      holds a `subscribed` list of asset ids and a `subscribed_all` flag. Validation
+      rules: cannot combine `subscribe` with `subscribe_all`; cannot combine
+      `unsubscribe` with `unsubscribe_all`; cannot combine `unsubscribe` with
+      `subscribe_all`. Notifications carry `prices` as a **map keyed by asset id**.
     messages:
       pricesRequest:
         $ref: "#/components/messages/PricesRequest"
@@ -100,11 +112,12 @@ channels:
   trades:
     address: /trades
     description: |
-      Real-time trade updates by order book, optionally filtered by user. See the
-      protocol guide §7 for the two-axis subscription model. `users_all: true` is
-      the implicit default for the user axis when a change omits both `user_ids`
-      and `users_all`. All-mode is not connection-scoped — `unsubscribe` can clear
-      `order_books_all` / `users_all` without closing the connection.
+      Real-time trade updates by order book, optionally filtered by user. Two-axis
+      subscription model: an order-book axis (`order_book_ids` / `order_books_all`) and
+      a user axis (`user_ids` / `users_all`). `users_all: true` is the implicit default
+      for the user axis when a change omits both `user_ids` and `users_all`. All-mode is
+      not connection-scoped — `unsubscribe` can clear `order_books_all` / `users_all`
+      without closing the connection.
     messages:
       tradesRequest:
         $ref: "#/components/messages/TradesRequest"
@@ -113,122 +126,355 @@ channels:
       tradesNotification:
         $ref: "#/components/messages/TradesNotification"
 
+  assets:
+    address: /assets
+    description: |
+      Full asset updates. A single boolean `subscribe` toggles the stream on/off.
+      Notifications carry `assets` as a **map keyed by asset id**.
+    messages:
+      assetsRequest:
+        $ref: "#/components/messages/AssetsRequest"
+      assetsResponse:
+        $ref: "#/components/messages/AssetsResponse"
+      assetsNotification:
+        $ref: "#/components/messages/AssetsNotification"
+
+  orderbookStats:
+    address: /orderbook/stats
+    description: |
+      Orderbook market stats. Same subscription shape as `/prices`: a `subscribed` list
+      of order book ids plus a `subscribed_all` flag. Notifications carry `stats` as a
+      **map keyed by order book id**.
+    messages:
+      orderbookStatsRequest:
+        $ref: "#/components/messages/OrderbookStatsRequest"
+      orderbookStatsResponse:
+        $ref: "#/components/messages/OrderbookStatsResponse"
+      orderbookStatsNotification:
+        $ref: "#/components/messages/OrderbookStatsNotification"
+
+  chartsCandles:
+    address: /charts/candles
+    description: |
+      Streaming candles per resolution. Each subscription is a set of order book ids plus
+      a resolution expressed as a Go `time.Duration` in nanoseconds. Notifications carry
+      `candles` as a **map keyed by order book id**; each value is an array of candle
+      records for the current resolution window.
+    messages:
+      chartsCandlesRequest:
+        $ref: "#/components/messages/ChartsCandlesRequest"
+      chartsCandlesResponse:
+        $ref: "#/components/messages/ChartsCandlesResponse"
+      chartsCandlesNotification:
+        $ref: "#/components/messages/ChartsCandlesNotification"
+
+  accountsBalance:
+    address: /accounts/balance
+    description: |
+      Stream account balances for one or more users. **Auth required** — the token must
+      have access to the requested users. Notifications carry `balances` as a **map keyed
+      by user id**; each value is an array of balance records.
+    messages:
+      accountsBalanceRequest:
+        $ref: "#/components/messages/AccountsBalanceRequest"
+      accountsBalanceResponse:
+        $ref: "#/components/messages/AccountsBalanceResponse"
+      accountsBalanceNotification:
+        $ref: "#/components/messages/AccountsBalanceNotification"
+
+  poolsBalance:
+    address: /pools/balance
+    description: |
+      Pool balances. Same subscription shape as `/prices`: a `subscribed` list of order
+      book ids plus a `subscribed_all` flag. Notifications carry `balances` as a **map
+      keyed by order book id**.
+    messages:
+      poolsBalanceRequest:
+        $ref: "#/components/messages/PoolsBalanceRequest"
+      poolsBalanceResponse:
+        $ref: "#/components/messages/PoolsBalanceResponse"
+      poolsBalanceNotification:
+        $ref: "#/components/messages/PoolsBalanceNotification"
+
+  ordersByUser:
+    address: /orders/byuser
+    description: |
+      Order updates for a single user. **Auth required** — the token must have access to
+      the requested user. `user_id` is required on every request. Notifications carry
+      `orders` as a **map keyed by order book id**; each value is an array of order
+      records.
+    messages:
+      ordersByUserRequest:
+        $ref: "#/components/messages/OrdersByUserRequest"
+      ordersByUserResponse:
+        $ref: "#/components/messages/OrdersByUserResponse"
+      ordersByUserNotification:
+        $ref: "#/components/messages/OrdersByUserNotification"
+
+  debugNotify:
+    address: /debug/notify
+    description: |
+      Debug route that echoes the request's `data` value as a notification after `delay`
+      nanoseconds. Useful for testing client notification handling without a real
+      subscription. The response `data` is the scheduled notification time as an
+      ISO-8601 string.
+    messages:
+      debugNotifyRequest:
+        $ref: "#/components/messages/DebugNotifyRequest"
+      debugNotifyResponse:
+        $ref: "#/components/messages/DebugNotifyResponse"
+      debugNotifyNotification:
+        $ref: "#/components/messages/DebugNotifyNotification"
+
 operations:
-  pricesSubscribe:
+  rootRequest:
     action: send
-    summary: |
-      Add asset ids to the subscribed list. No-op while `subscribed_to_all` is
-      `true` (the list is `null` in that state).
+    channel:
+      $ref: "#/channels/root"
+    summary: List all available wsplex routes.
     messages:
-      - $ref: "#/channels/prices/messages/pricesRequest"
+      - $ref: "#/channels/root/messages/rootRequest"
     traits:
       - $ref: "#/components/operationTraits/RequestEnvelope"
+  rootReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/root"
+    summary: The response listing available routes.
+    messages:
+      - $ref: "#/channels/root/messages/rootResponse"
 
-  pricesUnsubscribe:
+  pricesRequest:
     action: send
     channel:
       $ref: "#/channels/prices"
     summary: |
-      Remove asset ids from the subscribed list. Returns an error response when
-      `subscribed_to_all` is currently `true` — `unsubscribe` is not allowed in
-      all-mode.
+      Subscription change for `/prices`. Mutates the `subscribed` list and/or the
+      `subscribed_all` flag. See the channel description for the validation rules.
     messages:
       - $ref: "#/channels/prices/messages/pricesRequest"
     traits:
       - $ref: "#/components/operationTraits/RequestEnvelope"
-
-  pricesSetAll:
-    action: send
-    channel:
-      $ref: "#/channels/prices"
-    summary: |
-      Turn the `subscribed_to_all` flag on. From this point onward, every asset's
-      prices stream. **The subscribed list is reset to `null`** by this operation.
-    messages:
-      - $ref: "#/channels/prices/messages/pricesRequest"
-    traits:
-      - $ref: "#/components/operationTraits/RequestEnvelope"
-
-  pricesClearAll:
-    action: send
-    channel:
-      $ref: "#/channels/prices"
-    summary: |
-      Turn the `subscribed_to_all` flag off. The stream reverts to the subscribed
-      list. **The subscribed list is reset to `null`** by this operation; any
-      ids added before all-mode was enabled are gone. Re-send `subscribe` to
-      rebuild the list.
-    messages:
-      - $ref: "#/channels/prices/messages/pricesRequest"
-    traits:
-      - $ref: "#/components/operationTraits/RequestEnvelope"
-
   pricesReceiveResponse:
     action: receive
     channel:
       $ref: "#/channels/prices"
     summary: |
-      The single response matching a `/prices` request, correlated by `id`.
-      `subscribed` is `null` when the list has been reset (e.g. all-mode is on
-      or was just toggled).
+      The single response matching a `/prices` request, correlated by `id`. `subscribed`
+      is an array of asset ids (empty when `subscribed_all` is on).
     messages:
       - $ref: "#/channels/prices/messages/pricesResponse"
-
   pricesReceiveNotification:
     action: receive
     channel:
       $ref: "#/channels/prices"
     summary: |
-      Server-pushed price updates. Streamed while `subscribed_to_all` is `true`
-      or the subscribed list is non-empty.
+      Server-pushed price updates. `prices` is a map keyed by asset id. Streamed while
+      `subscribed_all` is `true` or the subscribed list is non-empty.
     messages:
       - $ref: "#/channels/prices/messages/pricesNotification"
 
-  tradesSubscribe:
+  tradesRequest:
     action: send
     channel:
       $ref: "#/channels/trades"
     summary: |
-      Add an `(order_book_id, user_id)` filter pair to the subscribed list. May
-      also include `order_books_all` or `users_all` to activate the
-      corresponding bypass flag.
+      Subscription change for `/trades`. Each change object inside `subscribe` or
+      `unsubscribe` may set `order_book_ids` / `order_books_all` and `user_ids` /
+      `users_all`. If neither `user_ids` nor `users_all` is set on a change, the user
+      axis defaults to `users_all=true` for that change.
     messages:
       - $ref: "#/channels/trades/messages/tradesRequest"
     traits:
       - $ref: "#/components/operationTraits/RequestEnvelope"
-
-  tradesUnsubscribe:
-    action: send
-    channel:
-      $ref: "#/channels/trades"
-    summary: |
-      Remove filter pairs from the subscribed list. To clear an all-mode axis,
-      unsubscribe the all-mode entry (e.g., `{"unsubscribe":[{"order_books_all":true}]}`
-      returns `{"subscriptions":[]}`). All-mode is not connection-scoped and can
-      be cleared without closing the connection.
-    messages:
-      - $ref: "#/channels/trades/messages/tradesRequest"
-    traits:
-      - $ref: "#/components/operationTraits/RequestEnvelope"
-
   tradesReceiveResponse:
     action: receive
     channel:
       $ref: "#/channels/trades"
-    summary: |
-      The single response matching a `/trades` request, correlated by `id`.
+    summary: The single response matching a `/trades` request, correlated by `id`.
     messages:
       - $ref: "#/channels/trades/messages/tradesResponse"
-
   tradesReceiveNotification:
     action: receive
     channel:
       $ref: "#/channels/trades"
     summary: |
-      Server-pushed trade updates. Streamed while at least one matching filter
-      is active for the connection.
+      Server-pushed trade updates. Field names intentionally match the legacy non-plex
+      `/trades/{id}/stream` payload.
     messages:
       - $ref: "#/channels/trades/messages/tradesNotification"
+
+  assetsRequest:
+    action: send
+    channel:
+      $ref: "#/channels/assets"
+    summary: Toggle the `/assets` stream on (`true`) or off (`false`).
+    messages:
+      - $ref: "#/channels/assets/messages/assetsRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  assetsReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/assets"
+    summary: The single response matching an `/assets` request.
+    messages:
+      - $ref: "#/channels/assets/messages/assetsResponse"
+  assetsReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/assets"
+    summary: Server-pushed full asset updates, keyed by asset id.
+    messages:
+      - $ref: "#/channels/assets/messages/assetsNotification"
+
+  orderbookStatsRequest:
+    action: send
+    channel:
+      $ref: "#/channels/orderbookStats"
+    summary: Subscription change for `/orderbook/stats` (list + all-mode flag).
+    messages:
+      - $ref: "#/channels/orderbookStats/messages/orderbookStatsRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  orderbookStatsReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/orderbookStats"
+    summary: The single response matching an `/orderbook/stats` request.
+    messages:
+      - $ref: "#/channels/orderbookStats/messages/orderbookStatsResponse"
+  orderbookStatsReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/orderbookStats"
+    summary: Server-pushed orderbook market stats, keyed by order book id.
+    messages:
+      - $ref: "#/channels/orderbookStats/messages/orderbookStatsNotification"
+
+  chartsCandlesRequest:
+    action: send
+    channel:
+      $ref: "#/channels/chartsCandles"
+    summary: |
+      Subscribe/unsubscribe to candles per resolution. `resolution` is a
+      `time.Duration` in nanoseconds (e.g. 1m = `60000000000`).
+    messages:
+      - $ref: "#/channels/chartsCandles/messages/chartsCandlesRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  chartsCandlesReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/chartsCandles"
+    summary: The single response matching a `/charts/candles` request.
+    messages:
+      - $ref: "#/channels/chartsCandles/messages/chartsCandlesResponse"
+  chartsCandlesReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/chartsCandles"
+    summary: Server-pushed candles for the current resolution window, keyed by order book id.
+    messages:
+      - $ref: "#/channels/chartsCandles/messages/chartsCandlesNotification"
+
+  accountsBalanceRequest:
+    action: send
+    channel:
+      $ref: "#/channels/accountsBalance"
+    summary: Subscribe/unsubscribe to account balances for one or more users (auth required).
+    messages:
+      - $ref: "#/channels/accountsBalance/messages/accountsBalanceRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  accountsBalanceReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/accountsBalance"
+    summary: The single response matching an `/accounts/balance` request.
+    messages:
+      - $ref: "#/channels/accountsBalance/messages/accountsBalanceResponse"
+  accountsBalanceReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/accountsBalance"
+    summary: Server-pushed account balances, keyed by user id.
+    messages:
+      - $ref: "#/channels/accountsBalance/messages/accountsBalanceNotification"
+
+  poolsBalanceRequest:
+    action: send
+    channel:
+      $ref: "#/channels/poolsBalance"
+    summary: Subscription change for `/pools/balance` (list + all-mode flag).
+    messages:
+      - $ref: "#/channels/poolsBalance/messages/poolsBalanceRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  poolsBalanceReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/poolsBalance"
+    summary: The single response matching a `/pools/balance` request.
+    messages:
+      - $ref: "#/channels/poolsBalance/messages/poolsBalanceResponse"
+  poolsBalanceReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/poolsBalance"
+    summary: Server-pushed pool balances, keyed by order book id.
+    messages:
+      - $ref: "#/channels/poolsBalance/messages/poolsBalanceNotification"
+
+  ordersByUserRequest:
+    action: send
+    channel:
+      $ref: "#/channels/ordersByUser"
+    summary: |
+      Subscribe/unsubscribe to order updates for a single user (auth required).
+      `user_id` is required on every request.
+    messages:
+      - $ref: "#/channels/ordersByUser/messages/ordersByUserRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  ordersByUserReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/ordersByUser"
+    summary: The single response matching an `/orders/byuser` request, keyed by user id.
+    messages:
+      - $ref: "#/channels/ordersByUser/messages/ordersByUserResponse"
+  ordersByUserReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/ordersByUser"
+    summary: Server-pushed order updates, keyed by order book id.
+    messages:
+      - $ref: "#/channels/ordersByUser/messages/ordersByUserNotification"
+
+  debugNotifyRequest:
+    action: send
+    channel:
+      $ref: "#/channels/debugNotify"
+    summary: Schedule a notification that echoes `data` after `delay` nanoseconds.
+    messages:
+      - $ref: "#/channels/debugNotify/messages/debugNotifyRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  debugNotifyReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/debugNotify"
+    summary: The response carrying the scheduled notification time as an ISO-8601 string.
+    messages:
+      - $ref: "#/channels/debugNotify/messages/debugNotifyResponse"
+  debugNotifyReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/debugNotify"
+    summary: The echoed `data` value, pushed after `delay`.
+    messages:
+      - $ref: "#/channels/debugNotify/messages/debugNotifyNotification"
 
 components:
   securitySchemes:
@@ -251,79 +497,264 @@ components:
   operationTraits:
     RequestEnvelope:
       description: |
-        All `/prices` and `/trades` requests share the same envelope shape.
-        `id` is a fresh UUIDv7 per request (single-use). `data` is required and
-        must match the path-specific request schema. The `Authorization` header
-        is sent on the WebSocket upgrade request (not per-message); all requests
-        on the same connection inherit that authorization.
+        All requests share the same envelope shape. `id` is a fresh UUIDv7 per request
+        (single-use). `data` is required and must match the path-specific request
+        schema. The `Authorization` and `User-Agent` headers are sent on the WebSocket
+        upgrade request (not per-message); all requests on the same connection inherit
+        that authorization.
 
   messages:
+    # ----- / -----
+    RootRequest:
+      name: RootRequest
+      title: / request
+      summary: List all available wsplex routes. `data` is an empty object.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/RootRequest"
+    RootResponse:
+      name: RootResponse
+      title: / response
+      summary: The response listing available routes.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/RootResponse"
+
+    # ----- /prices -----
     PricesRequest:
       name: PricesRequest
       title: /prices request
       summary: |
-        Subscription change for `/prices`. Each request carries exactly one
-        optional field of `subscribe`, `unsubscribe`, `subscribed_to_all`,
-        or `unsubscribed_to_all` (typically just one). Multiple fields can be
-        combined in a single request to mutate the list and the bypass flag
-        atomically.
+        Subscription change for `/prices`. Mutates the `subscribed` list and/or the
+        `subscribed_all` flag. Validation rules: cannot combine `subscribe` with
+        `subscribe_all`; cannot combine `unsubscribe` with `unsubscribe_all`; cannot
+        combine `unsubscribe` with `subscribe_all`.
       contentType: application/json
       payload:
         $ref: "#/components/schemas/PricesRequest"
-
     PricesResponse:
       name: PricesResponse
       title: /prices response
       summary: |
-        The single response matching a `/prices` request. Contains either
-        `data` (success) or `error` (failure).
+        The single response matching a `/prices` request. Contains either `data`
+        (success) or `error` (failure).
       contentType: application/json
       payload:
         $ref: "#/components/schemas/PricesResponse"
-
     PricesNotification:
       name: PricesNotification
       title: /prices notification
       summary: |
-        Server-pushed price updates. The `id` typically corresponds to the
-        most recent request that set up the subscription; clients should
-        route notifications by `path`, not by `id`.
+        Server-pushed price updates. `prices` is a **map keyed by asset id**. The `id`
+        typically corresponds to the most recent request that set up the subscription;
+        clients should route notifications by `path`, not by `id`.
       contentType: application/json
       payload:
         $ref: "#/components/schemas/PricesNotification"
 
+    # ----- /trades -----
     TradesRequest:
       name: TradesRequest
       title: /trades request
       summary: |
-        Subscription change for `/trades`. Each change object inside
-        `subscribe` or `unsubscribe` may specify `order_book_ids` /
-        `order_books_all` on the order-book axis and `user_ids` / `users_all`
-        on the user axis. If neither `user_ids` nor `users_all` is set on
-        a change, the user axis defaults to `users_all=true` for that change.
+        Subscription change for `/trades`. Each change object inside `subscribe` or
+        `unsubscribe` may specify `order_book_ids` / `order_books_all` on the order-book
+        axis and `user_ids` / `users_all` on the user axis. If neither `user_ids` nor
+        `users_all` is set on a change, the user axis defaults to `users_all=true` for
+        that change.
       contentType: application/json
       payload:
         $ref: "#/components/schemas/TradesRequest"
-
     TradesResponse:
       name: TradesResponse
       title: /trades response
       summary: |
-        The single response matching a `/trades` request. Contains either
-        `data` (success) or `error` (failure).
+        The single response matching a `/trades` request. Contains either `data`
+        (success) or `error` (failure).
       contentType: application/json
       payload:
         $ref: "#/components/schemas/TradesResponse"
-
     TradesNotification:
       name: TradesNotification
       title: /trades notification
       summary: |
-        Server-pushed trade updates. Field names intentionally match the
-        legacy non-plex `/trades/{id}/stream` payload.
+        Server-pushed trade updates. Field names intentionally match the legacy
+        non-plex `/trades/{id}/stream` payload.
       contentType: application/json
       payload:
         $ref: "#/components/schemas/TradesNotification"
+
+    # ----- /assets -----
+    AssetsRequest:
+      name: AssetsRequest
+      title: /assets request
+      summary: |
+        Toggle the `/assets` stream. `subscribe: true` to start, `false` to stop.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AssetsRequest"
+    AssetsResponse:
+      name: AssetsResponse
+      title: /assets response
+      summary: The single response matching an `/assets` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AssetsResponse"
+    AssetsNotification:
+      name: AssetsNotification
+      title: /assets notification
+      summary: Server-pushed full asset updates. `assets` is a map keyed by asset id.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AssetsNotification"
+
+    # ----- /orderbook/stats -----
+    OrderbookStatsRequest:
+      name: OrderbookStatsRequest
+      title: /orderbook/stats request
+      summary: Subscription change for `/orderbook/stats` (list + all-mode flag).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrderbookStatsRequest"
+    OrderbookStatsResponse:
+      name: OrderbookStatsResponse
+      title: /orderbook/stats response
+      summary: The single response matching an `/orderbook/stats` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrderbookStatsResponse"
+    OrderbookStatsNotification:
+      name: OrderbookStatsNotification
+      title: /orderbook/stats notification
+      summary: Server-pushed orderbook market stats. `stats` is a map keyed by order book id.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrderbookStatsNotification"
+
+    # ----- /charts/candles -----
+    ChartsCandlesRequest:
+      name: ChartsCandlesRequest
+      title: /charts/candles request
+      summary: |
+        Subscribe/unsubscribe to candles per resolution. `resolution` is a
+        `time.Duration` in nanoseconds.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/ChartsCandlesRequest"
+    ChartsCandlesResponse:
+      name: ChartsCandlesResponse
+      title: /charts/candles response
+      summary: The single response matching a `/charts/candles` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/ChartsCandlesResponse"
+    ChartsCandlesNotification:
+      name: ChartsCandlesNotification
+      title: /charts/candles notification
+      summary: |
+        Server-pushed candles for the current resolution window. `candles` is a map
+        keyed by order book id; each value is an array of candle records.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/ChartsCandlesNotification"
+
+    # ----- /accounts/balance -----
+    AccountsBalanceRequest:
+      name: AccountsBalanceRequest
+      title: /accounts/balance request
+      summary: Subscribe/unsubscribe to account balances for one or more users (auth required).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccountsBalanceRequest"
+    AccountsBalanceResponse:
+      name: AccountsBalanceResponse
+      title: /accounts/balance response
+      summary: The single response matching an `/accounts/balance` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccountsBalanceResponse"
+    AccountsBalanceNotification:
+      name: AccountsBalanceNotification
+      title: /accounts/balance notification
+      summary: |
+        Server-pushed account balances. `balances` is a map keyed by user id; each
+        value is an array of balance records.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccountsBalanceNotification"
+
+    # ----- /pools/balance -----
+    PoolsBalanceRequest:
+      name: PoolsBalanceRequest
+      title: /pools/balance request
+      summary: Subscription change for `/pools/balance` (list + all-mode flag).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PoolsBalanceRequest"
+    PoolsBalanceResponse:
+      name: PoolsBalanceResponse
+      title: /pools/balance response
+      summary: The single response matching a `/pools/balance` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PoolsBalanceResponse"
+    PoolsBalanceNotification:
+      name: PoolsBalanceNotification
+      title: /pools/balance notification
+      summary: Server-pushed pool balances. `balances` is a map keyed by order book id.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PoolsBalanceNotification"
+
+    # ----- /orders/byuser -----
+    OrdersByUserRequest:
+      name: OrdersByUserRequest
+      title: /orders/byuser request
+      summary: |
+        Subscribe/unsubscribe to order updates for a single user (auth required).
+        `user_id` is required on every request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersByUserRequest"
+    OrdersByUserResponse:
+      name: OrdersByUserResponse
+      title: /orders/byuser response
+      summary: The single response matching an `/orders/byuser` request, keyed by user id.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersByUserResponse"
+    OrdersByUserNotification:
+      name: OrdersByUserNotification
+      title: /orders/byuser notification
+      summary: |
+        Server-pushed order updates. `orders` is a map keyed by order book id; each
+        value is an array of order records.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersByUserNotification"
+
+    # ----- /debug/notify -----
+    DebugNotifyRequest:
+      name: DebugNotifyRequest
+      title: /debug/notify request
+      summary: Schedule a notification that echoes `data` after `delay` nanoseconds.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DebugNotifyRequest"
+    DebugNotifyResponse:
+      name: DebugNotifyResponse
+      title: /debug/notify response
+      summary: The response carrying the scheduled notification time as an ISO-8601 string.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DebugNotifyResponse"
+    DebugNotifyNotification:
+      name: DebugNotifyNotification
+      title: /debug/notify notification
+      summary: The echoed `data` value, pushed after `delay`.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DebugNotifyNotification"
 
   schemas:
     # ----- common envelope fragments -----
@@ -336,19 +767,31 @@ components:
           type: string
           format: uuid
           description: |
-            Single-use UUIDv7 identifier. Generate a fresh id for every
-            request, including retries after errors.
+            Single-use UUIDv7 identifier. Generate a fresh id for every request,
+            including retries after errors.
           pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$"
         path:
           type: string
           description: |
-            Must start with `/`. Currently: `/prices`, `/trades`.
-          enum: ["/prices", "/trades"]
+            Must start with `/`. One of: `/`, `/prices`, `/trades`, `/assets`,
+            `/orderbook/stats`, `/charts/candles`, `/accounts/balance`, `/pools/balance`,
+            `/orders/byuser`, `/debug/notify`.
+          enum:
+            - "/"
+            - "/prices"
+            - "/trades"
+            - "/assets"
+            - "/orderbook/stats"
+            - "/charts/candles"
+            - "/accounts/balance"
+            - "/pools/balance"
+            - "/orders/byuser"
+            - "/debug/notify"
         data:
           type: object
           description: |
-            Required, non-empty. The shape is path-specific (see PricesRequest
-            and TradesRequest).
+            Required, non-empty. The shape is path-specific (see the per-path request
+            schemas). Unknown fields in `data` are rejected.
 
     ResponseEnvelope:
       type: object
@@ -357,22 +800,30 @@ components:
         id:
           type: string
           format: uuid
-          description: |
-            Echoes the request id this response corresponds to.
+          description: Echoes the request id this response corresponds to.
         kind:
           type: string
           enum: [response]
         path:
           type: string
-          enum: ["/prices", "/trades"]
+          enum:
+            - "/"
+            - "/prices"
+            - "/trades"
+            - "/assets"
+            - "/orderbook/stats"
+            - "/charts/candles"
+            - "/accounts/balance"
+            - "/pools/balance"
+            - "/orders/byuser"
+            - "/debug/notify"
         data:
-          description: |
-            Path-specific response payload. Present on success.
+          description: Path-specific response payload. Present on success.
         error:
           type: string
           description: |
-            Human-readable error string. Present on failure. Intended for
-            humans — do not pattern-match on its content.
+            Human-readable error string. Present on failure. Intended for humans — do
+            not pattern-match on its content.
 
     NotificationEnvelope:
       type: object
@@ -382,18 +833,55 @@ components:
           type: string
           format: uuid
           description: |
-            Server-pushed notification id. Often the id of the request that
-            set up the subscription, but clients should route notifications
-            by `path`, not `id`.
+            Server-pushed notification id. Often the id of the request that set up the
+            subscription, but clients should route notifications by `path`, not `id`.
         kind:
           type: string
           enum: [notification]
         path:
           type: string
-          enum: ["/prices", "/trades"]
+          enum:
+            - "/prices"
+            - "/trades"
+            - "/assets"
+            - "/orderbook/stats"
+            - "/charts/candles"
+            - "/accounts/balance"
+            - "/pools/balance"
+            - "/orders/byuser"
+            - "/debug/notify"
         data:
-          description: |
-            Path-specific notification payload.
+          description: Path-specific notification payload.
+
+    # ----- / -----
+
+    RootRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Empty object — no parameters.
+              additionalProperties: false
+
+    RootResponseData:
+      type: object
+      required: [routes]
+      properties:
+        routes:
+          type: array
+          description: The list of available wsplex routes.
+          items:
+            type: string
+
+    RootResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/RootResponseData"
 
     # ----- /prices -----
 
@@ -405,11 +893,9 @@ components:
             data:
               type: object
               description: |
-                Subscription change. At least one field should be set per
-                request. The flag overrides the list: toggling all-mode on or
-                off resets the list to `null`. `subscribe` is a no-op while
-                all-mode is on; `unsubscribe` is not allowed and returns an
-                error response.
+                Subscription change. Validation rules: cannot combine `subscribe` with
+                `subscribe_all`; cannot combine `unsubscribe` with `unsubscribe_all`;
+                cannot combine `unsubscribe` with `subscribe_all`.
               properties:
                 subscribe:
                   type: array
@@ -419,41 +905,35 @@ components:
                     format: uuid
                 unsubscribe:
                   type: array
-                  description: |
-                    Subtractive — removes asset ids from the subscribed list.
-                    Returns an error response in `subscribed_to_all` mode.
+                  description: Subtractive — removes asset ids from the subscribed list.
                   items:
                     type: string
                     format: uuid
-                subscribed_to_all:
+                subscribe_all:
                   type: boolean
                   description: |
-                    When `true`, turns the bypass flag on. The stream emits
-                    every asset's prices regardless of list contents.
-                    **Resets the subscribed list to `null`.**
-                unsubscribed_to_all:
+                    When `true`, turns all-mode on. Every asset's prices stream
+                    regardless of the list.
+                unsubscribe_all:
                   type: boolean
-                  description: |
-                    When `true`, turns the bypass flag off. The list stays
-                    `null` — it is **not** restored to its pre-all-mode
-                    contents.
+                  description: When `true`, turns all-mode off.
               additionalProperties: false
 
     PricesResponseData:
       type: object
-      required: [subscribed, subscribed_to_all]
+      required: [subscribed, subscribed_all]
       properties:
         subscribed:
-          type: [array, "null"]
+          type: array
           description: |
-            The current subscribed list after the change. `null` when the list
-            has been cleared (e.g. all-mode is on or was just toggled).
+            The current subscribed list after the change. Empty when `subscribed_all`
+            is on.
           items:
             type: string
             format: uuid
-        subscribed_to_all:
+        subscribed_all:
           type: boolean
-          description: The current bypass flag state after the change was applied.
+          description: The current all-mode flag state after the change was applied.
 
     PricesResponse:
       allOf:
@@ -468,8 +948,11 @@ components:
       required: [prices]
       properties:
         prices:
-          type: array
-          items:
+          type: object
+          description: |
+            **Map keyed by asset id.** Each value is the price record for that asset.
+            (Previously an array — this is a breaking change.)
+          additionalProperties:
             $ref: "#/components/schemas/Price"
 
     Price:
@@ -482,13 +965,11 @@ components:
         price:
           type: string
           description: |
-            Decimal price, expressed as a string. Parse as a high-precision
-            decimal.
+            Decimal price, expressed as a string. Parse as a high-precision decimal.
           examples: ["0.717414207417403554"]
         ytm:
           type: string
-          description: |
-            Yield to maturity as a string. `'0'` for non-bond assets.
+          description: Yield to maturity as a string. `'0'` for non-bond assets.
           examples: ["0"]
         time:
           type: string
@@ -507,8 +988,8 @@ components:
     TradesSubscriptionChange:
       type: object
       description: |
-        One filter pair. At least one of `order_book_ids` / `order_books_all`
-        and one of `user_ids` / `users_all` should be set on each change.
+        One filter pair. At least one of `order_book_ids` / `order_books_all` and one
+        of `user_ids` / `users_all` should be set on each change.
       properties:
         order_book_ids:
           type: array
@@ -530,9 +1011,9 @@ components:
         users_all:
           type: boolean
           description: |
-            When `true`, the user-axis bypass flag is activated. Overrides
-            `user_ids` in the same change object. Defaults to `true` if
-            neither field is set on a change.
+            When `true`, the user-axis bypass flag is activated. Overrides `user_ids`
+            in the same change object. Defaults to `true` if neither field is set on a
+            change.
       additionalProperties: false
 
     TradesRequest:
@@ -552,10 +1033,9 @@ components:
                   type: array
                   description: |
                     Subtractive — removes filter pairs from the subscribed list.
-                    All-mode axes can be cleared by unsubscribing the
-                    corresponding all-mode entry (e.g.,
-                    `{"unsubscribe":[{"order_books_all":true}]}` returns
-                    `{"subscriptions":[]}`).
+                    All-mode axes can be cleared by unsubscribing the corresponding
+                    all-mode entry (e.g., `{"unsubscribe":[{"order_books_all":true}]}`
+                    returns `{"subscriptions":[]}`).
                   items:
                     $ref: "#/components/schemas/TradesSubscriptionChange"
               additionalProperties: false
@@ -567,9 +1047,9 @@ components:
         subscriptions:
           type: array
           description: |
-            The canonicalized effective subscription after the change was
-            applied (server canonicalizes overlapping changes to the broadest
-            effective subscription).
+            The canonicalized effective subscription after the change was applied (the
+            server canonicalizes overlapping changes to the broadest effective
+            subscription).
           items:
             $ref: "#/components/schemas/TradesSubscriptionChange"
 
@@ -584,8 +1064,8 @@ components:
     Trade:
       type: object
       description: |
-        One trade. Field names intentionally match the legacy
-        non-plex `/trades/{id}/stream` payload.
+        One trade. Field names intentionally match the legacy non-plex
+        `/trades/{id}/stream` payload.
       required:
         - transaction_id
         - asset_0
@@ -650,3 +1130,710 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/TradesNotificationData"
+
+    # ----- /assets -----
+
+    AssetsRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: "`subscribe: true` to start the stream, `false` to stop."
+              properties:
+                subscribe:
+                  type: boolean
+                  description: Toggle the `/assets` stream on or off.
+              additionalProperties: false
+
+    AssetsResponseData:
+      type: object
+      required: [subscribed]
+      properties:
+        subscribed:
+          type: boolean
+          description: Whether the stream is currently active.
+
+    AssetsResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AssetsResponseData"
+
+    Asset:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    AssetsNotificationData:
+      type: object
+      required: [assets]
+      properties:
+        assets:
+          type: object
+          description: Map keyed by asset id.
+          additionalProperties:
+            $ref: "#/components/schemas/Asset"
+
+    AssetsNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AssetsNotificationData"
+
+    # ----- /orderbook/stats -----
+
+    OrderbookStatsRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change. Same shape as `/prices`: a `subscribed` list of
+                order book ids plus a `subscribed_all` flag.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds order book ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes order book ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all:
+                  type: boolean
+                  description: When `true`, streams stats for every order book.
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, turns all-mode off.
+              additionalProperties: false
+
+    OrderbookStatsResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: [array, "null"]
+          description: The current subscribed list after the change. `null` when `subscribed_all` is on.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+
+    OrderbookStatsResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderbookStatsResponseData"
+
+    OrderbookStat:
+      type: object
+      required:
+        - order_book_id
+        - open_price
+        - last_price
+        - high_24h
+        - low_24h
+        - change_24h
+        - change_pct_24h
+        - volume_24h_base
+        - volume_24h_usd
+      properties:
+        order_book_id:
+          type: string
+          format: uuid
+        open_price:
+          type: string
+          description: Opening price for the 24h window.
+        last_price:
+          type: string
+          description: Most recent trade price.
+        high_24h:
+          type: string
+          description: Highest price in the last 24h.
+        low_24h:
+          type: string
+          description: Lowest price in the last 24h.
+        change_24h:
+          type: string
+          description: Absolute price change over 24h.
+        change_pct_24h:
+          type: string
+          description: Percentage price change over 24h.
+        volume_24h_base:
+          type: string
+          description: 24h volume in the base asset.
+        volume_24h_usd:
+          type: string
+          description: 24h volume in USD.
+
+    OrderbookStatsNotificationData:
+      type: object
+      required: [stats]
+      properties:
+        stats:
+          type: object
+          description: Map keyed by order book id.
+          additionalProperties:
+            $ref: "#/components/schemas/OrderbookStat"
+
+    OrderbookStatsNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrderbookStatsNotificationData"
+
+    # ----- /charts/candles -----
+
+    ChartsCandlesSubscribe:
+      type: object
+      required: [orderbook_ids, resolution]
+      properties:
+        orderbook_ids:
+          type: array
+          description: Order book ids to subscribe.
+          items:
+            type: string
+            format: uuid
+        resolution:
+          type: integer
+          format: int64
+          description: |
+            Candle resolution as a Go `time.Duration` in nanoseconds. For example,
+            1 minute = `60000000000`.
+
+    ChartsCandlesUnsubscribe:
+      type: object
+      properties:
+        orderbook_ids:
+          type: array
+          description: Order book ids to unsubscribe at the given resolution.
+          items:
+            type: string
+            format: uuid
+        resolution:
+          type: integer
+          format: int64
+          description: Candle resolution to unsubscribe, in nanoseconds.
+        all:
+          type: boolean
+          description: When `true`, unsubscribes all candles.
+
+    ChartsCandlesRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                subscribe:
+                  $ref: "#/components/schemas/ChartsCandlesSubscribe"
+                unsubscribe:
+                  $ref: "#/components/schemas/ChartsCandlesUnsubscribe"
+              additionalProperties: false
+
+    ChartsCandlesResponseData:
+      type: object
+      required: [subscriptions]
+      properties:
+        subscriptions:
+          type: object
+          description: |
+            Map keyed by a human-readable resolution key (e.g. `1m`); each value is an
+            array of order book ids subscribed at that resolution.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              format: uuid
+
+    ChartsCandlesResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ChartsCandlesResponseData"
+
+    Candle:
+      type: object
+      required:
+        - order_book_id
+        - start_timestamp
+        - open
+        - high
+        - low
+        - close
+        - ytm
+        - open_ytm
+        - high_ytm
+        - low_ytm
+        - close_ytm
+        - volume
+      properties:
+        order_book_id:
+          type: string
+          format: uuid
+        start_timestamp:
+          type: string
+          format: date-time
+        open:
+          type: string
+        high:
+          type: string
+        low:
+          type: string
+        close:
+          type: string
+        ytm:
+          type: string
+          description: Yield to maturity at candle close.
+        open_ytm:
+          type: string
+          description: YTM at candle open.
+        high_ytm:
+          type: string
+          description: Highest YTM in the candle window.
+        low_ytm:
+          type: string
+          description: Lowest YTM in the candle window.
+        close_ytm:
+          type: string
+          description: YTM at candle close.
+        volume:
+          type: string
+
+    ChartsCandlesNotificationData:
+      type: object
+      required: [resolution, candles]
+      properties:
+        resolution:
+          type: integer
+          format: int64
+          description: The resolution this notification covers, in nanoseconds.
+        candles:
+          type: object
+          description: Map keyed by order book id; each value is an array of candle records.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Candle"
+
+    ChartsCandlesNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ChartsCandlesNotificationData"
+
+    # ----- /accounts/balance -----
+
+    AccountsBalanceRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Subscribe/unsubscribe to balances for one or more users.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds user ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes user ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+              additionalProperties: false
+
+    AccountsBalanceResponseData:
+      type: object
+      required: [subscribed]
+      properties:
+        subscribed:
+          type: array
+          description: The current subscribed list of user ids after the change.
+          items:
+            type: string
+            format: uuid
+
+    AccountsBalanceResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AccountsBalanceResponseData"
+
+    Balance:
+      type: object
+      description: |
+        One balance record (position) for a user. Field names match the Position
+        schema from the Dora REST API.
+      required:
+        - id
+        - asset_id
+        - seq
+        - is_global
+        - available
+        - locked
+        - supplied
+        - borrowed
+        - impending_borrows
+        - avg_entry_price
+        - borrow_limit
+        - liquidation_threshold
+        - created_at
+        - position_name
+        - pending_withdrawal
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Position identifier.
+        asset_id:
+          type: string
+          format: uuid
+          description: The asset this balance is for.
+        seq:
+          type: integer
+          minimum: 1
+          description: Sequence number (starts at 1).
+        is_global:
+          type: boolean
+          description: Whether this is the user's global position.
+        available:
+          type: string
+          description: Available balance (not locked, supplied, or used as collateral).
+        locked:
+          type: string
+          description: Balance reserved for current orders.
+        supplied:
+          type: string
+          description: Balance supplied to the leverage module.
+        borrowed:
+          type: string
+          description: Outstanding debt for this position.
+        impending_borrows:
+          type: string
+          description: Balance reserved for leveraged orders that would borrow.
+        avg_entry_price:
+          type: string
+          description: Average cost per unit paid (long) or received (short).
+        borrow_limit:
+          type: string
+          description: The borrow limit.
+        liquidation_threshold:
+          type: string
+          description: The liquidation threshold.
+        created_at:
+          type: string
+          format: date-time
+          description: When the position was created.
+        position_name:
+          type: string
+          description: Name of the position.
+        pending_withdrawal:
+          type: string
+          description: Amount pending withdrawal from the position.
+
+    AccountsBalanceNotificationData:
+      type: object
+      required: [balances]
+      properties:
+        balances:
+          type: object
+          description: |
+            Map keyed by user id; each value is an array of balance records for that
+            user.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Balance"
+
+    AccountsBalanceNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AccountsBalanceNotificationData"
+
+    # ----- /pools/balance -----
+
+    PoolsBalanceRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change. Same shape as `/prices`: a `subscribed` list of
+                order book ids plus a `subscribed_all` flag.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds order book ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes order book ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all:
+                  type: boolean
+                  description: When `true`, streams balances for every pool.
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, turns all-mode off.
+              additionalProperties: false
+
+    PoolsBalanceResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: [array, "null"]
+          description: The current subscribed list after the change. `null` when `subscribed_all` is on.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+
+    PoolsBalanceResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PoolsBalanceResponseData"
+
+    PoolBalance:
+      type: object
+      required: [order_book_id, base_quantity, quote_quantity, shares_quantity]
+      properties:
+        order_book_id:
+          type: string
+          format: uuid
+        base_quantity:
+          oneOf:
+            - type: number
+            - type: string
+          description: Base-asset quantity (numeric or decimal string).
+        quote_quantity:
+          oneOf:
+            - type: number
+            - type: string
+          description: Quote-asset quantity (numeric or decimal string).
+        shares_quantity:
+          oneOf:
+            - type: number
+            - type: string
+          description: LP shares quantity (numeric or decimal string).
+
+    PoolsBalanceNotificationData:
+      type: object
+      required: [balances]
+      properties:
+        balances:
+          type: object
+          description: Map keyed by order book id.
+          additionalProperties:
+            $ref: "#/components/schemas/PoolBalance"
+
+    PoolsBalanceNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PoolsBalanceNotificationData"
+
+    # ----- /orders/byuser -----
+
+    OrdersByUserRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscribe/unsubscribe to order updates for a single user. `user_id` is
+                required.
+              required: [user_id]
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  description: The user whose orders to stream.
+                subscribe_orderbooks:
+                  type: array
+                  description: Additive — adds order book ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe_orderbooks:
+                  type: array
+                  description: Subtractive — removes order book ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all_orderbooks:
+                  type: boolean
+                  description: When `true`, streams orders from every order book for the user.
+                unsubscribe_all_orderbooks:
+                  type: boolean
+                  description: When `true`, turns all-mode off for order books.
+              additionalProperties: false
+
+    OrdersByUserResponseData:
+      type: object
+      required: [users]
+      properties:
+        users:
+          type: object
+          description: |
+            Map keyed by user id; each value mirrors the per-user subscription state.
+          additionalProperties:
+            type: object
+            required: [subscribed, subscribed_all]
+            properties:
+              subscribed:
+                type: [array, "null"]
+                description: The current subscribed order book ids after the change. `null` when `subscribed_all` is on.
+                items:
+                  type: string
+                  format: uuid
+              subscribed_all:
+                type: boolean
+
+    OrdersByUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrdersByUserResponseData"
+
+    Order:
+      type: object
+      required: [id, orderbook_id, status, side]
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderbook_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          description: Order status (e.g. `OPEN`).
+        side:
+          type: string
+          enum: [BUY, SELL]
+
+    OrdersByUserNotificationData:
+      type: object
+      required: [user_id, orders]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        orders:
+          type: object
+          description: |
+            Map keyed by order book id; each value is an array of order records for
+            that order book.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Order"
+
+    OrdersByUserNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrdersByUserNotificationData"
+
+    # ----- /debug/notify -----
+
+    DebugNotifyRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Schedule a notification that echoes `data` after `delay` nanoseconds.
+              required: [delay, data]
+              properties:
+                delay:
+                  type: integer
+                  format: int64
+                  description: "`time.Duration` in nanoseconds to wait before pushing the notification."
+                data:
+                  description: |
+                    Arbitrary JSON value to echo back as the notification `data`.
+              additionalProperties: false
+
+    DebugNotifyResponseData:
+      type: string
+      format: date-time
+      description: The scheduled notification time as an ISO-8601 string.
+
+    DebugNotifyResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DebugNotifyResponseData"
+
+    DebugNotifyNotificationData:
+      description: |
+        The echoed `data` value from the request — an arbitrary JSON value.
+
+    DebugNotifyNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DebugNotifyNotificationData"
