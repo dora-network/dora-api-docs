@@ -52,6 +52,12 @@ Models/CreateOrderResponseEnvelope.md
 Models/CurrentLeverageAccruedInterest.md
 Models/CurrentLeverageAccruedInterestResponseEnvelope.md
 Models/DefundUserRequest.md
+Models/DepositArgs.md
+Models/DepositCall.md
+Models/DepositInstructionForChain.md
+Models/DepositInstructionsResponse.md
+Models/DepositInstructionsResponseEnvelope.md
+Models/DepositResponse.md
 Models/FundUser.md
 Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
@@ -85,6 +91,7 @@ Models/ListAssetPriceResponseEnvelope.md
 Models/ListAssetYieldResponseEnvelope.md
 Models/ListCandlesResponseEnvelope.md
 Models/ListCouponPaymentsResponseEnvelope.md
+Models/ListDepositsResponseEnvelope.md
 Models/ListOrderBookDepthResponseEnvelope.md
 Models/ListOrderbookResponseEnvelope.md
 Models/ListOrdersResponseEnvelope.md
@@ -127,6 +134,9 @@ Models/PLSummary.md
 Models/PayLeverageAccruedInterest.md
 Models/PayLeverageAccruedInterestRequest.md
 Models/PayLeverageAccruedInterestResponseEnvelope.md
+Models/PermitDomain.md
+Models/PermitMessage.md
+Models/PermitTypedData.md
 Models/PnLRankingResponse.md
 Models/PoolPrice.md
 Models/PoolPriceResponseEnvelope.md
@@ -194,6 +204,7 @@ Models/TransferBalancesRequest.md
 Models/TransferBalancesResponseEnvelope.md
 Models/TransformedAssets.md
 Models/TriggerType.md
+Models/TypedDataField.md
 Models/UnitePositionRequest.md
 Models/UnitePositionResponseEnvelope.md
 Models/UnitedPosition.md
@@ -221,6 +232,7 @@ Models/UserValue.md
 Models/UserValueResponseEnvelope.md
 Models/ValidateSubmitOrderRequest.md
 Models/ValidateSubmitOrderResponse.md
+Models/Web3EventStatus.md
 Models/Withdraw.md
 Models/WithdrawRequest.md
 Models/WithdrawResponseEnvelope.md

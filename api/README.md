@@ -17,7 +17,6 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**createAPIKeyForUser**](Apis/DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 *DefaultApi* | [**createAPIKeyForUserID**](Apis/DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 *DefaultApi* | [**createConditionalOrder**](Apis/DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
-*DefaultApi* | [**createNewIsolatedAccountV2**](Apis/DefaultApi.md#createNewIsolatedAccountV2) | **POST** /v2/accounts/new_isolated | Create a new isolated account for a user transferring available assets into the account |
 *DefaultApi* | [**createOrder**](Apis/DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 *DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
@@ -32,6 +31,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getAssetsStream**](Apis/DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 *DefaultApi* | [**getCandleData**](Apis/DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 *DefaultApi* | [**getCouponPaymentsByAssetId**](Apis/DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
+*DefaultApi* | [**getDepositInstructions**](Apis/DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
 *DefaultApi* | [**getL1Depth**](Apis/DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
 *DefaultApi* | [**getL2Depth**](Apis/DefaultApi.md#getL2Depth) | **GET** /v1/orderbooks/{order_book_id}/L2 | Get the aggregated price levels for a specific orderbook (L2 market depth) |
 *DefaultApi* | [**getL3Depth**](Apis/DefaultApi.md#getL3Depth) | **GET** /v1/orderbooks/{order_book_id}/L3 | Get all open orders for a specific orderbook (L3 market depth) |
@@ -87,6 +87,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**liquiditySubtract**](Apis/DefaultApi.md#liquiditySubtract) | **POST** /v1/liquidity/pool/{pool_id}/remove | Subtract liquidity from a pool |
 *DefaultApi* | [**listAccountsSelfV2**](Apis/DefaultApi.md#listAccountsSelfV2) | **GET** /v2/user/self/accounts | List all accounts for the authenticated user |
 *DefaultApi* | [**listAssets**](Apis/DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
+*DefaultApi* | [**listDeposits**](Apis/DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
 *DefaultApi* | [**listOrderBooks**](Apis/DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 *DefaultApi* | [**listOrders**](Apis/DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 *DefaultApi* | [**listPositionAccountsSelf**](Apis/DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
@@ -165,6 +166,12 @@ All URIs are relative to *https://staging.dora.co*
  - [CurrentLeverageAccruedInterest](./Models/CurrentLeverageAccruedInterest.md)
  - [CurrentLeverageAccruedInterestResponseEnvelope](./Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
  - [DefundUserRequest](./Models/DefundUserRequest.md)
+ - [DepositArgs](./Models/DepositArgs.md)
+ - [DepositCall](./Models/DepositCall.md)
+ - [DepositInstructionForChain](./Models/DepositInstructionForChain.md)
+ - [DepositInstructionsResponse](./Models/DepositInstructionsResponse.md)
+ - [DepositInstructionsResponseEnvelope](./Models/DepositInstructionsResponseEnvelope.md)
+ - [DepositResponse](./Models/DepositResponse.md)
  - [FundUser](./Models/FundUser.md)
  - [FundUserRequest](./Models/FundUserRequest.md)
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
@@ -198,6 +205,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ListAssetYieldResponseEnvelope](./Models/ListAssetYieldResponseEnvelope.md)
  - [ListCandlesResponseEnvelope](./Models/ListCandlesResponseEnvelope.md)
  - [ListCouponPaymentsResponseEnvelope](./Models/ListCouponPaymentsResponseEnvelope.md)
+ - [ListDepositsResponseEnvelope](./Models/ListDepositsResponseEnvelope.md)
  - [ListOrderBookDepthResponseEnvelope](./Models/ListOrderBookDepthResponseEnvelope.md)
  - [ListOrderbookResponseEnvelope](./Models/ListOrderbookResponseEnvelope.md)
  - [ListOrdersResponseEnvelope](./Models/ListOrdersResponseEnvelope.md)
@@ -240,6 +248,9 @@ All URIs are relative to *https://staging.dora.co*
  - [PayLeverageAccruedInterest](./Models/PayLeverageAccruedInterest.md)
  - [PayLeverageAccruedInterestRequest](./Models/PayLeverageAccruedInterestRequest.md)
  - [PayLeverageAccruedInterestResponseEnvelope](./Models/PayLeverageAccruedInterestResponseEnvelope.md)
+ - [PermitDomain](./Models/PermitDomain.md)
+ - [PermitMessage](./Models/PermitMessage.md)
+ - [PermitTypedData](./Models/PermitTypedData.md)
  - [PnLRankingResponse](./Models/PnLRankingResponse.md)
  - [PoolPrice](./Models/PoolPrice.md)
  - [PoolPriceResponseEnvelope](./Models/PoolPriceResponseEnvelope.md)
@@ -307,6 +318,7 @@ All URIs are relative to *https://staging.dora.co*
  - [TransferBalancesResponseEnvelope](./Models/TransferBalancesResponseEnvelope.md)
  - [TransformedAssets](./Models/TransformedAssets.md)
  - [TriggerType](./Models/TriggerType.md)
+ - [TypedDataField](./Models/TypedDataField.md)
  - [UnitePositionRequest](./Models/UnitePositionRequest.md)
  - [UnitePositionResponseEnvelope](./Models/UnitePositionResponseEnvelope.md)
  - [UnitedPosition](./Models/UnitedPosition.md)
@@ -334,6 +346,7 @@ All URIs are relative to *https://staging.dora.co*
  - [UserValueResponseEnvelope](./Models/UserValueResponseEnvelope.md)
  - [ValidateSubmitOrderRequest](./Models/ValidateSubmitOrderRequest.md)
  - [ValidateSubmitOrderResponse](./Models/ValidateSubmitOrderResponse.md)
+ - [Web3EventStatus](./Models/Web3EventStatus.md)
  - [Withdraw](./Models/Withdraw.md)
  - [WithdrawRequest](./Models/WithdrawRequest.md)
  - [WithdrawResponseEnvelope](./Models/WithdrawResponseEnvelope.md)

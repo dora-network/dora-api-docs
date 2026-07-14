@@ -14,7 +14,6 @@ All URIs are relative to *https://staging.dora.co*
 | [**createAPIKeyForUser**](DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 | [**createAPIKeyForUserID**](DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 | [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
-| [**createNewIsolatedAccountV2**](DefaultApi.md#createNewIsolatedAccountV2) | **POST** /v2/accounts/new_isolated | Create a new isolated account for a user transferring available assets into the account |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
@@ -29,6 +28,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getAssetsStream**](DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 | [**getCandleData**](DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 | [**getCouponPaymentsByAssetId**](DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
+| [**getDepositInstructions**](DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
 | [**getL1Depth**](DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
 | [**getL2Depth**](DefaultApi.md#getL2Depth) | **GET** /v1/orderbooks/{order_book_id}/L2 | Get the aggregated price levels for a specific orderbook (L2 market depth) |
 | [**getL3Depth**](DefaultApi.md#getL3Depth) | **GET** /v1/orderbooks/{order_book_id}/L3 | Get all open orders for a specific orderbook (L3 market depth) |
@@ -84,6 +84,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**liquiditySubtract**](DefaultApi.md#liquiditySubtract) | **POST** /v1/liquidity/pool/{pool_id}/remove | Subtract liquidity from a pool |
 | [**listAccountsSelfV2**](DefaultApi.md#listAccountsSelfV2) | **GET** /v2/user/self/accounts | List all accounts for the authenticated user |
 | [**listAssets**](DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
+| [**listDeposits**](DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
 | [**listOrderBooks**](DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 | [**listPositionAccountsSelf**](DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
@@ -357,31 +358,6 @@ Create a new conditional orders
 ### Return type
 
 [**CreateConditionalOrderResponseEnvelope**](../Models/CreateConditionalOrderResponseEnvelope.md)
-
-### Authorization
-
-[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-<a name="createNewIsolatedAccountV2"></a>
-# **createNewIsolatedAccountV2**
-> NewIsolatedAccountResponseV2Envelope createNewIsolatedAccountV2(NewIsolatedAccountRequestV2)
-
-Create a new isolated account for a user transferring available assets into the account
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **NewIsolatedAccountRequestV2** | [**NewIsolatedAccountRequestV2**](../Models/NewIsolatedAccountRequestV2.md)|  | |
-
-### Return type
-
-[**NewIsolatedAccountResponseV2Envelope**](../Models/NewIsolatedAccountResponseV2Envelope.md)
 
 ### Authorization
 
@@ -737,6 +713,36 @@ Get coupon payments for a bond asset
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getDepositInstructions"></a>
+# **getDepositInstructions**
+> DepositInstructionsResponseEnvelope getDepositInstructions(quantity, owner\_address, nonce, client\_reference\_id)
+
+Get per-chain instructions for depositing USDC into the Dora vault
+
+    Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **quantity** | **BigDecimal**| Human-decimal USDC quantity to deposit, e.g. &#39;100.50&#39;. Must be positive, with at most 6 decimal places. | [default to null] |
+| **owner\_address** | **String**| The user&#39;s wallet address as a 0x-prefixed 20-byte hex string. Used as the permit owner. | [default to null] |
+| **nonce** | **String**| The owner&#39;s current USDC permit nonce (read client-side), as a non-negative decimal string. It belongs to the single supported chain. | [default to null] |
+| **client\_reference\_id** | **String**| Optional client-supplied reference as a hex string (0x prefix optional), at most 32 bytes. Left-aligned into the deposit call&#39;s bytes32 argument. | [optional] [default to null] |
+
+### Return type
+
+[**DepositInstructionsResponseEnvelope**](../Models/DepositInstructionsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -2159,6 +2165,35 @@ No authorization required
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="listDeposits"></a>
+# **listDeposits**
+> ListDepositsResponseEnvelope listDeposits(user\_id, page, limit)
+
+List USDC deposits
+
+    Lists USDC deposits ordered by observed_at descending. Admin users may list deposits for any user (or all users); non-admin users may only list their own deposits.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**| Filter by user ID. Non-admin callers may only specify their own user ID. | [optional] [default to null] |
+| **page** | **Long**|  | [optional] [default to 1] |
+| **limit** | **Long**|  | [optional] [default to 50] |
+
+### Return type
+
+[**ListDepositsResponseEnvelope**](../Models/ListDepositsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="listOrderBooks"></a>
 # **listOrderBooks**
 > ListOrderbookResponseEnvelope listOrderBooks(status, base\_asset\_id, quote\_asset\_id, page, limit)
@@ -2198,7 +2233,7 @@ List all orders
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **user\_id** | **UUID**| Filter by user ID (only allowed if the user has copy trading enabled) | [optional] [default to null] |
+| **user\_id** | **UUID**| Filter by user ID (only allowed if the user has copy trading enabled, or if the requester is an Admin or Integrator within the same tenant) | [optional] [default to null] |
 | **order\_book\_id** | [**List**](../Models/UUID.md)|  | [optional] [default to null] |
 | **kind** | [**List**](../Models/OrderKind.md)|  | [optional] [default to null] |
 | **status** | [**List**](../Models/OrderStatus.md)|  | [optional] [default to null] |

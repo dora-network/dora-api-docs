@@ -1666,7 +1666,7 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "Filter by user ID (only allowed if the user has copy trading enabled)"
+            "description": "Filter by user ID (only allowed if the user has copy trading enabled, or if the requester is an Admin or Integrator within the same tenant)"
           },
           {
             "name": "order_book_id",
@@ -3684,7 +3684,7 @@
         "summary": "Create an isolated position by transferring collateral to the position from the user's global collateral",
         "operationId": "leverageIsolateCollateral",
         "deprecated": true,
-        "x-deprecated-reason": "Use /v1/positions/new_isolated instead, to create an isolated position with available balance, then collateralize it in a separate step.",
+        "x-deprecated-reason": "The position is created automatically through order flow.",
         "requestBody": {
           "required": true,
           "content": {
@@ -6615,33 +6615,63 @@
         }
       }
     },
-    "/v2/accounts/new_isolated": {
-      "post": {
-        "summary": "Create a new isolated account for a user transferring available assets into the account",
-        "operationId": "createNewIsolatedAccountV2",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewIsolatedAccountRequestV2"
-              }
-            }
+    "/v1/web3/deposit-instructions": {
+      "get": {
+        "summary": "Get per-chain instructions for depositing USDC into the Dora vault",
+        "description": "Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry.",
+        "operationId": "getDepositInstructions",
+        "parameters": [
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "decimal"
+            },
+            "description": "Human-decimal USDC quantity to deposit, e.g. '100.50'. Must be positive, with at most 6 decimal places."
+          },
+          {
+            "name": "owner_address",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The user's wallet address as a 0x-prefixed 20-byte hex string. Used as the permit owner."
+          },
+          {
+            "name": "nonce",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The owner's current USDC permit nonce (read client-side), as a non-negative decimal string. It belongs to the single supported chain."
+          },
+          {
+            "name": "client_reference_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional client-supplied reference as a hex string (0x prefix optional), at most 32 bytes. Left-aligned into the deposit call's bytes32 argument."
           }
-        },
+        ],
         "responses": {
-          "201": {
-            "description": "Isolated account created",
+          "200": {
+            "description": "Per-chain deposit instructions for the authenticated user",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NewIsolatedAccountResponseV2"
+                  "$ref": "#/components/schemas/DepositInstructionsResponseEnvelope"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request, e.g. missing required fields",
+            "description": "Bad request, e.g. invalid or missing quantity, owner_address, or nonce, or an invalid client_reference_id",
             "content": {
               "application/json": {
                 "schema": {
@@ -6651,7 +6681,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "description": "Unauthorized, user not logged in",
             "content": {
               "application/json": {
                 "schema": {
@@ -6660,8 +6690,90 @@
               }
             }
           },
-          "409": {
-            "description": "Conflict, e.g. the requested amount is not available to transfer",
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/web3/deposits": {
+      "get": {
+        "summary": "List USDC deposits",
+        "description": "Lists USDC deposits ordered by observed_at descending. Admin users may list deposits for any user (or all users); non-admin users may only list their own deposits.",
+        "operationId": "listDeposits",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Filter by user ID. Non-admin callers may only specify their own user ID."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of deposits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDepositsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. a non-admin user requesting another user's deposits",
             "content": {
               "application/json": {
                 "schema": {
@@ -6705,6 +6817,377 @@
       }
     },
     "schemas": {
+      "Web3EventStatus": {
+        "type": "string",
+        "description": "Processing status of an observed on-chain event.",
+        "enum": [
+          "PENDING",
+          "FINALIZED",
+          "ORPHANED"
+        ]
+      },
+      "DepositInstructionForChain": {
+        "type": "object",
+        "description": "Everything the caller needs to deposit USDC into the Dora vault on a single chain with one signature and one transaction.",
+        "properties": {
+          "network_name": {
+            "type": "string",
+            "description": "Human-readable network name, e.g. 'Ethereum Mainnet'."
+          },
+          "chain_id": {
+            "type": "string",
+            "description": "EVM chain ID."
+          },
+          "contract_address": {
+            "type": "string",
+            "description": "The DoraUSDCVault contract address for this chain, as a 0x-prefixed hex string."
+          },
+          "usdc_address": {
+            "type": "string",
+            "description": "The ERC-20 USDC token contract on this chain, as a 0x-prefixed hex string. It is the verifying contract of the permit; the spender granted by the permit is contract_address (the vault)."
+          },
+          "approval": {
+            "$ref": "#/components/schemas/PermitTypedData"
+          },
+          "deposit": {
+            "$ref": "#/components/schemas/DepositCall"
+          }
+        },
+        "required": [
+          "network_name",
+          "chain_id",
+          "contract_address",
+          "usdc_address",
+          "approval",
+          "deposit"
+        ]
+      },
+      "PermitTypedData": {
+        "type": "object",
+        "description": "An EIP-712 typed-data message in the exact shape expected by eth_signTypedData_v4. The user signs it to authorize the vault as a USDC spender via EIP-2612 permit.",
+        "properties": {
+          "types": {
+            "type": "object",
+            "description": "EIP-712 type definitions, keyed by type name ('EIP712Domain' and 'Permit').",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TypedDataField"
+              }
+            }
+          },
+          "primaryType": {
+            "type": "string",
+            "description": "Always 'Permit'."
+          },
+          "domain": {
+            "$ref": "#/components/schemas/PermitDomain"
+          },
+          "message": {
+            "$ref": "#/components/schemas/PermitMessage"
+          }
+        },
+        "required": [
+          "types",
+          "primaryType",
+          "domain",
+          "message"
+        ]
+      },
+      "TypedDataField": {
+        "type": "object",
+        "description": "A single field in an EIP-712 type definition.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "Solidity type, e.g. 'address' or 'uint256'."
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "PermitDomain": {
+        "type": "object",
+        "description": "The EIP-712 domain separator data for the USDC token on this chain.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "EIP-712 domain name of the USDC token, e.g. 'USD Coin'."
+          },
+          "version": {
+            "type": "string",
+            "description": "EIP-712 domain version of the USDC token, e.g. '2'."
+          },
+          "chainId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "EVM chain ID, as a JSON number."
+          },
+          "verifyingContract": {
+            "type": "string",
+            "description": "The USDC token contract address, as a 0x-prefixed hex string."
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "chainId",
+          "verifyingContract"
+        ]
+      },
+      "PermitMessage": {
+        "type": "object",
+        "description": "The EIP-2612 Permit struct the user signs. The uint256 fields are decimal strings to avoid JSON number precision loss.",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "The user's wallet address (permit owner), as a 0x-prefixed hex string."
+          },
+          "spender": {
+            "type": "string",
+            "description": "The vault contract address granted the allowance, as a 0x-prefixed hex string."
+          },
+          "value": {
+            "type": "string",
+            "description": "Approved quantity in USDC base units (10^-6 USDC), as a decimal string."
+          },
+          "nonce": {
+            "type": "string",
+            "description": "The owner's current USDC permit nonce on this chain, as a decimal string."
+          },
+          "deadline": {
+            "type": "string",
+            "description": "Unix timestamp (seconds) at which the permit expires, as a decimal string. One hour from issuance."
+          }
+        },
+        "required": [
+          "owner",
+          "spender",
+          "value",
+          "nonce",
+          "deadline"
+        ]
+      },
+      "DepositCall": {
+        "type": "object",
+        "description": "Descriptor of the vault deposit() transaction the client builds after signing the permit. The client splits the permit signature into v/r/s and ABI-encodes function_signature with args plus (v, r, s) to produce the calldata sent to 'to'.",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "The vault contract address, as a 0x-prefixed hex string."
+          },
+          "chain_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "EVM chain ID, as a JSON number."
+          },
+          "value": {
+            "type": "string",
+            "description": "Native currency value to send with the transaction. Always '0'."
+          },
+          "function_signature": {
+            "type": "string",
+            "description": "Canonical Solidity signature of the vault's permit-aware deposit function: deposit(uint256,bytes16,bytes32,uint256,uint8,bytes32,bytes32)."
+          },
+          "selector": {
+            "type": "string",
+            "description": "The 4-byte ABI call selector of function_signature, as a 0x-prefixed hex string."
+          },
+          "args": {
+            "$ref": "#/components/schemas/DepositArgs"
+          }
+        },
+        "required": [
+          "to",
+          "chain_id",
+          "value",
+          "function_signature",
+          "selector",
+          "args"
+        ]
+      },
+      "DepositArgs": {
+        "type": "object",
+        "description": "The non-signature arguments to the vault deposit() call. The remaining (v, r, s) arguments come from the permit signature the client obtains by signing the approval.",
+        "properties": {
+          "quantity": {
+            "type": "string",
+            "description": "Deposit quantity in USDC base units (10^-6 USDC), as a decimal string. Matches the permit's value."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "The caller's user ID as 16 bytes, 0x-prefixed hex. Stored on-chain with the deposit and mapped back to the user by the indexer."
+          },
+          "client_reference_id": {
+            "type": "string",
+            "description": "The bytes32 client reference as a 0x-prefixed hex string. All zero bytes when not supplied."
+          },
+          "deadline": {
+            "type": "string",
+            "description": "Unix timestamp (seconds), as a decimal string. Matches the permit's deadline exactly."
+          }
+        },
+        "required": [
+          "quantity",
+          "user_id",
+          "client_reference_id",
+          "deadline"
+        ]
+      },
+      "DepositInstructionsResponse": {
+        "type": "object",
+        "description": "Per-chain instructions for depositing USDC into the Dora vault via EIP-2612 permit.",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The authenticated user the instructions are issued for."
+          },
+          "owner_address": {
+            "type": "string",
+            "description": "The wallet address the instructions were issued for, echoed from the request."
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Human-decimal USDC deposit quantity, echoed from the request."
+          },
+          "chains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DepositInstructionForChain"
+            }
+          }
+        },
+        "required": [
+          "user_id",
+          "owner_address",
+          "quantity",
+          "chains"
+        ]
+      },
+      "DepositInstructionsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/DepositInstructionsResponse"
+              }
+            }
+          }
+        ]
+      },
+      "DepositResponse": {
+        "type": "object",
+        "description": "A single USDC deposit observed on-chain.",
+        "properties": {
+          "network_chain_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Internal numeric identifier of the chain."
+          },
+          "network_name": {
+            "type": "string",
+            "description": "Human-readable network name."
+          },
+          "chain_id": {
+            "type": "string",
+            "description": "EVM chain ID."
+          },
+          "tx_hash": {
+            "type": "string",
+            "description": "Transaction hash as a 0x-prefixed hex string."
+          },
+          "log_index": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Index of the log within the transaction."
+          },
+          "block_number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "block_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contract_address": {
+            "type": "string",
+            "description": "Vault contract address as a 0x-prefixed hex string."
+          },
+          "depositor_address": {
+            "type": "string",
+            "description": "Address that made the deposit, as a 0x-prefixed hex string."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Human-decimal USDC value (base units divided by 10^6)."
+          },
+          "client_reference_id": {
+            "type": "string",
+            "description": "Optional client-supplied reference, as a 0x-prefixed hex string."
+          },
+          "status": {
+            "$ref": "#/components/schemas/Web3EventStatus"
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Internal transaction ID, present once the deposit has been credited."
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "network_chain_id",
+          "network_name",
+          "chain_id",
+          "tx_hash",
+          "log_index",
+          "block_number",
+          "block_time",
+          "contract_address",
+          "depositor_address",
+          "user_id",
+          "quantity",
+          "status",
+          "observed_at"
+        ]
+      },
+      "ListDepositsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DepositResponse"
+                }
+              }
+            }
+          }
+        ]
+      },
       "Asset": {
         "type": "object",
         "properties": {
