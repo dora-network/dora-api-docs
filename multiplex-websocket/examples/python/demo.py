@@ -24,7 +24,6 @@ DEFAULT_ORDER_BOOK_ID = "019c3420-5cd7-7a88-8fe6-a5a622e01ad9"
 DEFAULT_USER_ID = "019c4d37-311e-7a2f-8d58-f17c39170865"
 DEFAULT_ASSET_ID = "019c3401-9737-7106-b3d3-b7a6e6eef0e6"
 
-ONE_MINUTE_NS = 60_000_000_000
 
 
 def pick_base_url_and_key() -> tuple[str | None, str | None]:
@@ -110,7 +109,7 @@ async def run() -> int:
 
         # --- /charts/candles (1-minute candles for one order book) ---
         await req("/charts/candles",
-                  {"subscribe": {"orderbook_ids": [order_book_id], "resolution": ONE_MINUTE_NS}},
+                  {"subscribe": {"orderbook_ids": [order_book_id], "resolution": "1m"}},
                   "/charts/candles subscribe", notif=make_handler("/charts/candles"))
 
         # --- /accounts/balance (auth required; one user) ---

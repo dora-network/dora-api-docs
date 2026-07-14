@@ -15,7 +15,6 @@ const DEFAULT_ORDER_BOOK_ID = "019c3420-5cd7-7a88-8fe6-a5a622e01ad9";
 const DEFAULT_USER_ID = "019c4d37-311e-7a2f-8d58-f17c39170865";
 const DEFAULT_ASSET_ID = "019c3401-9737-7106-b3d3-b7a6e6eef0e6";
 
-const ONE_MINUTE_NS = 60_000_000_000;
 
 function pickBaseUrlAndKey(): { url: string; apiKey: string } | null {
   const staging = process.env.DORA_STAGING_BASE_URL;
@@ -111,7 +110,7 @@ async function main(): Promise<number> {
     // --- /charts/candles (1-minute candles for one order book) ---
     await req(
       "/charts/candles",
-      { subscribe: { orderbook_ids: [orderBookId], resolution: ONE_MINUTE_NS } },
+      { subscribe: { orderbook_ids: [orderBookId], resolution: "1m" } },
       "/charts/candles subscribe",
       makeHandler("/charts/candles"),
     );

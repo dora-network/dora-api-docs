@@ -359,7 +359,25 @@ Subscribe/unsubscribe to full asset updates.
     "assets": {
       "019c3401-9737-7106-b3d3-b7a6e6eef0e6": {
         "id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
-        "name": "Example Bond"
+        "name": "NVDA 3.5% 2040",
+        "symbol": "NVDA",
+        "kind": "BOND",
+        "decimals": 3,
+        "can_trade": true,
+        "can_add_liquidity": false,
+        "can_direct_borrow": false,
+        "can_onboard": false,
+        "can_virtual_borrow": false,
+        "max_leverage": 1,
+        "bond": {
+          "id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
+          "kind": "BOND",
+          "isin": "US1234567890",
+          "issuer": "NVDA",
+          "maturity_at": "2040-01-01T00:00:00Z",
+          "principal_value": "1000",
+          "payments_per_year": 2
+        }
       }
     }
   }
@@ -430,30 +448,30 @@ Subscribe/unsubscribe to orderbook market stats.
 
 ## Path: `/charts/candles`
 
-Subscribe/unsubscribe to streaming candles per resolution. Each subscription is keyed by a set of order book ids plus a resolution (a Go `time.Duration` expressed in **nanoseconds**).
+Subscribe/unsubscribe to streaming candles per resolution. Each subscription is keyed by a set of order book ids plus a resolution string (`1m`, `5m`, `15m`, `1h`, `4h`, `1d`, or `7d`).
 
 ### Request data
 
 | Field | Type | Notes |
 |---|---|---|
 | `subscribe.orderbook_ids` | `string[]` (order book ids) | Order book ids to subscribe. |
-| `subscribe.resolution` | `int64` (ns) | Candle resolution as a `time.Duration` in nanoseconds. |
+| `subscribe.resolution` | `string` | Candle resolution as a canonical string (`1m`, `5m`, `15m`, `1h`, `4h`, `1d`, or `7d`). |
 | `unsubscribe.orderbook_ids` | `string[]` (order book ids) | Order book ids to unsubscribe. |
-| `unsubscribe.resolution` | `int64` (ns) | Candle resolution to unsubscribe. |
+| `unsubscribe.resolution` | `string` | Candle resolution to unsubscribe (same format as subscribe). |
 | `unsubscribe.all` | `bool` | When `true`, unsubscribes all candles. |
 
-Example (1 minute resolution = `60000000000` ns):
+Example (1 minute resolution):
 
 ```json
-{"id":"019ee189-87d7-7c69-802a-8070f3779b95","path":"/charts/candles","data":{"subscribe":{"orderbook_ids":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"],"resolution":60000000000}}}
+{"id":"019ee189-87d7-7c69-802a-8070f3779b95","path":"/charts/candles","data":{"subscribe":{"orderbook_ids":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"],"resolution":"1m"}}}
 ```
 
 ### Response data
 
-Subscriptions are grouped by a human-readable resolution key in Go duration string format (e.g. `1m0s` for 1 minute):
+Subscriptions are grouped by a canonical resolution string (e.g. `1m`):
 
 ```json
-{"id":"019ee189-87d7-7c69-802a-8070f3779b95","kind":"response","path":"/charts/candles","data":{"subscriptions":{"1m0s":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"]}}}
+{"id":"019ee189-87d7-7c69-802a-8070f3779b95","kind":"response","path":"/charts/candles","data":{"subscriptions":{"1m":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"]}}}
 ```
 
 ### Notification data
@@ -466,7 +484,7 @@ Subscriptions are grouped by a human-readable resolution key in Go duration stri
   "path": "/charts/candles",
   "id": "019ee189-87d7-7c69-802a-8070f3779ba5",
   "data": {
-    "resolution": 60000000000,
+    "resolution": "1m",
     "candles": {
       "019c3420-5cd7-7a88-8fe6-a5a622e01ad9": [
         {
@@ -526,8 +544,6 @@ Stream account balances for one or more users. **Auth required** — the token m
 | `borrowed` | string | Outstanding debt for this position. |
 | `impending_borrows` | string | Balance reserved for leveraged orders that would borrow. |
 | `avg_entry_price` | string | Average cost per unit paid (long) or received (short). |
-| `borrow_limit` | string | The borrow limit. |
-| `liquidation_threshold` | string | The liquidation threshold. |
 | `created_at` | date-time | When the position was created. |
 | `position_name` | string | Name of the position. |
 | `pending_withdrawal` | string | Amount pending withdrawal from the position. |
@@ -551,8 +567,6 @@ Stream account balances for one or more users. **Auth required** — the token m
           "borrowed": "0",
           "impending_borrows": "0",
           "avg_entry_price": "0.717414207417403554",
-          "borrow_limit": "850",
-          "liquidation_threshold": "700",
           "created_at": "2026-02-06T18:02:26Z",
           "position_name": "global_account",
           "pending_withdrawal": "0"
@@ -636,7 +650,37 @@ The response is keyed by user id, mirroring the request's `user_id`:
 
 ### Notification data
 
-`orders` is a **map keyed by order book id**; each value is an array of order records for that order book:
+`orders` is a **map keyed by order book id**; each value is an array of order records for that order book. Each order record contains the full `Order` object (same fields as the REST API `Order` type):
+
+| Field | Type | Description |
+|---|---|---|
+| `order_id` | UUID | Order identifier. |
+| `order_book_id` | UUID | The orderbook this order is in. |
+| `kind` | string | Order kind (e.g. `LIMIT`, `MARKET`). |
+| `original_price` | string | Limit price (0 for market orders). |
+| `avg_fill_price` | string | Average fill price. |
+| `cancelled_quantity` | string | Quantity cancelled, if any. |
+| `open_quantity` | string | Quantity left open, if any. |
+| `original_quantity` | string | Original order quantity. |
+| `filled_quantity` | string | Quantity filled, if any. |
+| `filled_notional` | string | Notional quantity filled, if any. |
+| `locked_quantity` | string | Locked quantity (limit orders only). |
+| `impending_borrows_quantity` | string | Reserved borrowing on fills (limit orders only). |
+| `last_update_at` | date-time | Last update time. |
+| `opened_at` | date-time | Creation time. |
+| `order_info` | string | Optional order info. |
+| `inverse_leverage` | string | Inverse leverage, in range (0, 1]. |
+| `side` | string | `BUY` or `SELL`. |
+| `status` | string | Order status (e.g. `OPEN`). |
+| `user_id` | UUID | The user who placed the order. |
+| `order_modifiers` | string[] | Optional order modifiers. |
+| `position_id` | UUID | User's account ID for the order. |
+| `good_till_date` | date-time | Optional expiry date. |
+| `trigger_price` | string | Optional trigger price. |
+| `triggered_at` | date-time | Optional trigger time. |
+| `trigger_type` | string | Optional trigger type. |
+| `client_order_id` | string | Optional client-assigned order ID. |
+| `parent_order_id` | string | Optional parent order ID. |
 
 ```json
 {
@@ -648,10 +692,25 @@ The response is keyed by user id, mirroring the request's `user_id`:
     "orders": {
       "019c3420-5cd7-7a88-8fe6-a5a622e01ad9": [
         {
-          "id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
-          "orderbook_id": "019c3420-5cd7-7a88-8fe6-a5a622e01ad9",
+          "order_id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
+          "order_book_id": "019c3420-5cd7-7a88-8fe6-a5a622e01ad9",
+          "kind": "LIMIT",
+          "original_price": "0.72",
+          "avg_fill_price": "0.72",
+          "cancelled_quantity": "0",
+          "open_quantity": "100",
+          "original_quantity": "100",
+          "filled_quantity": "0",
+          "filled_notional": "0",
+          "locked_quantity": "100",
+          "impending_borrows_quantity": "0",
+          "last_update_at": "2026-07-03T20:30:00Z",
+          "opened_at": "2026-07-03T20:30:00Z",
+          "inverse_leverage": "1",
+          "side": "BUY",
           "status": "OPEN",
-          "side": "BUY"
+          "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
+          "position_id": "019c4d37-3120-7ea8-b42b-789da5a51d5a"
         }
       ]
     }

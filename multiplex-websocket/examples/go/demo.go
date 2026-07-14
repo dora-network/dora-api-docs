@@ -89,8 +89,7 @@ func main() {
 	}
 
 	// --- /charts/candles (1-minute candles for one order book) ---
-	const oneMinuteNs = 60_000_000_000
-	candleSub := map[string]any{"subscribe": map[string]any{"orderbook_ids": []string{orderBookID}, "resolution": oneMinuteNs}}
+	candleSub := map[string]any{"subscribe": map[string]any{"orderbook_ids": []string{orderBookID}, "resolution": "1m"}}
 	if resp, err := client.Request(ctx, "/charts/candles", candleSub, notif("/charts/candles")); err != nil {
 		fmt.Fprintln(os.Stderr, "wsplex demo: /charts/candles subscribe:", err)
 	} else {

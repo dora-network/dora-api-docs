@@ -37,7 +37,7 @@ Bruno, Postman, Insomnia), define them as environment variables.
 | `{{USER_ID}}`         | Your own Dora user UUID (all roles can access their own data)                                             |
 | `{{USER_ID_2}}`       | Another user UUID (requires integrator or admin role — see [User ID access notes](#user-id-access-notes)) |
 
-1 minute resolution = `60000000000` ns
+1 minute resolution = `"1m"`
 
 ## Fetching entity IDs
 
@@ -344,7 +344,7 @@ User-scoped channels (`/accounts/balance`, `/orders/byuser`, and `/trades` with
   "data": {
     "subscribe": {
       "orderbook_ids": ["{{ORDER_BOOK_ID}}"],
-      "resolution": 60000000000
+      "resolution": "1m"
     }
   }
 }
@@ -359,7 +359,7 @@ User-scoped channels (`/accounts/balance`, `/orders/byuser`, and `/trades` with
   "data": {
     "subscribe": {
       "orderbook_ids": ["{{ORDER_BOOK_ID}}", "{{ORDER_BOOK_ID_2}}"],
-      "resolution": 60000000000
+      "resolution": "1m"
     }
   }
 }
@@ -374,7 +374,7 @@ User-scoped channels (`/accounts/balance`, `/orders/byuser`, and `/trades` with
   "data": {
     "unsubscribe": {
       "orderbook_ids": ["{{ORDER_BOOK_ID}}"],
-      "resolution": 60000000000
+      "resolution": "1m"
     }
   }
 }

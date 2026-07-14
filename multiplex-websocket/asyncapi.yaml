@@ -157,7 +157,7 @@ channels:
     address: /charts/candles
     description: |
       Streaming candles per resolution. Each subscription is a set of order book ids plus
-      a resolution expressed as a Go `time.Duration` in nanoseconds. Notifications carry
+      a resolution expressed as a canonical string (`1m`, `5m`, `15m`, `1h`, `4h`, `1d`, or `7d`). Notifications carry
       `candles` as a **map keyed by order book id**; each value is an array of candle
       records for the current resolution window.
     messages:
@@ -358,7 +358,7 @@ operations:
       $ref: "#/channels/chartsCandles"
     summary: |
       Subscribe/unsubscribe to candles per resolution. `resolution` is a
-      `time.Duration` in nanoseconds (e.g. 1m = `60000000000`).
+      canonical resolution string (e.g. `1m`).
     messages:
       - $ref: "#/channels/chartsCandles/messages/chartsCandlesRequest"
     traits:
@@ -637,7 +637,7 @@ components:
       title: /charts/candles request
       summary: |
         Subscribe/unsubscribe to candles per resolution. `resolution` is a
-        `time.Duration` in nanoseconds.
+        canonical resolution string.
       contentType: application/json
       payload:
         $ref: "#/components/schemas/ChartsCandlesRequest"
@@ -1165,13 +1165,143 @@ components:
 
     Asset:
       type: object
-      required: [id, name]
+      description: |
+        Full asset object (same fields as the `/v1/assets` REST endpoint).
+      required:
+        - id
+        - collateral_weight
+        - created_at
+        - decimals
+        - fractionalized_units
+        - description
+        - liquidation_weight
+        - max_supply
+        - max_utilization
+        - minimum_rate
+        - kink_rate
+        - maximum_rate
+        - kink_utilization
+        - name
+        - symbol
+        - can_add_liquidity
+        - can_direct_borrow
+        - can_onboard
+        - can_trade
+        - can_virtual_borrow
+        - max_leverage
       properties:
         id:
           type: string
           format: uuid
+        collateral_weight:
+          type: number
+        created_at:
+          type: string
+          format: date-time
+        decimals:
+          type: integer
+        fractionalized_units:
+          type: integer
+        description:
+          type: string
+        liquidation_weight:
+          type: number
+        max_supply:
+          type: integer
+        max_utilization:
+          type: number
+        minimum_rate:
+          type: number
+        kink_rate:
+          type: number
+        maximum_rate:
+          type: number
+        kink_utilization:
+          type: number
         name:
           type: string
+        symbol:
+          type: string
+        kind:
+          type: string
+          description: Asset kind (e.g. `BOND`, `CURRENCY`, `INTEREST`, `POOL_SHARE`).
+        yield:
+          type: number
+          description: Optional yield (can be NaN).
+        can_add_liquidity:
+          type: boolean
+        can_direct_borrow:
+          type: boolean
+        can_onboard:
+          type: boolean
+        can_trade:
+          type: boolean
+        can_virtual_borrow:
+          type: boolean
+        leverage_interest_rate:
+          type: number
+        max_leverage:
+          type: number
+        bond:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/BondResponse"
+          description: Present for bond assets only.
+
+    BondResponse:
+      type: object
+      required:
+        - id
+        - kind
+        - created_at
+        - isin
+        - issued_at
+        - issuer
+        - maturity_at
+        - principal_value
+        - payments_per_year
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        coupon_kind:
+          type: string
+        bond_kind:
+          type: string
+        coupon_start_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        final_coupon_at:
+          type: string
+          format: date-time
+          nullable: true
+        isin:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        issuer:
+          type: string
+        maturity_at:
+          type: string
+          format: date-time
+        principal_value:
+          type: string
+        payments_per_year:
+          type: integer
+        payments_every:
+          type: integer
+          format: int64
+        next_coupon_payment:
+          type: string
+          format: date-time
+          nullable: true
 
     AssetsNotificationData:
       type: object
@@ -1292,9 +1422,13 @@ components:
       properties:
         stats:
           type: object
-          description: Map keyed by order book id.
+          description: |
+            Map keyed by order book id. Values can be `null` when a subscribed
+            orderbook disappears from the snapshot.
           additionalProperties:
-            $ref: "#/components/schemas/OrderbookStat"
+            oneOf:
+              - $ref: "#/components/schemas/OrderbookStat"
+              - type: "null"
 
     OrderbookStatsNotification:
       allOf:
@@ -1317,11 +1451,10 @@ components:
             type: string
             format: uuid
         resolution:
-          type: integer
-          format: int64
+          type: string
           description: |
-            Candle resolution as a Go `time.Duration` in nanoseconds. For example,
-            1 minute = `60000000000`.
+            Candle resolution as a canonical string: `1m`, `5m`, `15m`, `1h`,
+            `4h`, `1d`, or `7d`.
 
     ChartsCandlesUnsubscribe:
       type: object
@@ -1333,9 +1466,8 @@ components:
             type: string
             format: uuid
         resolution:
-          type: integer
-          format: int64
-          description: Candle resolution to unsubscribe, in nanoseconds.
+          type: string
+          description: Candle resolution to unsubscribe (same format as subscribe).
         all:
           type: boolean
           description: When `true`, unsubscribes all candles.
@@ -1361,7 +1493,7 @@ components:
         subscriptions:
           type: object
           description: |
-            Map keyed by a human-readable resolution key (e.g. `1m`); each value is an
+            Map keyed by a canonical resolution string (e.g. `1m`); each value is an
             array of order book ids subscribed at that resolution.
           additionalProperties:
             type: array
@@ -1430,9 +1562,8 @@ components:
       required: [resolution, candles]
       properties:
         resolution:
-          type: integer
-          format: int64
-          description: The resolution this notification covers, in nanoseconds.
+          type: string
+          description: The canonical resolution string this notification covers (e.g. `1m`).
         candles:
           type: object
           description: Map keyed by order book id; each value is an array of candle records.
@@ -1509,8 +1640,6 @@ components:
         - borrowed
         - impending_borrows
         - avg_entry_price
-        - borrow_limit
-        - liquidation_threshold
         - created_at
         - position_name
         - pending_withdrawal
@@ -1548,12 +1677,6 @@ components:
         avg_entry_price:
           type: string
           description: Average cost per unit paid (long) or received (short).
-        borrow_limit:
-          type: string
-          description: The borrow limit.
-        liquidation_threshold:
-          type: string
-          description: The liquidation threshold.
         created_at:
           type: string
           format: date-time
@@ -1670,9 +1793,13 @@ components:
       properties:
         balances:
           type: object
-          description: Map keyed by order book id.
+          description: |
+            Map keyed by order book id. Values can be `null` when a subscribed
+            pool disappears from the snapshot.
           additionalProperties:
-            $ref: "#/components/schemas/PoolBalance"
+            oneOf:
+              - $ref: "#/components/schemas/PoolBalance"
+              - type: "null"
 
     PoolsBalanceNotification:
       allOf:
@@ -1751,20 +1878,105 @@ components:
 
     Order:
       type: object
-      required: [id, orderbook_id, status, side]
+      description: |
+        Full order record. Same field names as the REST API Order type.
+      required:
+        - order_id
+        - order_book_id
+        - kind
+        - original_price
+        - avg_fill_price
+        - cancelled_quantity
+        - open_quantity
+        - original_quantity
+        - filled_quantity
+        - filled_notional
+        - locked_quantity
+        - impending_borrows_quantity
+        - last_update_at
+        - opened_at
+        - inverse_leverage
+        - side
+        - status
+        - user_id
+        - position_id
       properties:
-        id:
+        order_id:
           type: string
           format: uuid
-        orderbook_id:
+        order_book_id:
           type: string
           format: uuid
-        status:
+          description: The orderbook this order is in.
+        kind:
           type: string
-          description: Order status (e.g. `OPEN`).
+          description: Order kind (e.g. `LIMIT`, `MARKET`).
+        original_price:
+          type: string
+          description: Limit price (0 for market orders).
+        avg_fill_price:
+          type: string
+          description: Average fill price.
+        cancelled_quantity:
+          type: string
+        open_quantity:
+          type: string
+          description: Quantity left open, if any.
+        original_quantity:
+          type: string
+          description: Original order quantity.
+        filled_quantity:
+          type: string
+          filled_notional:
+          type: string
+        locked_quantity:
+          type: string
+          description: Locked quantity (limit orders only).
+        impending_borrows_quantity:
+          type: string
+          description: Reserved borrowing on fills (limit orders only).
+        last_update_at:
+          type: string
+          format: date-time
+        opened_at:
+          type: string
+          format: date-time
+        order_info:
+          type: string
+        inverse_leverage:
+          type: string
+          description: In range (0, 1].
         side:
           type: string
           enum: [BUY, SELL]
+        status:
+          type: string
+          description: Order status (e.g. `OPEN`).
+        user_id:
+          type: string
+          format: uuid
+        order_modifiers:
+          type: array
+          items:
+            type: string
+        position_id:
+          type: string
+          format: uuid
+          description: User's account ID for the order.
+        good_till_date:
+          type: string
+          format: date-time
+        trigger_price:
+          type: string
+        triggered_at:
+          type: string
+          format: date-time
+        trigger_type:
+          type: string
+        client_order_id:
+          type: string
+        parent_order_id:
+          type: string
 
     OrdersByUserNotificationData:
       type: object
