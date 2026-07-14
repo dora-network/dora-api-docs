@@ -12,14 +12,16 @@ Requires Go 1.26+.
 
 ## Configure
 
-The demo reads three environment variables:
+The demo reads these environment variables:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
 | `DORA_STAGING_BASE_URL` *or* `DORA_PROD_BASE_URL` | yes | — | e.g. `https://staging.dora.co` |
 | `DORA_STAGING_API_KEY` *or* `DORA_PROD_API_KEY` | yes | — | your API key |
 | `DORA_DEMO_PRICE_ASSET_IDS` | no | `019c3401-9737-7106-b3d3-b7a6e6eef0e6,019c4d37-311e-7a2f-8d58-f17c39170865` | comma-separated asset ids to subscribe on `/prices` |
-| `DORA_DEMO_ORDER_BOOK_ID` | no | `019c3420-5cd7-7a88-8fe6-a5a622e01ad9` | order book id to subscribe on `/trades` |
+| `DORA_DEMO_ORDER_BOOK_ID` | no | `019c3420-5cd7-7a88-8fe6-a5a622e01ad9` | order book id for `/trades`, `/orderbook/stats`, `/charts/candles` |
+| `DORA_DEMO_USER_ID` | no | `019c4d37-311e-7a2f-8d58-f17c39170865` | user id for `/accounts/balance` and `/orders/byuser` |
+| `DORA_DEMO_ASSET_ID` | no | `019c3401-9737-7106-b3d3-b7a6e6eef0e6` | asset id echoed in the `/debug/notify` payload |
 
 Example:
 
@@ -39,10 +41,14 @@ go run .
 The demo:
 
 1. Connects to `wss://<base_url>/plex`.
-2. Subscribes to two asset ids on `/prices`.
-3. Subscribes to one order book on `/trades`.
+2. Sends a request to `/` to list available routes.
+3. Subscribes to `/prices` (specific asset ids), `/trades` (one order book), `/assets`, `/orderbook/stats` (all), `/charts/candles` (1-minute), `/accounts/balance` (one user), `/pools/balance` (all), `/orders/byuser` (one user, all order books), and schedules a `/debug/notify` echo.
 4. Logs responses and notifications for ~10 seconds.
-5. On `Ctrl+C` or the 10-second timer: sends explicit unsubscribes, logs the responses, closes the socket.
+5. On `Ctrl+C` or the 10-second timer: sends explicit unsubscribes for each stream, logs the responses, closes the socket.
+
+> `/prices` notifications carry `prices` as a **map keyed by asset id**, not an array. The demo prints the raw JSON; see the [protocol guide](../../README.md#path-prices) for the shape.
+
+> `/accounts/balance` and `/orders/byuser` require an authorized token. If your key lacks scope, those requests return an error response but the connection stays open.
 
 ## Verify syntax
 

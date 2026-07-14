@@ -1,8 +1,15 @@
-"""Runnable end-to-end demo for the DORA wsplex multiplexed WebSocket."""
+"""Runnable end-to-end demo for the DORA wsplex multiplexed WebSocket.
+
+Demonstrates every documented path: /, /prices, /trades, /assets,
+/orderbook/stats, /charts/candles, /accounts/balance, /pools/balance,
+/orders/byuser, and /debug/notify. The /prices notification payload is a
+map keyed by asset id (not an array) — the handler prints it as-is.
+"""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import signal
 from typing import Any
@@ -14,6 +21,9 @@ DEFAULT_PRICE_IDS = (
     "019c4d37-311e-7a2f-8d58-f17c39170865",
 )
 DEFAULT_ORDER_BOOK_ID = "019c3420-5cd7-7a88-8fe6-a5a622e01ad9"
+DEFAULT_USER_ID = "019c4d37-311e-7a2f-8d58-f17c39170865"
+DEFAULT_ASSET_ID = "019c3401-9737-7106-b3d3-b7a6e6eef0e6"
+
 
 
 def pick_base_url_and_key() -> tuple[str | None, str | None]:
@@ -31,6 +41,10 @@ def split_non_empty(s: str, fallback: tuple[str, ...]) -> list[str]:
     return parts or list(fallback)
 
 
+def first_non_empty(s: str | None, fallback: str) -> str:
+    return s if s else fallback
+
+
 def to_plex_url(base_url: str) -> str:
     url = base_url.rstrip("/")
     if url.startswith("https://"):
@@ -40,6 +54,12 @@ def to_plex_url(base_url: str) -> str:
     return url + "/plex"
 
 
+def make_handler(path: str):
+    def handler(data: dict[str, Any]) -> None:
+        print(f"[notif {path}] {json.dumps(data)}", flush=True)
+    return handler
+
+
 async def run() -> int:
     base_url, api_key = pick_base_url_and_key()
     if not base_url or not api_key:
@@ -47,29 +67,66 @@ async def run() -> int:
         return 2
 
     price_ids = split_non_empty(os.environ.get("DORA_DEMO_PRICE_ASSET_IDS", ""), DEFAULT_PRICE_IDS)
-    order_book_id = os.environ.get("DORA_DEMO_ORDER_BOOK_ID") or DEFAULT_ORDER_BOOK_ID
+    order_book_id = first_non_empty(os.environ.get("DORA_DEMO_ORDER_BOOK_ID"), DEFAULT_ORDER_BOOK_ID)
+    user_id = first_non_empty(os.environ.get("DORA_DEMO_USER_ID"), DEFAULT_USER_ID)
+    asset_id = first_non_empty(os.environ.get("DORA_DEMO_ASSET_ID"), DEFAULT_ASSET_ID)
 
     client = await PlexClient.connect(PlexOptions(
         url=to_plex_url(base_url),
         auth_header=f"ApiKey {api_key}",
     ))
 
-    def on_prices(data: dict[str, Any]) -> None:
-        print(f"[notif /prices] {data}", flush=True)
+    async def req(path: str, data: dict[str, Any], label: str, notif: Any = None) -> None:
+        resp = await client.request(path, data, on_notification=notif)
+        print(f"[resp {label}] {json.dumps(resp)}", flush=True)
 
-    def on_trades(data: dict[str, Any]) -> None:
-        print(f"[notif /trades] {data}", flush=True)
+    async def unsub(path: str, data: dict[str, Any], label: str) -> None:
+        try:
+            resp = await client.request(path, data)
+            print(f"[resp {label} unsubscribe] {json.dumps(resp)}", flush=True)
+        except RuntimeError as exc:
+            print(f"wsplex demo: {label} unsubscribe: {exc}", file=__import__("sys").stderr, flush=True)
 
     try:
-        resp = await client.request("/prices", {"subscribe": price_ids}, on_notification=on_prices)
-        print(f"[resp /prices subscribe] {resp}", flush=True)
+        # --- / (list routes) ---
+        await req("/", {}, "/ routes")
 
-        resp = await client.request(
-            "/trades",
-            {"subscribe": [{"order_book_ids": [order_book_id]}]},
-            on_notification=on_trades,
-        )
-        print(f"[resp /trades subscribe] {resp}", flush=True)
+        # --- /prices (subscribe to specific asset ids; notifications are a map keyed by asset id) ---
+        await req("/prices", {"subscribe": price_ids}, "/prices subscribe",
+                  notif=make_handler("/prices"))
+
+        # --- /trades (one order book, all users) ---
+        await req("/trades", {"subscribe": [{"order_book_ids": [order_book_id]}]},
+                  "/trades subscribe", notif=make_handler("/trades"))
+
+        # --- /assets (full asset updates) ---
+        await req("/assets", {"subscribe": True}, "/assets subscribe",
+                  notif=make_handler("/assets"))
+
+        # --- /orderbook/stats (all order books) ---
+        await req("/orderbook/stats", {"subscribe_all": True}, "/orderbook/stats subscribe",
+                  notif=make_handler("/orderbook/stats"))
+
+        # --- /charts/candles (1-minute candles for one order book) ---
+        await req("/charts/candles",
+                  {"subscribe": {"orderbook_ids": [order_book_id], "resolution": "1m"}},
+                  "/charts/candles subscribe", notif=make_handler("/charts/candles"))
+
+        # --- /accounts/balance (auth required; one user) ---
+        await req("/accounts/balance", {"subscribe": [user_id]}, "/accounts/balance subscribe",
+                  notif=make_handler("/accounts/balance"))
+
+        # --- /pools/balance (all pools) ---
+        await req("/pools/balance", {"subscribe_all": True}, "/pools/balance subscribe",
+                  notif=make_handler("/pools/balance"))
+
+        # --- /orders/byuser (auth required; one user, all order books) ---
+        await req("/orders/byuser", {"user_id": user_id, "subscribe_all_orderbooks": True},
+                  "/orders/byuser subscribe", notif=make_handler("/orders/byuser"))
+
+        # --- /debug/notify (echo a ping after 100ms) ---
+        await req("/debug/notify", {"delay": 100_000_000, "data": {"ping": "pong", "asset_id": asset_id}},
+                  "/debug/notify", notif=make_handler("/debug/notify"))
 
         stop = asyncio.Event()
         loop = asyncio.get_running_loop()
@@ -86,14 +143,15 @@ async def run() -> int:
 
         print("wsplex demo: shutting down", flush=True)
 
-        resp = await client.request("/prices", {"unsubscribe": price_ids})
-        print(f"[resp /prices unsubscribe] {resp}", flush=True)
-
-        resp = await client.request(
-            "/trades",
-            {"unsubscribe": [{"order_book_ids": [order_book_id]}]},
-        )
-        print(f"[resp /trades unsubscribe] {resp}", flush=True)
+        # Clean up subscriptions.
+        await unsub("/prices", {"unsubscribe": price_ids}, "/prices")
+        await unsub("/trades", {"unsubscribe": [{"order_book_ids": [order_book_id]}]}, "/trades")
+        await unsub("/assets", {"subscribe": False}, "/assets")
+        await unsub("/orderbook/stats", {"unsubscribe_all": True}, "/orderbook/stats")
+        await unsub("/charts/candles", {"unsubscribe": {"all": True}}, "/charts/candles")
+        await unsub("/accounts/balance", {"unsubscribe": [user_id]}, "/accounts/balance")
+        await unsub("/pools/balance", {"unsubscribe_all": True}, "/pools/balance")
+        await unsub("/orders/byuser", {"user_id": user_id, "unsubscribe_all_orderbooks": True}, "/orders/byuser")
     finally:
         await client.close()
 
