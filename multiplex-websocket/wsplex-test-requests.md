@@ -568,3 +568,154 @@ User-scoped channels (`/accounts/balance`, `/orders/byuser`, and `/trades` with
   }
 }
 ```
+
+## Path: `/transactions`
+
+### 34. /transactions: subscribe_all (public)
+
+```json
+{
+  "id": "019f3c41-b16e-7491-3a37-22a8d5ffa1a3",
+  "path": "/transactions",
+  "data": {
+    "subscribe_all": true
+  }
+}
+```
+
+### 35. /transactions: subscribe to one user (filtered)
+
+```json
+{
+  "id": "019f3c41-b16e-7bc1-2ad8-9b1f7d09e6f1",
+  "path": "/transactions",
+  "data": {
+    "subscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 36. /transactions: unsubscribe one user
+
+```json
+{
+  "id": "019f3c41-b16e-7ae2-12c1-bf1d6f1b8a0d",
+  "path": "/transactions",
+  "data": {
+    "unsubscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 37. /transactions: unsubscribe_all
+
+```json
+{
+  "id": "019f3c41-b16e-7a73-2918-3a18d2c0eb4d",
+  "path": "/transactions",
+  "data": {
+    "unsubscribe_all": true
+  }
+}
+```
+
+## Path: `/v1/user/leverage/accrued_interest/stream`
+
+### 38. /v1/user/leverage/accrued_interest/stream: subscribe to one user
+
+```json
+{
+  "id": "019f3c41-b16e-7e16-1a2a-8fa2c5d40a31",
+  "path": "/v1/user/leverage/accrued_interest/stream",
+  "data": {
+    "subscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 39. /v1/user/leverage/accrued_interest/stream: subscribe to two users
+
+```json
+{
+  "id": "019f3c41-b16e-7a30-2f0b-93a0e1d8b212",
+  "path": "/v1/user/leverage/accrued_interest/stream",
+  "data": {
+    "subscribe": ["{{USER_ID}}", "{{USER_ID_2}}"]
+  }
+}
+```
+
+### 40. /v1/user/leverage/accrued_interest/stream: unsubscribe one user
+
+```json
+{
+  "id": "019f3c41-b16e-7b1e-2a13-9b21aab7e1c4",
+  "path": "/v1/user/leverage/accrued_interest/stream",
+  "data": {
+    "unsubscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 41. /v1/user/leverage/accrued_interest/stream: unsubscribe_all
+
+```json
+{
+  "id": "019f3c41-b16e-7d2b-1ab4-8f6e9a06e1d3",
+  "path": "/v1/user/leverage/accrued_interest/stream",
+  "data": {
+    "unsubscribe_all": true
+  }
+}
+```
+
+## Path: `/coupon-payments/byuser`
+
+### 42. /coupon-payments/byuser: subscribe to one user
+
+```json
+{
+  "id": "019f3c41-b16e-7a44-2f7b-9b8e1d2c4f18",
+  "path": "/coupon-payments/byuser",
+  "data": {
+    "subscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 43. /coupon-payments/byuser: subscribe to two users
+
+```json
+{
+  "id": "019f3c41-b16e-7c11-3a26-8d9c0b6e1f27",
+  "path": "/coupon-payments/byuser",
+  "data": {
+    "subscribe": ["{{USER_ID}}", "{{USER_ID_2}}"]
+  }
+}
+```
+
+### 44. /coupon-payments/byuser: unsubscribe one user
+
+```json
+{
+  "id": "019f3c41-b16e-7b9c-1f33-8a7d12c4d2e5",
+  "path": "/coupon-payments/byuser",
+  "data": {
+    "unsubscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 45. /coupon-payments/byuser: unsubscribe_all
+
+```json
+{
+  "id": "019f3c41-b16e-7d12-29be-9c4f0a8e1234",
+  "path": "/coupon-payments/byuser",
+  "data": {
+    "unsubscribe_all": true
+  }
+}
+```
+

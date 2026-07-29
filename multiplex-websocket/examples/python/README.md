@@ -34,7 +34,7 @@ export DORA_STAGING_API_KEY=your-key
 python demo.py
 ```
 
-Connects, subscribes to every documented path (`/`, `/prices`, `/trades`, `/assets`, `/orderbook/stats`, `/charts/candles`, `/accounts/balance`, `/pools/balance`, `/orders/byuser`, `/debug/notify`), logs responses and notifications for ~10 seconds, then sends explicit unsubscribes and closes.
+Connects, subscribes to every documented path (`/`, `/prices`, `/trades`, `/transactions`, `/assets`, `/orderbook/stats`, `/charts/candles`, `/accounts/balance`, `/pools/balance`, `/orders/byuser`, `/v1/user/leverage/accrued_interest/stream`, `/coupon-payments/byuser`, `/debug/notify`), logs responses and notifications for ~10 seconds, then sends explicit unsubscribes and closes.
 
 > `/prices` notifications carry `prices` as a **map keyed by asset id**, not an array. The demo prints the raw JSON; see the [protocol guide](../../README.md#path-prices) for the shape.
 

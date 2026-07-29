@@ -42,7 +42,7 @@ The demo:
 
 1. Connects to `wss://<base_url>/plex`.
 2. Sends a request to `/` to list available routes.
-3. Subscribes to `/prices` (specific asset ids), `/trades` (one order book), `/assets`, `/orderbook/stats` (all), `/charts/candles` (1-minute), `/accounts/balance` (one user), `/pools/balance` (all), `/orders/byuser` (one user, all order books), and schedules a `/debug/notify` echo.
+3. Subscribes to `/prices` (specific asset ids), `/trades` (one order book), `/transactions`, `/assets`, `/orderbook/stats` (all), `/charts/candles` (1-minute), `/accounts/balance` (one user), `/pools/balance` (all), `/orders/byuser` (one user, all order books), `/v1/user/leverage/accrued_interest/stream` (one user), `/coupon-payments/byuser` (one user), and schedules a `/debug/notify` echo.
 4. Logs responses and notifications for ~10 seconds.
 5. On `Ctrl+C` or the 10-second timer: sends explicit unsubscribes for each stream, logs the responses, closes the socket.
 

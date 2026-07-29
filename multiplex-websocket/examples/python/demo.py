@@ -1,9 +1,10 @@
 """Runnable end-to-end demo for the DORA wsplex multiplexed WebSocket.
 
-Demonstrates every documented path: /, /prices, /trades, /assets,
-/orderbook/stats, /charts/candles, /accounts/balance, /pools/balance,
-/orders/byuser, and /debug/notify. The /prices notification payload is a
-map keyed by asset id (not an array) — the handler prints it as-is.
+Demonstrates every documented path: /, /prices, /trades, /transactions,
+/assets, /orderbook/stats, /charts/candles, /accounts/balance,
+/pools/balance, /orders/byuser, /v1/user/leverage/accrued_interest/stream,
+/coupon-payments/byuser, and /debug/notify. The /prices notification payload
+is a map keyed by asset id (not an array) — the handler prints it as-is.
 """
 
 from __future__ import annotations
@@ -99,6 +100,10 @@ async def run() -> int:
         await req("/trades", {"subscribe": [{"order_book_ids": [order_book_id]}]},
                   "/trades subscribe", notif=make_handler("/trades"))
 
+        # --- /transactions (public transaction stream) ---
+        await req("/transactions", {"subscribe_all": True}, "/transactions subscribe",
+                  notif=make_handler("/transactions"))
+
         # --- /assets (full asset updates) ---
         await req("/assets", {"subscribe": True}, "/assets subscribe",
                   notif=make_handler("/assets"))
@@ -124,6 +129,17 @@ async def run() -> int:
         await req("/orders/byuser", {"user_id": user_id, "subscribe_all_orderbooks": True},
                   "/orders/byuser subscribe", notif=make_handler("/orders/byuser"))
 
+        # --- /v1/user/leverage/accrued_interest/stream (auth required; one user) ---
+        await req("/v1/user/leverage/accrued_interest/stream",
+                  {"subscribe": [user_id]},
+                  "/v1/user/leverage/accrued_interest/stream subscribe",
+                  notif=make_handler("/v1/user/leverage/accrued_interest/stream"))
+
+        # --- /coupon-payments/byuser (auth required; one user) ---
+        await req("/coupon-payments/byuser", {"subscribe": [user_id]},
+                  "/coupon-payments/byuser subscribe",
+                  notif=make_handler("/coupon-payments/byuser"))
+
         # --- /debug/notify (echo a ping after 100ms) ---
         await req("/debug/notify", {"delay": 100_000_000, "data": {"ping": "pong", "asset_id": asset_id}},
                   "/debug/notify", notif=make_handler("/debug/notify"))
@@ -146,12 +162,15 @@ async def run() -> int:
         # Clean up subscriptions.
         await unsub("/prices", {"unsubscribe": price_ids}, "/prices")
         await unsub("/trades", {"unsubscribe": [{"order_book_ids": [order_book_id]}]}, "/trades")
+        await unsub("/transactions", {"unsubscribe_all": True}, "/transactions")
         await unsub("/assets", {"subscribe": False}, "/assets")
         await unsub("/orderbook/stats", {"unsubscribe_all": True}, "/orderbook/stats")
         await unsub("/charts/candles", {"unsubscribe": {"all": True}}, "/charts/candles")
         await unsub("/accounts/balance", {"unsubscribe": [user_id]}, "/accounts/balance")
         await unsub("/pools/balance", {"unsubscribe_all": True}, "/pools/balance")
         await unsub("/orders/byuser", {"user_id": user_id, "unsubscribe_all_orderbooks": True}, "/orders/byuser")
+        await unsub("/v1/user/leverage/accrued_interest/stream", {"unsubscribe": [user_id]}, "/v1/user/leverage/accrued_interest/stream")
+        await unsub("/coupon-payments/byuser", {"unsubscribe": [user_id]}, "/coupon-payments/byuser")
     finally:
         await client.close()
 

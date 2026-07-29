@@ -1,9 +1,11 @@
 // Runnable end-to-end demo for the DORA wsplex multiplexed WebSocket.
 //
-// Demonstrates every documented path: /, /prices, /trades, /assets,
-// /orderbook/stats, /charts/candles, /accounts/balance, /pools/balance,
-// /orders/byuser, and /debug/notify. The /prices notification payload is a
-// map keyed by asset id (not an array) — the handler prints it as-is.
+// Demonstrates every documented path: /, /prices, /trades, /transactions,
+// /assets, /orderbook/stats, /charts/candles, /accounts/balance,
+// /pools/balance, /orders/byuser,
+// /v1/user/leverage/accrued_interest/stream, /coupon-payments/byuser, and
+// /debug/notify. The /prices notification payload is a map keyed by asset id
+// (not an array) — the handler prints it as-is.
 
 import { PlexClient } from "./client.js";
 
@@ -96,6 +98,14 @@ async function main(): Promise<number> {
       makeHandler("/trades"),
     );
 
+    // --- /transactions (public transaction stream) ---
+    await req(
+      "/transactions",
+      { subscribe_all: true },
+      "/transactions subscribe",
+      makeHandler("/transactions"),
+    );
+
     // --- /assets (full asset updates) ---
     await req("/assets", { subscribe: true }, "/assets subscribe", makeHandler("/assets"));
 
@@ -139,6 +149,22 @@ async function main(): Promise<number> {
       makeHandler("/orders/byuser"),
     );
 
+    // --- /v1/user/leverage/accrued_interest/stream (auth required; one user) ---
+    await req(
+      "/v1/user/leverage/accrued_interest/stream",
+      { subscribe: [userId] },
+      "/v1/user/leverage/accrued_interest/stream subscribe",
+      makeHandler("/v1/user/leverage/accrued_interest/stream"),
+    );
+
+    // --- /coupon-payments/byuser (auth required; one user) ---
+    await req(
+      "/coupon-payments/byuser",
+      { subscribe: [userId] },
+      "/coupon-payments/byuser subscribe",
+      makeHandler("/coupon-payments/byuser"),
+    );
+
     // --- /debug/notify (echo a ping after 100ms) ---
     await req(
       "/debug/notify",
@@ -160,12 +186,15 @@ async function main(): Promise<number> {
     // Clean up subscriptions.
     await unsub("/prices", { unsubscribe: priceIds }, "/prices");
     await unsub("/trades", { unsubscribe: [{ order_book_ids: [orderBookId] }] }, "/trades");
+    await unsub("/transactions", { unsubscribe_all: true }, "/transactions");
     await unsub("/assets", { subscribe: false }, "/assets");
     await unsub("/orderbook/stats", { unsubscribe_all: true }, "/orderbook/stats");
     await unsub("/charts/candles", { unsubscribe: { all: true } }, "/charts/candles");
     await unsub("/accounts/balance", { unsubscribe: [userId] }, "/accounts/balance");
     await unsub("/pools/balance", { unsubscribe_all: true }, "/pools/balance");
     await unsub("/orders/byuser", { user_id: userId, unsubscribe_all_orderbooks: true }, "/orders/byuser");
+    await unsub("/v1/user/leverage/accrued_interest/stream", { unsubscribe: [userId] }, "/v1/user/leverage/accrued_interest/stream");
+    await unsub("/coupon-payments/byuser", { unsubscribe: [userId] }, "/coupon-payments/byuser");
   } finally {
     await client.close();
   }

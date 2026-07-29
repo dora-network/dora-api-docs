@@ -74,6 +74,13 @@ func main() {
 		fmt.Printf("[resp /trades subscribe] %s\n", string(resp))
 	}
 
+	// --- /transactions (public transaction stream) ---
+	if resp, err := client.Request(ctx, "/transactions", map[string]any{"subscribe_all": true}, notif("/transactions")); err != nil {
+		fmt.Fprintln(os.Stderr, "wsplex demo: /transactions subscribe:", err)
+	} else {
+		fmt.Printf("[resp /transactions subscribe] %s\n", string(resp))
+	}
+
 	// --- /assets (subscribe to full asset updates) ---
 	if resp, err := client.Request(ctx, "/assets", map[string]any{"subscribe": true}, notif("/assets")); err != nil {
 		fmt.Fprintln(os.Stderr, "wsplex demo: /assets subscribe:", err)
@@ -118,6 +125,20 @@ func main() {
 		fmt.Printf("[resp /orders/byuser subscribe] %s\n", string(resp))
 	}
 
+	// --- /v1/user/leverage/accrued_interest/stream (auth required; one user) ---
+	if resp, err := client.Request(ctx, "/v1/user/leverage/accrued_interest/stream", map[string]any{"subscribe": []string{userID}}, notif("/v1/user/leverage/accrued_interest/stream")); err != nil {
+		fmt.Fprintln(os.Stderr, "wsplex demo: /v1/user/leverage/accrued_interest/stream subscribe:", err)
+	} else {
+		fmt.Printf("[resp /v1/user/leverage/accrued_interest/stream subscribe] %s\n", string(resp))
+	}
+
+	// --- /coupon-payments/byuser (auth required; one user) ---
+	if resp, err := client.Request(ctx, "/coupon-payments/byuser", map[string]any{"subscribe": []string{userID}}, notif("/coupon-payments/byuser")); err != nil {
+		fmt.Fprintln(os.Stderr, "wsplex demo: /coupon-payments/byuser subscribe:", err)
+	} else {
+		fmt.Printf("[resp /coupon-payments/byuser subscribe] %s\n", string(resp))
+	}
+
 	// --- /debug/notify (echo a ping after 100ms) ---
 	debugReq := map[string]any{"delay": 100_000_000, "data": map[string]any{"ping": "pong", "asset_id": assetID}}
 	if resp, err := client.Request(ctx, "/debug/notify", debugReq, notif("/debug/notify")); err != nil {
@@ -147,14 +168,16 @@ func main() {
 
 	unsub("/prices", map[string]any{"unsubscribe": priceIDs}, "/prices")
 	unsub("/trades", map[string]any{"unsubscribe": []map[string]any{{"order_book_ids": []string{orderBookID}}}}, "/trades")
+	unsub("/transactions", map[string]any{"unsubscribe_all": true}, "/transactions")
 	unsub("/assets", map[string]any{"subscribe": false}, "/assets")
 	unsub("/orderbook/stats", map[string]any{"unsubscribe_all": true}, "/orderbook/stats")
 	unsub("/charts/candles", map[string]any{"unsubscribe": map[string]any{"all": true}}, "/charts/candles")
 	unsub("/accounts/balance", map[string]any{"unsubscribe": []string{userID}}, "/accounts/balance")
 	unsub("/pools/balance", map[string]any{"unsubscribe_all": true}, "/pools/balance")
 	unsub("/orders/byuser", map[string]any{"user_id": userID, "unsubscribe_all_orderbooks": true}, "/orders/byuser")
+	unsub("/v1/user/leverage/accrued_interest/stream", map[string]any{"unsubscribe": []string{userID}}, "/v1/user/leverage/accrued_interest/stream")
+	unsub("/coupon-payments/byuser", map[string]any{"unsubscribe": []string{userID}}, "/coupon-payments/byuser")
 }
-
 func pickBaseURLAndKey() (string, string) {
 	if v := os.Getenv("DORA_STAGING_BASE_URL"); v != "" {
 		return v, os.Getenv("DORA_STAGING_API_KEY")
