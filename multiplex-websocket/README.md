@@ -13,12 +13,15 @@ Currently documented paths:
 - [`/`](#path-) — list all available wsplex routes.
 - [`/prices`](#path-prices) — real-time price updates for selected assets.
 - [`/trades`](#path-trades) — trade updates by order book, optionally filtered by user.
+- [`/transactions`](#path-transactions) — public transaction stream, optional user filter.
 - [`/assets`](#path-assets) — full asset updates.
 - [`/orderbook/stats`](#path-orderbookstats) — orderbook market stats.
 - [`/charts/candles`](#path-chartscandles) — streaming candles per resolution.
 - [`/accounts/balance`](#path-accountsbalance) — account balances for one or more users (auth required).
 - [`/pools/balance`](#path-poolsbalance) — pool balances.
 - [`/orders/byuser`](#path-ordersbyuser) — order updates for a single user (auth required).
+- [`/v1/user/leverage/accrued_interest/stream`](#path-v1userleverageaccrued_intereststream) — leverage accrued interest per user (auth required).
+- [`/coupon-payments/byuser`](#path-coupon-paymentsbyuser) — coupon payments per user (auth required).
 - [`/debug/notify`](#path-debugnotify) — debug route that echoes `data` after a delay.
 
 Runnable examples in three languages:
@@ -173,12 +176,15 @@ List all available wsplex routes. Send an empty `data` object.
       "/accounts/balance",
       "/assets",
       "/charts/candles",
+      "/coupon-payments/byuser",
       "/debug/notify",
       "/orderbook/stats",
       "/orders/byuser",
       "/pools/balance",
       "/prices",
-      "/trades"
+      "/trades",
+      "/transactions",
+      "/v1/user/leverage/accrued_interest/stream"
     ]
   }
 }
@@ -320,6 +326,66 @@ Each change object inside `subscribe` or `unsubscribe` may specify `order_book_i
         "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
         "side": "BUY",
         "aggressor_indicator": true
+      }
+    ]
+  }
+}
+```
+
+## Path: `/transactions`
+
+Subscribe to public transaction updates for all users or for selected users. An unfiltered (`subscribe_all` / `unsubscribe_all`) request is public. Requesting a specific user requires either an admin, a same-tenant integrator, or the user themselves.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (user ids) | Additive — adds user ids to the subscribed list. |
+| `unsubscribe` | `string[]` (user ids) | Subtractive — removes user ids. |
+| `subscribe_all` | `bool` | When `true`, turns all-mode on. The server streams every user's transactions. |
+| `unsubscribe_all` | `bool` | When `true`, turns all-mode off. |
+
+Public request:
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b95","path":"/transactions","data":{"subscribe_all":true}}
+```
+
+Filtered request:
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b96","path":"/transactions","data":{"subscribe":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Response data
+
+The response carries the post-change state. `subscribed` is the list of explicit user ids (empty when all-mode is on) and `subscribed_all` is the all-mode flag:
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b95","kind":"response","path":"/transactions","data":{"subscribed":[],"subscribed_all":true}}
+```
+
+### Notification data
+
+`transactions` is an array of transaction records. Each record has the same shape as the REST `/v1/transactions` `Transaction` type:
+
+```json
+{
+  "kind": "notification",
+  "path": "/transactions",
+  "id": "019ee189-87d7-7c69-802a-8070f3779ba3",
+  "data": {
+    "transactions": [
+      {
+        "id": "019ee01d-f5f4-775d-b14a-4164a31ee592",
+        "created_at": "2026-06-19T13:42:00.427375Z",
+        "kind": "CREDIT",
+        "asset0": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
+        "quantity0": "100",
+        "quantity1": "0",
+        "asset1": "00000000-0000-0000-0000-000000000000",
+        "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
+        "admin_user_id": "00000000-0000-0000-0000-000000000000"
       }
     ]
   }
@@ -577,6 +643,64 @@ Stream account balances for one or more users. **Auth required** — the token m
 }
 ```
 
+## Path: `/v1/user/leverage/accrued_interest/stream`
+
+Subscribe to current leverage accrued-interest updates for selected users. **Auth required.** Admins may select any user. Integrators may select users in their tenant; users may select only themselves. Permissions are validated whenever the subscription changes. Unfiltered subscriptions are not supported.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (user ids) | Additive — adds user ids to the subscribed list. |
+| `unsubscribe` | `string[]` (user ids) | Subtractive — removes user ids. |
+| `unsubscribe_all` | `bool` | When `true`, removes every subscribed user. |
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b98","path":"/v1/user/leverage/accrued_interest/stream","data":{"subscribe":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Response data
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b98","kind":"response","path":"/v1/user/leverage/accrued_interest/stream","data":{"subscribed":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Notification data
+
+Every notification carries the current leverage accrued interest (LAI) for each subscribed user:
+
+| Field | Type | Description |
+|---|---|---|
+| `current_leverage_accrued_interest` | array | One record per open leveraged position. |
+| `current_leverage_accrued_interest[].user_id` | UUID | User whose position this record is for. |
+| `current_leverage_accrued_interest[].asset_id` | UUID | The asset of the position. |
+| `current_leverage_accrued_interest[].position_id` | UUID | The position identifier. |
+| `current_leverage_accrued_interest[].current_accrued_interest_usd` | string | Accrued interest in USD. |
+| `current_leverage_accrued_interest[].asset_name` | string | Display name of the asset. |
+| `current_leverage_accrued_interest[].asset_symbol` | string | Symbol of the asset. |
+| `cleared_user_ids` | `string[]` (user ids) | Users whose previously delivered LAI snapshot is now empty. Clients should remove all cached LAI items for those users. |
+
+```json
+{
+  "kind": "notification",
+  "path": "/v1/user/leverage/accrued_interest/stream",
+  "id": "019ee189-87d7-7c69-802a-8070f3779ba8",
+  "data": {
+    "current_leverage_accrued_interest": [
+      {
+        "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
+        "asset_id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
+        "position_id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
+        "current_accrued_interest_usd": "12.34",
+        "asset_name": "US Dollar",
+        "asset_symbol": "USD"
+      }
+    ],
+    "cleared_user_ids": []
+  }
+}
+```
+
 ## Path: `/pools/balance`
 
 Subscribe/unsubscribe to pool balances.
@@ -711,6 +835,64 @@ The response is keyed by user id, mirroring the request's `user_id`:
           "status": "OPEN",
           "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
           "position_id": "019c4d37-3120-7ea8-b42b-789da5a51d5a"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Path: `/coupon-payments/byuser`
+
+Subscribe to real-time coupon-payment updates for selected users. **Auth required.** Subscriptions are allowed for admins, same-tenant integrators, and users subscribing to themselves. Subscribe-all is not supported.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (user ids) | Additive — adds user ids to the subscribed list. |
+| `unsubscribe` | `string[]` (user ids) | Subtractive — removes user ids. |
+| `unsubscribe_all` | `bool` | When `true`, removes every subscribed user. |
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b99","path":"/coupon-payments/byuser","data":{"subscribe":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Response data
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b99","kind":"response","path":"/coupon-payments/byuser","data":{"subscribed":["019c4d37-311e-7a2f-8d58-f17c39170865"],"subscribed_all":false}}
+```
+
+### Notification data
+
+`coupon_payments` is a **map keyed by user id**; each value is an array of pending-or-completed coupon-payment records for that user. `summary_by_asset` is a map keyed by user id with per-asset rollups of total pending and completed amounts:
+
+```json
+{
+  "kind": "notification",
+  "path": "/coupon-payments/byuser",
+  "id": "019ee189-87d7-7c69-802a-8070f3779baa",
+  "data": {
+    "coupon_payments": {
+      "019c4d37-311e-7a2f-8d58-f17c39170865": [
+        {
+          "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
+          "position_id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
+          "asset_id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
+          "coupon_payment_id": "019ee189-87d7-7c69-802a-8070f3779bab",
+          "seq": 1,
+          "pending": "12.5",
+          "completed": "1.25"
+        }
+      ]
+    },
+    "summary_by_asset": {
+      "019c4d37-311e-7a2f-8d58-f17c39170865": [
+        {
+          "asset_id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
+          "pending": "12.5",
+          "completed": "1.25"
         }
       ]
     }
