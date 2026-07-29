@@ -27,6 +27,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getAssetYieldData**](DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 | [**getAssetsStream**](DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 | [**getCandleData**](DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
+| [**getCopyTraders**](DefaultApi.md#getCopyTraders) | **GET** /v1/user/copy_traders | Get list of user IDs with copy trading enabled |
 | [**getCouponPaymentsByAssetId**](DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
 | [**getDepositInstructions**](DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
 | [**getL1Depth**](DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
@@ -90,6 +91,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**listPositionAccountsSelf**](DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
 | [**payLeverageGetAccruedInterest**](DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 | [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
+| [**repayUSD**](DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
 | [**revokeAPIKeyForUser**](DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 | [**settleLeverageAccruedInterest**](DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
@@ -618,6 +620,8 @@ No authorization required
 
 Get yield chart data for an asset
 
+    Returns complete yield buckets starting at &#x60;start&#x60;; &#x60;end&#x60; is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
@@ -688,6 +692,32 @@ Get candlestick data for an orderbook
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getCopyTraders"></a>
+# **getCopyTraders**
+> GetCopyTradersResponse getCopyTraders(page, limit)
+
+Get list of user IDs with copy trading enabled
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **page** | **Integer**|  | [optional] [default to 1] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+
+### Return type
+
+[**GetCopyTradersResponse**](../Models/GetCopyTradersResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -1038,6 +1068,8 @@ Get all pending withdrawal requests for this user
 
 Get order by ID
 
+    Get details of a specific order. Traders can only view their own orders. Admins can view any order. Integrators can view orders for users within their tenant.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
@@ -1313,17 +1345,21 @@ Get realized P&amp;L settlements with filters
 
 <a name="getTopTradersByPnL"></a>
 # **getTopTradersByPnL**
-> GetPnLRankingResponse getTopTradersByPnL(start, end, limit)
+> GetPnLRankingResponse getTopTradersByPnL(start, end, page, limit, all)
 
 Get top traders by PnL
+
+    Returns user PnL ranking for the provided time range. By default only users with allow_copy_trading&#x3D;true are included. Set all&#x3D;true to include all users; this requires an admin role.
 
 ### Parameters
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **start** | **Date**|  | [default to null] |
-| **end** | **Date**|  | [default to null] |
-| **limit** | **Integer**|  | [optional] [default to null] |
+| **start** | **Date**| Start timestamp (inclusive) in RFC3339 format. | [default to null] |
+| **end** | **Date**| End timestamp (exclusive) in RFC3339 format. | [default to null] |
+| **page** | **Integer**| 1-based page number for pagination. | [optional] [default to 1] |
+| **limit** | **Integer**| Number of records per page (max 100). Defaults to 100. | [optional] [default to 100] |
+| **all** | **Boolean**| When true, includes users with allow_copy_trading&#x3D;false. Requires admin role. | [optional] [default to false] |
 
 ### Return type
 
@@ -2321,6 +2357,31 @@ Reject a pending withdrawal request
 ### Return type
 
 [**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="repayUSD"></a>
+# **repayUSD**
+> RepayUSDResponseEnvelope repayUSD(RepayUSDRequest)
+
+Repay borrowed USD, then accrue and pay leverage interest
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **RepayUSDRequest** | [**RepayUSDRequest**](../Models/RepayUSDRequest.md)|  | |
+
+### Return type
+
+[**RepayUSDResponseEnvelope**](../Models/RepayUSDResponseEnvelope.md)
 
 ### Authorization
 

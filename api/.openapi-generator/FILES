@@ -63,6 +63,7 @@ Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
 Models/GetAssetByIDResponseEnvelope.md
 Models/GetAssetYTMByIDResponseEnvelope.md
+Models/GetCopyTradersResponse.md
 Models/GetPnLRankingResponse.md
 Models/GetRealizedPnlSettlementsResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
@@ -152,6 +153,9 @@ Models/PositionType.md
 Models/PriceLevel.md
 Models/RealizedPnlSettlement.md
 Models/RealizedPnlSettlements.md
+Models/RepayUSDRequest.md
+Models/RepayUSDResponseEnvelope.md
+Models/RepayUSDResult.md
 Models/ResponseEnvelope.md
 Models/ResponseEnvelopeOfListAssets.md
 Models/RevokeAPIKeyData.md

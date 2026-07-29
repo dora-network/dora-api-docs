@@ -835,12 +835,14 @@
     "/v1/user/ranking": {
       "get": {
         "summary": "Get top traders by PnL",
+        "description": "Returns user PnL ranking for the provided time range. By default only users with allow_copy_trading=true are included. Set all=true to include all users; this requires an admin role.",
         "operationId": "getTopTradersByPnL",
         "parameters": [
           {
             "name": "start",
             "in": "query",
             "required": true,
+            "description": "Start timestamp (inclusive) in RFC3339 format.",
             "schema": {
               "type": "string",
               "format": "date-time"
@@ -850,19 +852,43 @@
             "name": "end",
             "in": "query",
             "required": true,
+            "description": "End timestamp (exclusive) in RFC3339 format.",
             "schema": {
               "type": "string",
               "format": "date-time"
             }
           },
           {
-            "name": "limit",
+            "name": "page",
             "in": "query",
             "required": false,
+            "description": "1-based page number for pagination.",
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Number of records per page (max 100). Defaults to 100.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "all",
+            "in": "query",
+            "required": false,
+            "description": "When true, includes users with allow_copy_trading=false. Requires admin role.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -878,7 +904,88 @@
             }
           },
           "400": {
-            "description": "Bad request, e.g. invalid path parameters",
+            "description": "Bad request, e.g. invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (authentication required when all=true)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden (admin role required when all=true)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user/copy_traders": {
+      "get": {
+        "summary": "Get list of user IDs with copy trading enabled",
+        "operationId": "getCopyTraders",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user IDs who have allow_copy_trading enabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCopyTradersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid pagination parameters",
             "content": {
               "application/json": {
                 "schema": {
@@ -1934,6 +2041,7 @@
     "/v1/orders/{order_id}": {
       "get": {
         "summary": "Get order by ID",
+        "description": "Get details of a specific order. Traders can only view their own orders. Admins can view any order. Integrators can view orders for users within their tenant.",
         "operationId": "getOrderById",
         "parameters": [
           {
@@ -2212,6 +2320,7 @@
     "/v1/charts/{asset_id}/yield": {
       "get": {
         "summary": "Get yield chart data for an asset",
+        "description": "Returns complete yield buckets starting at `start`; `end` is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets.",
         "operationId": "getAssetYieldData",
         "security": [],
         "parameters": [
@@ -2263,7 +2372,7 @@
             }
           },
           "400": {
-            "description": "Bad request, e.g. invalid parameters",
+            "description": "Bad request, e.g. invalid parameters or more than 10,000 complete buckets",
             "content": {
               "application/json": {
                 "schema": {
@@ -2284,6 +2393,16 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Yield query exceeded its execution deadline",
             "content": {
               "application/json": {
                 "schema": {
@@ -2515,6 +2634,84 @@
           },
           "409": {
             "description": "Conflict, e.g. the requested amount is not available to transfer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/positions/repay_usd": {
+      "post": {
+        "summary": "Repay borrowed USD, then accrue and pay leverage interest",
+        "operationId": "repayUSD",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepayUSDRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "USD borrow repaid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepayUSDResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. missing position_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Position or USD asset not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Position is not eligible for repayment or has no repayable USD balance",
             "content": {
               "application/json": {
                 "schema": {
@@ -6823,7 +7020,9 @@
         "enum": [
           "PENDING",
           "FINALIZED",
-          "ORPHANED"
+          "ORPHANED",
+          "USER_NOT_EXIST",
+          "DUST"
         ]
       },
       "DepositInstructionForChain": {
@@ -8606,6 +8805,25 @@
       },
       "ListOrderBooksResponse": {
         "$ref": "#/components/schemas/ListOrderbookResponseEnvelope"
+      },
+      "GetCopyTradersResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        ]
       },
       "OrderKind": {
         "type": "string",
@@ -11348,7 +11566,7 @@
           "price": {
             "type": "string"
           },
-          "timestamp": {
+          "time": {
             "type": "string",
             "format": "date-time"
           }
@@ -11356,7 +11574,7 @@
         "required": [
           "pool_id",
           "price",
-          "timestamp"
+          "time"
         ]
       },
       "PoolPriceResponseEnvelope": {
@@ -12056,6 +12274,63 @@
       },
       "TransferBalancesResponse": {
         "$ref": "#/components/schemas/TransferBalancesResponseEnvelope"
+      },
+      "RepayUSDRequest": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "position_id"
+        ]
+      },
+      "RepayUSDResult": {
+        "type": "object",
+        "properties": {
+          "position_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "repaid": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "transaction_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "position_id",
+          "asset_id",
+          "repaid",
+          "transaction_id"
+        ]
+      },
+      "RepayUSDResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/RepayUSDResult"
+              }
+            }
+          }
+        ]
+      },
+      "RepayUSDResponse": {
+        "$ref": "#/components/schemas/RepayUSDResponseEnvelope"
       },
       "PositionAccount": {
         "type": "object",

@@ -30,6 +30,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getAssetYieldData**](Apis/DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 *DefaultApi* | [**getAssetsStream**](Apis/DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 *DefaultApi* | [**getCandleData**](Apis/DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
+*DefaultApi* | [**getCopyTraders**](Apis/DefaultApi.md#getCopyTraders) | **GET** /v1/user/copy_traders | Get list of user IDs with copy trading enabled |
 *DefaultApi* | [**getCouponPaymentsByAssetId**](Apis/DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
 *DefaultApi* | [**getDepositInstructions**](Apis/DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
 *DefaultApi* | [**getL1Depth**](Apis/DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
@@ -93,6 +94,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**listPositionAccountsSelf**](Apis/DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
 *DefaultApi* | [**payLeverageGetAccruedInterest**](Apis/DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 *DefaultApi* | [**rejectLedgerWithdrawRequest**](Apis/DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
+*DefaultApi* | [**repayUSD**](Apis/DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
 *DefaultApi* | [**revokeAPIKeyForUser**](Apis/DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 *DefaultApi* | [**revokeAPIKeyForUserID**](Apis/DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
 *DefaultApi* | [**settleLeverageAccruedInterest**](Apis/DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
@@ -177,6 +179,7 @@ All URIs are relative to *https://staging.dora.co*
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
  - [GetAssetYTMByIDResponseEnvelope](./Models/GetAssetYTMByIDResponseEnvelope.md)
+ - [GetCopyTradersResponse](./Models/GetCopyTradersResponse.md)
  - [GetPnLRankingResponse](./Models/GetPnLRankingResponse.md)
  - [GetRealizedPnlSettlementsResponseEnvelope](./Models/GetRealizedPnlSettlementsResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
@@ -266,6 +269,9 @@ All URIs are relative to *https://staging.dora.co*
  - [PriceLevel](./Models/PriceLevel.md)
  - [RealizedPnlSettlement](./Models/RealizedPnlSettlement.md)
  - [RealizedPnlSettlements](./Models/RealizedPnlSettlements.md)
+ - [RepayUSDRequest](./Models/RepayUSDRequest.md)
+ - [RepayUSDResponseEnvelope](./Models/RepayUSDResponseEnvelope.md)
+ - [RepayUSDResult](./Models/RepayUSDResult.md)
  - [ResponseEnvelope](./Models/ResponseEnvelope.md)
  - [ResponseEnvelopeOfListAssets](./Models/ResponseEnvelopeOfListAssets.md)
  - [RevokeAPIKeyData](./Models/RevokeAPIKeyData.md)
