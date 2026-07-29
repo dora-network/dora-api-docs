@@ -211,6 +211,62 @@ channels:
       ordersByUserNotification:
         $ref: "#/components/messages/OrdersByUserNotification"
 
+  transactions:
+    address: /transactions
+    description: |
+      Public transaction updates for all users or selected users. Same subscription
+      shape as `/prices` but the list holds user ids: a `subscribed` list of user ids
+      plus a `subscribed_all` flag. An unfiltered `subscribe_all` / `unsubscribe_all`
+      request is public; a user-filtered request (`subscribe` / `unsubscribe` with
+      specific user ids) requires an admin, a same-tenant integrator, or the user
+      themselves. Notifications carry `transactions` as an **array** of transaction
+      records (not keyed by user id).
+    messages:
+      transactionsRequest:
+        $ref: "#/components/messages/TransactionsRequest"
+      transactionsResponse:
+        $ref: "#/components/messages/TransactionsResponse"
+      transactionsNotification:
+        $ref: "#/components/messages/TransactionsNotification"
+
+  accruedInterestStream:
+    address: /v1/user/leverage/accrued_interest/stream
+    description: |
+      Current leverage accrued-interest (LAI) updates for selected users. **Auth
+      required** — admins may select any user, integrators may select users in their
+      tenant, and users may select only themselves. Permissions are validated whenever
+      the subscription changes. Unfiltered subscriptions are **not supported**: there
+      is no `subscribe_all`, only `subscribe` / `unsubscribe` / `unsubscribe_all`. The
+      response carries a `subscribed` list of user ids (no all-mode flag). Notifications
+      carry `current_leverage_accrued_interest` as an array of records plus an optional
+      `cleared_user_ids` array of users whose previously delivered LAI snapshot is now
+      empty.
+    messages:
+      accruedInterestRequest:
+        $ref: "#/components/messages/AccruedInterestRequest"
+      accruedInterestResponse:
+        $ref: "#/components/messages/AccruedInterestResponse"
+      accruedInterestNotification:
+        $ref: "#/components/messages/AccruedInterestNotification"
+
+  couponPaymentsByUser:
+    address: /coupon-payments/byuser
+    description: |
+      Real-time coupon-payment updates for selected users. **Auth required** — admins,
+      same-tenant integrators, and users subscribing to themselves. Subscribe-all is
+      **not supported**: there is no `subscribe_all`, only `subscribe` / `unsubscribe` /
+      `unsubscribe_all`. The response carries a `subscribed` list of user ids plus a
+      `subscribed_all` flag that is always `false`. Notifications carry `coupon_payments`
+      as a **map keyed by user id** (each value an array of coupon-payment records) and
+      `summary_by_asset` as a map keyed by user id of per-asset rollups.
+    messages:
+      couponPaymentsRequest:
+        $ref: "#/components/messages/CouponPaymentsRequest"
+      couponPaymentsResponse:
+        $ref: "#/components/messages/CouponPaymentsResponse"
+      couponPaymentsNotification:
+        $ref: "#/components/messages/CouponPaymentsNotification"
+
   debugNotify:
     address: /debug/notify
     description: |
@@ -451,6 +507,90 @@ operations:
     summary: Server-pushed order updates, keyed by order book id.
     messages:
       - $ref: "#/channels/ordersByUser/messages/ordersByUserNotification"
+
+  transactionsRequest:
+    action: send
+    channel:
+      $ref: "#/channels/transactions"
+    summary: |
+      Subscription change for `/transactions`. Mutates the `subscribed` list and/or the
+      `subscribed_all` flag. Same validation rules as `/prices`; see the channel
+      description for the auth rules on user-filtered requests.
+    messages:
+      - $ref: "#/channels/transactions/messages/transactionsRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  transactionsReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/transactions"
+    summary: |
+      The single response matching a `/transactions` request, correlated by `id`.
+      `subscribed` is an array of user ids (empty when `subscribed_all` is on).
+    messages:
+      - $ref: "#/channels/transactions/messages/transactionsResponse"
+  transactionsReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/transactions"
+    summary: Server-pushed transaction updates. `transactions` is an array.
+    messages:
+      - $ref: "#/channels/transactions/messages/transactionsNotification"
+
+  accruedInterestRequest:
+    action: send
+    channel:
+      $ref: "#/channels/accruedInterestStream"
+    summary: |
+      Subscribe/unsubscribe to leverage accrued-interest updates for one or more users
+      (auth required). No `subscribe_all` — unfiltered subscriptions are not supported.
+    messages:
+      - $ref: "#/channels/accruedInterestStream/messages/accruedInterestRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  accruedInterestReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/accruedInterestStream"
+    summary: |
+      The single response matching a `/v1/user/leverage/accrued_interest/stream`
+      request, correlated by `id`.
+    messages:
+      - $ref: "#/channels/accruedInterestStream/messages/accruedInterestResponse"
+  accruedInterestReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/accruedInterestStream"
+    summary: |
+      Server-pushed current leverage accrued interest per user, plus `cleared_user_ids`.
+    messages:
+      - $ref: "#/channels/accruedInterestStream/messages/accruedInterestNotification"
+
+  couponPaymentsRequest:
+    action: send
+    channel:
+      $ref: "#/channels/couponPaymentsByUser"
+    summary: |
+      Subscribe/unsubscribe to coupon-payment updates for one or more users (auth
+      required). No `subscribe_all` — subscribe-all is not supported.
+    messages:
+      - $ref: "#/channels/couponPaymentsByUser/messages/couponPaymentsRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  couponPaymentsReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/couponPaymentsByUser"
+    summary: The single response matching a `/coupon-payments/byuser` request.
+    messages:
+      - $ref: "#/channels/couponPaymentsByUser/messages/couponPaymentsResponse"
+  couponPaymentsReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/couponPaymentsByUser"
+    summary: Server-pushed coupon payments keyed by user id, plus per-asset rollups.
+    messages:
+      - $ref: "#/channels/couponPaymentsByUser/messages/couponPaymentsNotification"
 
   debugNotifyRequest:
     action: send
@@ -733,6 +873,94 @@ components:
       payload:
         $ref: "#/components/schemas/OrdersByUserNotification"
 
+    # ----- /transactions -----
+    TransactionsRequest:
+      name: TransactionsRequest
+      title: /transactions request
+      summary: |
+        Subscription change for `/transactions`. Same shape as `/prices` but the list
+        holds user ids. Validation rules: cannot combine `subscribe` with
+        `subscribe_all`; cannot combine `unsubscribe` with `unsubscribe_all`; cannot
+        combine `unsubscribe` with `subscribe_all`.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/TransactionsRequest"
+    TransactionsResponse:
+      name: TransactionsResponse
+      title: /transactions response
+      summary: |
+        The single response matching a `/transactions` request. Contains either `data`
+        (success) or `error` (failure).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/TransactionsResponse"
+    TransactionsNotification:
+      name: TransactionsNotification
+      title: /transactions notification
+      summary: |
+        Server-pushed transaction updates. `transactions` is an array of transaction
+        records (same field names as the REST `/v1/transactions` `Transaction` type;
+        `order_side` and `internal_transfer` are present only when applicable).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/TransactionsNotification"
+
+    # ----- /v1/user/leverage/accrued_interest/stream -----
+    AccruedInterestRequest:
+      name: AccruedInterestRequest
+      title: /v1/user/leverage/accrued_interest/stream request
+      summary: |
+        Subscribe/unsubscribe to leverage accrued-interest updates for one or more
+        users (auth required). No `subscribe_all` — unfiltered subscriptions are not
+        supported.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccruedInterestRequest"
+    AccruedInterestResponse:
+      name: AccruedInterestResponse
+      title: /v1/user/leverage/accrued_interest/stream response
+      summary: The single response matching an accrued-interest request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccruedInterestResponse"
+    AccruedInterestNotification:
+      name: AccruedInterestNotification
+      title: /v1/user/leverage/accrued_interest/stream notification
+      summary: |
+        Server-pushed current leverage accrued interest. `current_leverage_accrued_interest`
+        is an array of records; `cleared_user_ids` (omitted when empty) lists users
+        whose previously delivered snapshot is now empty.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/AccruedInterestNotification"
+
+    # ----- /coupon-payments/byuser -----
+    CouponPaymentsRequest:
+      name: CouponPaymentsRequest
+      title: /coupon-payments/byuser request
+      summary: |
+        Subscribe/unsubscribe to coupon-payment updates for one or more users (auth
+        required). No `subscribe_all` — subscribe-all is not supported.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/CouponPaymentsRequest"
+    CouponPaymentsResponse:
+      name: CouponPaymentsResponse
+      title: /coupon-payments/byuser response
+      summary: The single response matching a `/coupon-payments/byuser` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/CouponPaymentsResponse"
+    CouponPaymentsNotification:
+      name: CouponPaymentsNotification
+      title: /coupon-payments/byuser notification
+      summary: |
+        Server-pushed coupon payments. `coupon_payments` is a map keyed by user id;
+        `summary_by_asset` is a map keyed by user id of per-asset rollups.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/CouponPaymentsNotification"
+
     # ----- /debug/notify -----
     DebugNotifyRequest:
       name: DebugNotifyRequest
@@ -773,9 +1001,10 @@ components:
         path:
           type: string
           description: |
-            Must start with `/`. One of: `/`, `/prices`, `/trades`, `/assets`,
-            `/orderbook/stats`, `/charts/candles`, `/accounts/balance`, `/pools/balance`,
-            `/orders/byuser`, `/debug/notify`.
+            Must start with `/`. One of: `/`, `/prices`, `/trades`, `/transactions`,
+            `/assets`, `/orderbook/stats`, `/charts/candles`, `/accounts/balance`,
+            `/v1/user/leverage/accrued_interest/stream`, `/pools/balance`, `/orders/byuser`,
+            `/coupon-payments/byuser`, `/debug/notify`.
           enum:
             - "/"
             - "/prices"
@@ -786,6 +1015,9 @@ components:
             - "/accounts/balance"
             - "/pools/balance"
             - "/orders/byuser"
+            - "/transactions"
+            - "/v1/user/leverage/accrued_interest/stream"
+            - "/coupon-payments/byuser"
             - "/debug/notify"
         data:
           type: object
@@ -816,6 +1048,9 @@ components:
             - "/accounts/balance"
             - "/pools/balance"
             - "/orders/byuser"
+            - "/transactions"
+            - "/v1/user/leverage/accrued_interest/stream"
+            - "/coupon-payments/byuser"
             - "/debug/notify"
         data:
           description: Path-specific response payload. Present on success.
@@ -849,6 +1084,9 @@ components:
             - "/accounts/balance"
             - "/pools/balance"
             - "/orders/byuser"
+            - "/transactions"
+            - "/v1/user/leverage/accrued_interest/stream"
+            - "/coupon-payments/byuser"
             - "/debug/notify"
         data:
           description: Path-specific notification payload.
@@ -1927,7 +2165,7 @@ components:
           description: Original order quantity.
         filled_quantity:
           type: string
-          filled_notional:
+        filled_notional:
           type: string
         locked_quantity:
           type: string
@@ -2002,6 +2240,407 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/OrdersByUserNotificationData"
+
+    # ----- /transactions -----
+
+    TransactionsRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change over user ids. Same shape as `/prices`. Validation
+                rules: cannot combine `subscribe` with `subscribe_all`; cannot combine
+                `unsubscribe` with `unsubscribe_all`; cannot combine `unsubscribe` with
+                `subscribe_all`.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds user ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes user ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all:
+                  type: boolean
+                  description: |
+                    When `true`, turns all-mode on. Streams every user's transactions.
+                    Public — no per-user auth required.
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, turns all-mode off.
+              additionalProperties: false
+
+    TransactionsResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: array
+          description: |
+            The current subscribed list of user ids after the change. Empty when
+            `subscribed_all` is on.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+          description: The current all-mode flag state after the change was applied.
+
+    TransactionsResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/TransactionsResponseData"
+
+    TransactionInternalTransfer:
+      type: object
+      description: |
+        Present on `INTERNAL_TRANSFER` transactions only. Describes the source account,
+        destination account, asset, and quantity moved.
+      required: [from_account_id, to_account_id, asset_id, quantity]
+      properties:
+        from_account_id:
+          type: string
+          format: uuid
+        to_account_id:
+          type: string
+          format: uuid
+        asset_id:
+          type: string
+          format: uuid
+        quantity:
+          type: string
+
+    Transaction:
+      type: object
+      description: |
+        One transaction, serialized from the wsplex `TransactionResponse` type. Same
+        field names as the REST `/v1/transactions` `Transaction` type, but
+        `order_side` and `internal_transfer` are `omitempty` — present only when the
+        transaction has them.
+      required:
+        - id
+        - created_at
+        - kind
+        - asset0
+        - quantity0
+        - quantity1
+        - asset1
+        - user_id
+        - admin_user_id
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        kind:
+          type: string
+          description: Transaction kind (e.g. `CREDIT`, `FILL`, `COUPON_PAYMENT`).
+        asset0:
+          type: string
+          format: uuid
+          description: The asset debited/credited on side 0.
+        quantity0:
+          type: string
+        quantity1:
+          type: string
+        asset1:
+          type: string
+          format: uuid
+          description: The asset debited/credited on side 1 (zero UUID when unused).
+        user_id:
+          type: string
+          format: uuid
+        admin_user_id:
+          type: string
+          format: uuid
+          description: Acting admin user id (zero UUID when no admin was involved).
+        order_side:
+          type: string
+          enum: [BUY, SELL]
+          description: Present only on trade-related transactions (e.g. `FILL`).
+        internal_transfer:
+          $ref: "#/components/schemas/TransactionInternalTransfer"
+          description: Present only on `INTERNAL_TRANSFER` transactions.
+
+    TransactionsNotificationData:
+      type: object
+      required: [transactions]
+      properties:
+        transactions:
+          type: array
+          description: Array of transaction records (not keyed by user id).
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    TransactionsNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/TransactionsNotificationData"
+
+    # ----- /v1/user/leverage/accrued_interest/stream -----
+
+    AccruedInterestRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscribe/unsubscribe to LAI updates for one or more users. No
+                `subscribe_all` — unfiltered subscriptions are not supported.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds user ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes user ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, removes every subscribed user.
+              additionalProperties: false
+
+    AccruedInterestResponseData:
+      type: object
+      required: [subscribed]
+      properties:
+        subscribed:
+          type: array
+          description: The current subscribed list of user ids after the change.
+          items:
+            type: string
+            format: uuid
+
+    AccruedInterestResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AccruedInterestResponseData"
+
+    CurrentLeverageAccruedInterest:
+      type: object
+      description: One current leverage accrued-interest record for an open leveraged position.
+      required:
+        - user_id
+        - asset_id
+        - position_id
+        - current_accrued_interest_usd
+        - asset_name
+        - asset_symbol
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        asset_id:
+          type: string
+          format: uuid
+        position_id:
+          type: string
+          format: uuid
+          description: The leveraged position accruing interest.
+        current_accrued_interest_usd:
+          type: string
+          description: Accrued interest in USD.
+        asset_name:
+          type: string
+          description: Display name of the asset.
+        asset_symbol:
+          type: string
+          description: Symbol of the asset.
+
+    AccruedInterestNotificationData:
+      type: object
+      required: [current_leverage_accrued_interest]
+      properties:
+        current_leverage_accrued_interest:
+          type: array
+          description: One record per open leveraged position.
+          items:
+            $ref: "#/components/schemas/CurrentLeverageAccruedInterest"
+        cleared_user_ids:
+          type: array
+          description: |
+            Users whose previously delivered LAI snapshot is now empty (omitted when
+            empty). Clients should remove all cached LAI items for those users.
+          items:
+            type: string
+            format: uuid
+
+    AccruedInterestNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/AccruedInterestNotificationData"
+
+    # ----- /coupon-payments/byuser -----
+
+    CouponPaymentsRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscribe/unsubscribe to coupon-payment updates for one or more users.
+                No `subscribe_all` — subscribe-all is not supported.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds user ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes user ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, removes every subscribed user.
+              additionalProperties: false
+
+    CouponPaymentsResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: array
+          description: The current subscribed list of user ids after the change.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+          description: Always `false` — subscribe-all is not supported on this path.
+
+    CouponPaymentsResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CouponPaymentsResponseData"
+
+    UserCouponPayment:
+      type: object
+      description: One pending-or-completed coupon-payment record for a user.
+      required:
+        - user_id
+        - position_id
+        - asset_id
+        - coupon_payment_id
+        - seq
+        - pending
+        - completed
+        - started_at
+        - ended_at
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        position_id:
+          type: string
+          format: uuid
+          description: The user's account/position this coupon payment accrues against.
+        asset_id:
+          type: string
+          format: uuid
+        coupon_payment_id:
+          type: string
+          format: uuid
+        seq:
+          type: integer
+          format: int64
+          minimum: 0
+        pending:
+          type: string
+          description: Pending coupon amount.
+        completed:
+          type: string
+          description: Completed coupon amount.
+        started_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+        transaction_id:
+          type: string
+          format: uuid
+          description: Present once the coupon payment is settled (omitted otherwise).
+
+    UserCouponPaymentAssetSummary:
+      type: object
+      description: Per-asset rollup of pending and completed coupon amounts for a user.
+      required: [asset_id, pending, completed]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        pending:
+          type: string
+        completed:
+          type: string
+
+    CouponPaymentsNotificationData:
+      type: object
+      required: [coupon_payments, summary_by_asset]
+      properties:
+        coupon_payments:
+          type: object
+          description: |
+            Map keyed by user id; each value is an array of coupon-payment records for
+            that user.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/UserCouponPayment"
+        summary_by_asset:
+          type: object
+          description: |
+            Map keyed by user id; each value is an array of per-asset rollups.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/UserCouponPaymentAssetSummary"
+
+    CouponPaymentsNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CouponPaymentsNotificationData"
 
     # ----- /debug/notify -----
 
