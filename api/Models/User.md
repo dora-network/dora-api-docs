@@ -9,6 +9,7 @@
 | **email** | **String** |  | [default to null] |
 | **first\_name** | **String** |  | [default to null] |
 | **last\_name** | **String** |  | [default to null] |
+| **user\_name** | **String** |  | [default to null] |
 | **country\_of\_domicile** | [**CountryCode**](CountryCode.md) |  | [default to null] |
 | **native\_asset\_id** | **UUID** |  | [default to null] |
 | **photo\_url** | **String** |  | [optional] [default to null] |

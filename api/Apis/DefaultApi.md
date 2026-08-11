@@ -4,17 +4,20 @@ All URIs are relative to *https://staging.dora.co*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
+| [**addTradingChallengeUsers**](DefaultApi.md#addTradingChallengeUsers) | **PUT** /v1/trading_challenges/add_users | Add users to a trading challenge |
 | [**approveLedgerWithdrawRequest**](DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
 | [**cancelAllOpenOrders**](DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user&#39;s orders on specific orderbook |
 | [**cancelLedgerWithdrawRequest**](DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 | [**cancelOrderById**](DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
 | [**claimLeverageGetAccruedInterest**](DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
+| [**claimTradingChallengePrize**](DefaultApi.md#claimTradingChallengePrize) | **POST** /v1/trading_challenges/{trading_challenge_id}/claim | Claim challenge prize |
 | [**closeIsolatedAccountV2**](DefaultApi.md#closeIsolatedAccountV2) | **POST** /v2/accounts/close | Close an isolated account, repaying the borrowed |
 | [**closeIsolatedPosition**](DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 | [**createAPIKeyForUser**](DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 | [**createAPIKeyForUserID**](DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
 | [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
+| [**createTradingChallenge**](DefaultApi.md#createTradingChallenge) | **POST** /v1/trading_challenges | Create a trading challenge |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
@@ -27,7 +30,9 @@ All URIs are relative to *https://staging.dora.co*
 | [**getAssetYieldData**](DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 | [**getAssetsStream**](DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
 | [**getCandleData**](DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
-| [**getCopyTraders**](DefaultApi.md#getCopyTraders) | **GET** /v1/user/copy_traders | Get list of user IDs with copy trading enabled |
+| [**getCashReserveByUserID**](DefaultApi.md#getCashReserveByUserID) | **GET** /v1/accounts/{user_id}/cash_reserve | Get the minimum USD cash reserve requirement for the given user |
+| [**getCashReserveSelf**](DefaultApi.md#getCashReserveSelf) | **GET** /v1/accounts/self/cash_reserve | Get the minimum USD cash reserve requirement for the logged in user |
+| [**getCopyTraders**](DefaultApi.md#getCopyTraders) | **GET** /v1/user/copy_traders | Get list of users with copy trading enabled |
 | [**getCouponPaymentsByAssetId**](DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
 | [**getDepositInstructions**](DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
 | [**getL1Depth**](DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
@@ -56,6 +61,9 @@ All URIs are relative to *https://staging.dora.co*
 | [**getTopTradersByPnL**](DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 | [**getTradeById**](DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 | [**getTrades**](DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
+| [**getTradingChallengeByID**](DefaultApi.md#getTradingChallengeByID) | **GET** /v1/trading_challenges/{trading_challenge_id} | Get trading challenge by ID |
+| [**getTradingChallengeDailySnapshots**](DefaultApi.md#getTradingChallengeDailySnapshots) | **GET** /v1/trading_challenges/{trading_challenge_id}/daily_snapshots | Get trading challenge daily snapshots |
+| [**getTradingChallengeResults**](DefaultApi.md#getTradingChallengeResults) | **GET** /v1/trading_challenges/{trading_challenge_id}/results | Get trading challenge results |
 | [**getTransactionById**](DefaultApi.md#getTransactionById) | **GET** /v1/transactions/{transaction_id} | Get a transaction by ID |
 | [**getTransactions**](DefaultApi.md#getTransactions) | **GET** /v1/transactions | Get a filtered, paginated list of transactions |
 | [**getTransactionsSettlements**](DefaultApi.md#getTransactionsSettlements) | **GET** /v1/transactions/settlements | Get transactions settlements with filters |
@@ -89,8 +97,10 @@ All URIs are relative to *https://staging.dora.co*
 | [**listOrderBooks**](DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 | [**listPositionAccountsSelf**](DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
+| [**listTradingChallenges**](DefaultApi.md#listTradingChallenges) | **GET** /v1/trading_challenges | List trading challenges |
 | [**payLeverageGetAccruedInterest**](DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 | [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
+| [**removeTradingChallengeUsers**](DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 | [**repayUSD**](DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
 | [**revokeAPIKeyForUser**](DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
@@ -109,6 +119,31 @@ All URIs are relative to *https://staging.dora.co*
 | [**validateSubmitOrder**](DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 | [**verifyUser**](DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
+
+<a name="addTradingChallengeUsers"></a>
+# **addTradingChallengeUsers**
+> TradingChallengeResponseEnvelope addTradingChallengeUsers(AddTradingChallengeUsersRequest)
+
+Add users to a trading challenge
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **AddTradingChallengeUsersRequest** | [**AddTradingChallengeUsersRequest**](../Models/AddTradingChallengeUsersRequest.md)|  | |
+
+### Return type
+
+[**TradingChallengeResponseEnvelope**](../Models/TradingChallengeResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 <a name="approveLedgerWithdrawRequest"></a>
 # **approveLedgerWithdrawRequest**
@@ -242,6 +277,31 @@ Claim current accrued leverage interest for a specific user
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="claimTradingChallengePrize"></a>
+# **claimTradingChallengePrize**
+> ClaimTradingChallengeResponseEnvelope claimTradingChallengePrize(trading\_challenge\_id)
+
+Claim challenge prize
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**ClaimTradingChallengeResponseEnvelope**](../Models/ClaimTradingChallengeResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 <a name="closeIsolatedAccountV2"></a>
@@ -385,6 +445,31 @@ Create a new order
 ### Return type
 
 [**CreateOrderResponseEnvelope**](../Models/CreateOrderResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="createTradingChallenge"></a>
+# **createTradingChallenge**
+> TradingChallengeResponseEnvelope createTradingChallenge(CreateTradingChallengeRequest)
+
+Create a trading challenge
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateTradingChallengeRequest** | [**CreateTradingChallengeRequest**](../Models/CreateTradingChallengeRequest.md)|  | |
+
+### Return type
+
+[**TradingChallengeResponseEnvelope**](../Models/TradingChallengeResponseEnvelope.md)
 
 ### Authorization
 
@@ -698,11 +783,62 @@ No authorization required
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getCashReserveByUserID"></a>
+# **getCashReserveByUserID**
+> CashReserveResponseEnvelope getCashReserveByUserID(user\_id)
+
+Get the minimum USD cash reserve requirement for the given user
+
+    Returns the user&#39;s available Global Account USD balance alongside their minimum cash reserve requirement and its breakdown. While available_usd is below required_usd the user may not open new leveraged positions, submit buy orders, transfer assets out of their Global Account or withdraw.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**CashReserveResponseEnvelope**](../Models/CashReserveResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getCashReserveSelf"></a>
+# **getCashReserveSelf**
+> CashReserveResponseEnvelope getCashReserveSelf()
+
+Get the minimum USD cash reserve requirement for the logged in user
+
+    Returns the user&#39;s available Global Account USD balance alongside their minimum cash reserve requirement and its breakdown. While available_usd is below required_usd the user may not open new leveraged positions, submit buy orders, transfer assets out of their Global Account or withdraw.
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**CashReserveResponseEnvelope**](../Models/CashReserveResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getCopyTraders"></a>
 # **getCopyTraders**
 > GetCopyTradersResponse getCopyTraders(page, limit)
 
-Get list of user IDs with copy trading enabled
+Get list of users with copy trading enabled
 
 ### Parameters
 
@@ -755,7 +891,7 @@ No authorization required
 
 Get per-chain instructions for depositing USDC into the Dora vault
 
-    Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry.
+    Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry. Restricted to DORA tenant users whose native asset is USDC.
 
 ### Parameters
 
@@ -1419,6 +1555,82 @@ Get a filtered, paginated list of trades
 ### Return type
 
 [**ListTradeResponseEnvelope**](../Models/ListTradeResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getTradingChallengeByID"></a>
+# **getTradingChallengeByID**
+> TradingChallengeResponseEnvelope getTradingChallengeByID(trading\_challenge\_id)
+
+Get trading challenge by ID
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**TradingChallengeResponseEnvelope**](../Models/TradingChallengeResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getTradingChallengeDailySnapshots"></a>
+# **getTradingChallengeDailySnapshots**
+> TradingChallengeDailySnapshotsResponseEnvelope getTradingChallengeDailySnapshots(trading\_challenge\_id)
+
+Get trading challenge daily snapshots
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**TradingChallengeDailySnapshotsResponseEnvelope**](../Models/TradingChallengeDailySnapshotsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getTradingChallengeResults"></a>
+# **getTradingChallengeResults**
+> TradingChallengeResultsResponseEnvelope getTradingChallengeResults(trading\_challenge\_id, board)
+
+Get trading challenge results
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+| **board** | **String**| Leaderboard board selector. Defaults to TOP_PNL. | [optional] [default to TOP_PNL] [enum: TOP_PNL, TOP_VOLUME, IRON_TRADER] |
+
+### Return type
+
+[**TradingChallengeResultsResponseEnvelope**](../Models/TradingChallengeResultsResponseEnvelope.md)
 
 ### Authorization
 
@@ -2314,6 +2526,35 @@ This endpoint does not need any parameter.
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="listTradingChallenges"></a>
+# **listTradingChallenges**
+> TradingChallengeListResponseEnvelope listTradingChallenges(tenant\_id, type, status, start, end)
+
+List trading challenges
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **tenant\_id** | **String**|  | [optional] [default to null] |
+| **type** | [**TradingChallengeType**](../Models/.md)|  | [optional] [default to null] [enum: TOURNAMENT, CASH] |
+| **status** | [**TradingChallengeStatus**](../Models/.md)|  | [optional] [default to null] [enum: PENDING, ACTIVE, COMPLETED] |
+| **start** | **Date**|  | [optional] [default to null] |
+| **end** | **Date**|  | [optional] [default to null] |
+
+### Return type
+
+[**TradingChallengeListResponseEnvelope**](../Models/TradingChallengeListResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="payLeverageGetAccruedInterest"></a>
 # **payLeverageGetAccruedInterest**
 > PayLeverageAccruedInterestResponseEnvelope payLeverageGetAccruedInterest(PayLeverageAccruedInterestRequest)
@@ -2357,6 +2598,31 @@ Reject a pending withdrawal request
 ### Return type
 
 [**WithdrawalInitiationResponseEnvelope**](../Models/WithdrawalInitiationResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="removeTradingChallengeUsers"></a>
+# **removeTradingChallengeUsers**
+> TradingChallengeResponseEnvelope removeTradingChallengeUsers(RemoveTradingChallengeUsersRequest)
+
+Remove users from a trading challenge
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **RemoveTradingChallengeUsersRequest** | [**RemoveTradingChallengeUsersRequest**](../Models/RemoveTradingChallengeUsersRequest.md)|  | |
+
+### Return type
+
+[**TradingChallengeResponseEnvelope**](../Models/TradingChallengeResponseEnvelope.md)
 
 ### Authorization
 

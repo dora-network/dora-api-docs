@@ -948,7 +948,7 @@
     },
     "/v1/user/copy_traders": {
       "get": {
-        "summary": "Get list of user IDs with copy trading enabled",
+        "summary": "Get list of users with copy trading enabled",
         "operationId": "getCopyTraders",
         "parameters": [
           {
@@ -975,7 +975,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of user IDs who have allow_copy_trading enabled",
+            "description": "List of users who have allow_copy_trading enabled",
             "content": {
               "application/json": {
                 "schema": {
@@ -1741,6 +1741,16 @@
           },
           "401": {
             "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve",
             "content": {
               "application/json": {
                 "schema": {
@@ -2632,6 +2642,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Conflict, e.g. the requested amount is not available to transfer",
             "content": {
@@ -2992,6 +3012,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden, e.g. an integrator depositing a non-USD asset, or a USD deposit to a user whose native asset is USDC (their USD only moves on chain, as USDC)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3052,6 +3082,16 @@
           },
           "400": {
             "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: the acting user is not permitted, or the target user's native asset is USDC - their USD only moves on chain, as a USDC deposit or withdrawal",
             "content": {
               "application/json": {
                 "schema": {
@@ -3223,6 +3263,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden: the acting user is not permitted, or the target user's native asset is USDC - their USD only moves on chain, as an USDC deposit or withdrawal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3331,6 +3381,16 @@
           },
           "400": {
             "description": "Bad request, e.g. invalid parameters or insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve",
             "content": {
               "application/json": {
                 "schema": {
@@ -6672,6 +6732,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Conflict, e.g. the requested amount is not available to transfer",
             "content": {
@@ -6815,7 +6885,7 @@
     "/v1/web3/deposit-instructions": {
       "get": {
         "summary": "Get per-chain instructions for depositing USDC into the Dora vault",
-        "description": "Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry.",
+        "description": "Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry. Restricted to DORA tenant users whose native asset is USDC.",
         "operationId": "getDepositInstructions",
         "parameters": [
           {
@@ -6879,6 +6949,16 @@
           },
           "401": {
             "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC. Admin and indexer API keys have no native asset and are also denied.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6971,6 +7051,670 @@
           },
           "403": {
             "description": "Forbidden, e.g. a non-admin user requesting another user's deposits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/accounts/{user_id}/cash_reserve": {
+      "get": {
+        "summary": "Get the minimum USD cash reserve requirement for the given user",
+        "operationId": "getCashReserveByUserID",
+        "description": "Returns the user's available Global Account USD balance alongside their minimum cash reserve requirement and its breakdown. While available_usd is below required_usd the user may not open new leveraged positions, submit buy orders, transfer assets out of their Global Account or withdraw.",
+        "responses": {
+          "200": {
+            "description": "The user's minimum USD cash reserve state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashReserveResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the caller may only read their own cash reserve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/v1/accounts/self/cash_reserve": {
+      "get": {
+        "summary": "Get the minimum USD cash reserve requirement for the logged in user",
+        "operationId": "getCashReserveSelf",
+        "description": "Returns the user's available Global Account USD balance alongside their minimum cash reserve requirement and its breakdown. While available_usd is below required_usd the user may not open new leveraged positions, submit buy orders, transfer assets out of their Global Account or withdraw.",
+        "responses": {
+          "200": {
+            "description": "The user's minimum USD cash reserve state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashReserveResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, the caller may only read their own cash reserve",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges": {
+      "post": {
+        "summary": "Create a trading challenge",
+        "operationId": "createTradingChallenge",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTradingChallengeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Trading challenge created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List trading challenges",
+        "operationId": "listTradingChallenges",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TradingChallengeType"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TradingChallengeStatus"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trading challenges list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeListResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/add_users": {
+      "put": {
+        "summary": "Add users to a trading challenge",
+        "operationId": "addTradingChallengeUsers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddTradingChallengeUsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/remove_users": {
+      "put": {
+        "summary": "Remove users from a trading challenge",
+        "operationId": "removeTradingChallengeUsers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveTradingChallengeUsersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Users removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}": {
+      "get": {
+        "summary": "Get trading challenge by ID",
+        "operationId": "getTradingChallengeByID",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Trading challenge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/daily_snapshots": {
+      "get": {
+        "summary": "Get trading challenge daily snapshots",
+        "operationId": "getTradingChallengeDailySnapshots",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily snapshots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeDailySnapshotsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/results": {
+      "get": {
+        "summary": "Get trading challenge results",
+        "operationId": "getTradingChallengeResults",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "board",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TOP_PNL",
+                "TOP_VOLUME",
+                "IRON_TRADER"
+              ],
+              "default": "TOP_PNL"
+            },
+            "description": "Leaderboard board selector. Defaults to TOP_PNL."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Challenge results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResultsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/claim": {
+      "post": {
+        "summary": "Claim challenge prize",
+        "operationId": "claimTradingChallengePrize",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prize claimed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimTradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -7931,12 +8675,16 @@
           "last_name": {
             "type": "string"
           },
+          "user_name": {
+            "type": "string"
+          },
           "country_of_domicile": {
             "$ref": "#/components/schemas/CountryCode"
           },
           "native_asset_id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Optional: the user's native asset ID. Must be a CURRENCY asset; defaults to USD. The USDC asset is never allowed for integrator-created users."
           },
           "photo_url": {
             "type": "string"
@@ -8090,6 +8838,9 @@
           "last_name": {
             "type": "string"
           },
+          "user_name": {
+            "type": "string"
+          },
           "country_of_domicile": {
             "$ref": "#/components/schemas/CountryCode"
           },
@@ -8156,6 +8907,7 @@
           "email",
           "first_name",
           "last_name",
+          "user_name",
           "country_of_domicile",
           "native_asset_id",
           "roles",
@@ -8817,12 +9569,27 @@
               "data": {
                 "type": "array",
                 "items": {
-                  "type": "string",
-                  "format": "uuid"
+                  "$ref": "#/components/schemas/CopyTrader"
                 }
               }
             }
           }
+        ]
+      },
+      "CopyTrader": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "user_name"
         ]
       },
       "OrderKind": {
@@ -12712,6 +13479,14 @@
           },
           "ltv": {
             "type": "string"
+          },
+          "realized_pl": {
+            "description": "The realized profit or loss since account inception",
+            "type": "string"
+          },
+          "unrealized_pl": {
+            "description": "The unrealized profit or loss for the account's current open positions",
+            "type": "string"
           }
         },
         "required": [
@@ -12719,7 +13494,9 @@
           "account_equity",
           "available",
           "health",
-          "ltv"
+          "ltv",
+          "realized_pl",
+          "unrealized_pl"
         ]
       },
       "PLAccount": {
@@ -13221,6 +13998,565 @@
       },
       "ListAccountsResponseV2": {
         "$ref": "#/components/schemas/ListAccountsResponseV2Envelope"
+      },
+      "CashReserveBreakdown": {
+        "type": "object",
+        "description": "Breakdown of the minimum USD cash reserve requirement.",
+        "properties": {
+          "completed_pac": {
+            "type": "string",
+            "description": "Completed PAC (partially accrued coupon) obligations the user owes, in USD."
+          },
+          "outstanding_lai": {
+            "type": "string",
+            "description": "Outstanding LAI (leverage accrued interest) the user owes, in USD."
+          },
+          "estimated_fees": {
+            "type": "string",
+            "description": "Estimated trading fees for the current settlement period, capped at a configured fraction (1% by default) of the user's traded USD volume since 00:00:00 UTC."
+          },
+          "borrowed_portion": {
+            "type": "string",
+            "description": "Configured fraction (10% by default) of the user's total outstanding borrowed value, in USD."
+          },
+          "floor": {
+            "type": "string",
+            "description": "Configured absolute minimum requirement, in USD."
+          },
+          "total": {
+            "type": "string",
+            "description": "The amount of USD the user must keep available in their Global Account."
+          }
+        },
+        "required": [
+          "completed_pac",
+          "outstanding_lai",
+          "estimated_fees",
+          "borrowed_portion",
+          "floor",
+          "total"
+        ]
+      },
+      "CashReserveResponse": {
+        "type": "object",
+        "properties": {
+          "enforced": {
+            "type": "boolean",
+            "description": "Whether the minimum cash reserve guard is active in this environment."
+          },
+          "available_usd": {
+            "type": "string",
+            "description": "The user's currently available USD balance in their Global Account."
+          },
+          "committed_usd": {
+            "type": "string",
+            "description": "USD still counted in available_usd but already claimed by the user's open market buy orders on the Global Account, which reserve no funds at submission time. The reserve is evaluated against available_usd minus committed_usd."
+          },
+          "required_usd": {
+            "type": "string",
+            "description": "The user's minimum USD cash reserve requirement."
+          },
+          "satisfied": {
+            "type": "boolean",
+            "description": "Whether available_usd minus committed_usd is at least required_usd."
+          },
+          "breakdown": {
+            "$ref": "#/components/schemas/CashReserveBreakdown"
+          }
+        },
+        "required": [
+          "enforced",
+          "available_usd",
+          "committed_usd",
+          "required_usd",
+          "satisfied",
+          "breakdown"
+        ]
+      },
+      "CashReserveResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CashReserveResponse"
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeType": {
+        "type": "string",
+        "enum": [
+          "TOURNAMENT",
+          "CASH"
+        ]
+      },
+      "TradingChallengeStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "ACTIVE",
+          "COMPLETED"
+        ]
+      },
+      "CreateTradingChallengeRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "tenant_id",
+          "type",
+          "max_users",
+          "start",
+          "end",
+          "initial_user_balance"
+        ],
+        "properties": {
+          "tenant_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trading challenge name"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TradingChallengeType"
+          },
+          "max_users": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "initial_user_balance": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "gold_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "silver_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "bronze_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "pnl_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "total_volume_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "avg_daily_volume_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "minimum_equity_percentage_condition": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 99
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "AddTradingChallengeUsersRequest": {
+        "type": "object",
+        "required": [
+          "trading_challenge_id",
+          "users"
+        ],
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "RemoveTradingChallengeUsersRequest": {
+        "type": "object",
+        "required": [
+          "trading_challenge_id",
+          "users"
+        ],
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "TradingChallenge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "description": "Trading challenge name"
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TradingChallengeType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TradingChallengeStatus"
+          },
+          "max_users": {
+            "type": "integer"
+          },
+          "start_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "initial_user_balance": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "gold_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "silver_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "bronze_prize_quantity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "pnl_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "total_volume_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "avg_daily_volume_condition": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "minimum_equity_percentage_condition": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_processed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "users_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "type",
+          "status",
+          "max_users",
+          "start_at",
+          "end_at",
+          "initial_user_balance",
+          "gold_prize_quantity",
+          "silver_prize_quantity",
+          "bronze_prize_quantity",
+          "pnl_condition",
+          "total_volume_condition",
+          "avg_daily_volume_condition",
+          "minimum_equity_percentage_condition",
+          "created_at",
+          "users_count"
+        ]
+      },
+      "TradingChallengeResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/TradingChallenge"
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeListResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TradingChallenge"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeDailySnapshot": {
+        "type": "object",
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "trading_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "daily_volume": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "daily_pnl": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "daily_trades": {
+            "type": "integer"
+          },
+          "volume_compliant": {
+            "type": "boolean"
+          },
+          "eod_equity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "active_day": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradingChallengeDailySnapshotsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TradingChallengeDailySnapshot"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeResult": {
+        "type": "object",
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "cum_volume": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "cum_pnl": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "pnl_pct": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "calendar_days_since_start": {
+            "type": "integer"
+          },
+          "active_days": {
+            "type": "integer"
+          },
+          "compliant_days": {
+            "type": "integer"
+          },
+          "crown_eligible": {
+            "type": "boolean"
+          },
+          "claim_eligible": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "FUNDED",
+              "ACTIVE",
+              "BUSTED",
+              "COMPLETED",
+              "PRIZE_CLAIMED"
+            ]
+          },
+          "crown": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "PNL_GOLD",
+              "PNL_SILVER",
+              "PNL_BRONZE",
+              "VOLUME_GOLD",
+              "VOLUME_SILVER",
+              "VOLUME_BRONZE",
+              "IRON_GOLD",
+              "IRON_SILVER",
+              "IRON_BRONZE"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "current_day_daily_volume": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "current_day_daily_pnl": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "current_day_trading_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "cum_trades": {
+            "type": "integer"
+          }
+        }
+      },
+      "TradingChallengeResultsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TradingChallengeResult"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ClaimTradingChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "trading_challenge_id",
+          "user_id",
+          "status"
+        ]
+      },
+      "ClaimTradingChallengeResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/ClaimTradingChallengeResponse"
+              }
+            }
+          }
+        ]
       }
     }
   }
