@@ -347,6 +347,95 @@
         }
       }
     },
+    "/v1/integrators/user/{user_id}/kyc": {
+      "post": {
+        "summary": "Set or clear a user's KYC completion timestamp",
+        "operationId": "updateUserKYC",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserKYCRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User KYC status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserKYCResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid user id or request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user": {
       "get": {
         "summary": "Get all users (admin only)",
@@ -1862,6 +1951,15 @@
               "default": 100,
               "minimum": 1
             }
+          },
+          {
+            "name": "client_order_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by client order ID prefix (max 256 characters)"
           }
         ],
         "responses": {
@@ -8721,6 +8819,49 @@
           }
         ]
       },
+      "UpdateUserKYCRequest": {
+        "type": "object",
+        "properties": {
+          "completed_kyc": {
+            "type": "boolean",
+            "description": "If true, sets kyc_completed_at to now; if false, clears it."
+          }
+        },
+        "required": [
+          "completed_kyc"
+        ]
+      },
+      "UpdateUserKYCResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kyc_completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user_id",
+          "kyc_completed"
+        ]
+      },
+      "UpdateUserKYCResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/UpdateUserKYCResponse"
+              }
+            }
+          }
+        ]
+      },
       "UserCreatedResponseEnvelope": {
         "allOf": [
           {
@@ -8900,6 +9041,12 @@
           },
           "allow_copy_trading": {
             "type": "boolean"
+          },
+          "kyc_completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the user completed KYC. Omitted/null if KYC has not been completed. Set via POST /v1/integrators/user/{user_id}/kyc."
           }
         },
         "required": [

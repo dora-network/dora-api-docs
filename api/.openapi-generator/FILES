@@ -234,6 +234,9 @@ Models/UpdateFieldBoolean.md
 Models/UpdateFieldString.md
 Models/UpdateRolesString.md
 Models/UpdateUserConfigRequest.md
+Models/UpdateUserKYCRequest.md
+Models/UpdateUserKYCResponse.md
+Models/UpdateUserKYCResponseEnvelope.md
 Models/User.md
 Models/UserBalanceResponseEnvelope.md
 Models/UserConfig.md

@@ -27,6 +27,7 @@
 | **allow\_deposit\_withdrawal\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_orders\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_copy\_trading** | **Boolean** |  | [default to null] |
+| **kyc\_completed\_at** | **Date** | When the user completed KYC. Omitted/null if KYC has not been completed. Set via POST /v1/integrators/user/{user_id}/kyc. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

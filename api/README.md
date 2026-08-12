@@ -119,6 +119,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**transferAvailableBalances**](Apis/DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user's accounts (e.g. global to isolated position) |
 *DefaultApi* | [**updateUserConfig**](Apis/DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 *DefaultApi* | [**updateUserConfigSelf**](Apis/DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
+*DefaultApi* | [**updateUserKYC**](Apis/DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user's KYC completion timestamp |
 *DefaultApi* | [**validateSubmitOrder**](Apis/DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 *DefaultApi* | [**verifyUser**](Apis/DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
@@ -360,6 +361,9 @@ All URIs are relative to *https://staging.dora.co*
  - [UpdateFieldString](./Models/UpdateFieldString.md)
  - [UpdateRolesString](./Models/UpdateRolesString.md)
  - [UpdateUserConfigRequest](./Models/UpdateUserConfigRequest.md)
+ - [UpdateUserKYCRequest](./Models/UpdateUserKYCRequest.md)
+ - [UpdateUserKYCResponse](./Models/UpdateUserKYCResponse.md)
+ - [UpdateUserKYCResponseEnvelope](./Models/UpdateUserKYCResponseEnvelope.md)
  - [User](./Models/User.md)
  - [UserBalanceResponseEnvelope](./Models/UserBalanceResponseEnvelope.md)
  - [UserConfig](./Models/UserConfig.md)

@@ -116,6 +116,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**transferAvailableBalances**](DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user&#39;s accounts (e.g. global to isolated position) |
 | [**updateUserConfig**](DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 | [**updateUserConfigSelf**](DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
+| [**updateUserKYC**](DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user&#39;s KYC completion timestamp |
 | [**validateSubmitOrder**](DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 | [**verifyUser**](DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
@@ -2473,7 +2474,7 @@ List order books
 
 <a name="listOrders"></a>
 # **listOrders**
-> ListOrdersResponseEnvelope listOrders(user\_id, order\_book\_id, kind, status, side, from, to, page, limit)
+> ListOrdersResponseEnvelope listOrders(user\_id, order\_book\_id, kind, status, side, from, to, page, limit, client\_order\_id)
 
 List all orders
 
@@ -2490,6 +2491,7 @@ List all orders
 | **to** | **Date**|  | [optional] [default to null] |
 | **page** | **Integer**|  | [optional] [default to 1] |
 | **limit** | **Integer**|  | [optional] [default to 100] |
+| **client\_order\_id** | **String**| Filter by client order ID prefix (max 256 characters) | [optional] [default to null] |
 
 ### Return type
 
@@ -3007,6 +3009,32 @@ Update user configuration for the authenticated user
 ### Return type
 
 [**UserUpdatedResponseEnvelope**](../Models/UserUpdatedResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="updateUserKYC"></a>
+# **updateUserKYC**
+> UpdateUserKYCResponseEnvelope updateUserKYC(user\_id, UpdateUserKYCRequest)
+
+Set or clear a user&#39;s KYC completion timestamp
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**|  | [default to null] |
+| **UpdateUserKYCRequest** | [**UpdateUserKYCRequest**](../Models/UpdateUserKYCRequest.md)|  | |
+
+### Return type
+
+[**UpdateUserKYCResponseEnvelope**](../Models/UpdateUserKYCResponseEnvelope.md)
 
 ### Authorization
 
