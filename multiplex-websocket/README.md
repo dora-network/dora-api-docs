@@ -16,8 +16,10 @@ Currently documented paths:
 - [`/transactions`](#path-transactions) — public transaction stream, optional user filter.
 - [`/assets`](#path-assets) — full asset updates.
 - [`/orderbook/stats`](#path-orderbookstats) — orderbook market stats.
+- [`/orders/open/l2`](#path-ordersopenl2) — L2 open-order price levels by order book.
 - [`/charts/candles`](#path-chartscandles) — streaming candles per resolution.
 - [`/accounts/balance`](#path-accountsbalance) — account balances for one or more users (auth required).
+- [`/pnl/byuser`](#path-pnlbyuser) — per-account PnL reports for selected users (auth required).
 - [`/pools/balance`](#path-poolsbalance) — pool balances.
 - [`/orders/byuser`](#path-ordersbyuser) — order updates for a single user (auth required).
 - [`/v1/user/leverage/accrued_interest/stream`](#path-v1userleverageaccrued_intereststream) — leverage accrued interest per user (auth required).
@@ -180,6 +182,8 @@ List all available wsplex routes. Send an empty `data` object.
       "/debug/notify",
       "/orderbook/stats",
       "/orders/byuser",
+      "/orders/open/l2",
+      "/pnl/byuser",
       "/pools/balance",
       "/prices",
       "/trades",
@@ -512,6 +516,47 @@ Subscribe/unsubscribe to orderbook market stats.
 }
 ```
 
+## Path: `/orders/open/l2`
+
+Subscribe/unsubscribe to L2 open-order price levels by order book.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (order book ids) | Additive — adds order book ids to the subscribed list. |
+| `unsubscribe` | `string[]` (order book ids) | Subtractive — removes order book ids. |
+| `subscribe_all` | `bool` | When `true`, streams levels for every order book. |
+| `unsubscribe_all` | `bool` | When `true`, turns all-mode off. |
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b97","path":"/orders/open/l2","data":{"subscribe":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"]}}
+```
+
+### Response data
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b97","kind":"response","path":"/orders/open/l2","data":{"subscribed":["019c3420-5cd7-7a88-8fe6-a5a622e01ad9"],"subscribed_all":false}}
+```
+
+### Notification data
+
+The notification `data` is a **map keyed by order book id**; each value is an array of price-level records for that book. Each level has `side` (`BUY`/`SELL`), `price`, and `quantity`:
+
+```json
+{
+  "kind": "notification",
+  "path": "/orders/open/l2",
+  "id": "019ee189-87d7-7c69-802a-8070f3779ba6",
+  "data": {
+    "019c3420-5cd7-7a88-8fe6-a5a622e01ad9": [
+      { "side": "BUY", "price": "1.10", "quantity": "42" },
+      { "side": "SELL", "price": "1.11", "quantity": "7" }
+    ]
+  }
+}
+```
+
 ## Path: `/charts/candles`
 
 Subscribe/unsubscribe to streaming candles per resolution. Each subscription is keyed by a set of order book ids plus a resolution string (`1m`, `5m`, `15m`, `1h`, `4h`, `1d`, or `7d`).
@@ -636,6 +681,59 @@ Stream account balances for one or more users. **Auth required** — the token m
           "created_at": "2026-02-06T18:02:26Z",
           "position_name": "global_account",
           "pending_withdrawal": "0"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Path: `/pnl/byuser`
+
+Stream the same per-account PnL reports returned by `GET /v1/pl/{user_id}`. **Auth required.** PnL is polled every second and a notification is sent when a subscribed user's report changes. Subscriptions are allowed for admins, integrators when every selected user belongs to the integrator's tenant, and self users selecting themselves. Subscribing without explicit user IDs is not supported.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (user ids) | Additive — adds user ids to the subscribed list. |
+| `unsubscribe` | `string[]` (user ids) | Subtractive — removes user ids. |
+| `unsubscribe_all` | `bool` | When `true`, removes every subscribed user. |
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b99","path":"/pnl/byuser","data":{"subscribe":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Response data
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779b99","kind":"response","path":"/pnl/byuser","data":{"subscribed":["019c4d37-311e-7a2f-8d58-f17c39170865"],"subscribed_all":false}}
+```
+
+### Notification data
+
+`pnl` is a **map keyed by user id**; each value is an array of per-account PnL report records:
+
+```json
+{
+  "kind": "notification",
+  "path": "/pnl/byuser",
+  "id": "019ee189-87d7-7c69-802a-8070f3779b9b",
+  "data": {
+    "pnl": {
+      "019c4d37-311e-7a2f-8d58-f17c39170865": [
+        {
+          "account_id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
+          "account_name": "global_account",
+          "is_global": true,
+          "assets": [],
+          "summary": {
+            "leverage": "1",
+            "account_equity": "0",
+            "available": "0",
+            "ltv": "0",
+            "health": "1"
+          }
         }
       ]
     }

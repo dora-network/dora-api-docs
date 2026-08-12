@@ -282,6 +282,40 @@ channels:
       debugNotifyNotification:
         $ref: "#/components/messages/DebugNotifyNotification"
 
+  ordersOpenL2:
+    address: /orders/open/l2
+    description: |
+      L2 open-order price levels by order book. Same subscription shape as
+      `/orderbook/stats`: a `subscribed` list of order book ids plus a `subscribed_all`
+      flag. Notifications are a **map keyed by order book id**; each value is an array of
+      price-level records (`side`, `price`, `quantity`). Unlike other paths, the
+      notification `data` is the map itself — there is no wrapping field.
+    messages:
+      ordersOpenL2Request:
+        $ref: "#/components/messages/OrdersOpenL2Request"
+      ordersOpenL2Response:
+        $ref: "#/components/messages/OrdersOpenL2Response"
+      ordersOpenL2Notification:
+        $ref: "#/components/messages/OrdersOpenL2Notification"
+
+  pnlByUser:
+    address: /pnl/byuser
+    description: |
+      Per-account profit-and-loss reports for selected users, polled periodically; a
+      notification is sent when a subscribed user's report changes. **Auth required** —
+      admins may select any user, integrators may select users in their tenant, and users
+      may select only themselves. Subscribe-all is **not supported** (such requests are
+      rejected); only `subscribe` / `unsubscribe` / `unsubscribe_all`. The report shape
+      matches the REST `GET /v1/pl/{user_id}` `Accounts` type. Notifications carry `pnl`
+      as a **map keyed by user id**; each value is an array of account reports.
+    messages:
+      pnlByUserRequest:
+        $ref: "#/components/messages/PnLByUserRequest"
+      pnlByUserResponse:
+        $ref: "#/components/messages/PnLByUserResponse"
+      pnlByUserNotification:
+        $ref: "#/components/messages/PnLByUserNotification"
+
 operations:
   rootRequest:
     action: send
@@ -615,6 +649,56 @@ operations:
     summary: The echoed `data` value, pushed after `delay`.
     messages:
       - $ref: "#/channels/debugNotify/messages/debugNotifyNotification"
+
+  ordersOpenL2Request:
+    action: send
+    channel:
+      $ref: "#/channels/ordersOpenL2"
+    summary: Subscription change for `/orders/open/l2` (list + all-mode flag).
+    messages:
+      - $ref: "#/channels/ordersOpenL2/messages/ordersOpenL2Request"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  ordersOpenL2ReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/ordersOpenL2"
+    summary: The single response matching an `/orders/open/l2` request.
+    messages:
+      - $ref: "#/channels/ordersOpenL2/messages/ordersOpenL2Response"
+  ordersOpenL2ReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/ordersOpenL2"
+    summary: Server-pushed L2 open-order price levels, keyed by order book id.
+    messages:
+      - $ref: "#/channels/ordersOpenL2/messages/ordersOpenL2Notification"
+
+  pnlByUserRequest:
+    action: send
+    channel:
+      $ref: "#/channels/pnlByUser"
+    summary: |
+      Subscribe/unsubscribe to per-account PnL reports for one or more users (auth
+      required). No `subscribe_all` — subscribe-all is not supported.
+    messages:
+      - $ref: "#/channels/pnlByUser/messages/pnlByUserRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  pnlByUserReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/pnlByUser"
+    summary: The single response matching a `/pnl/byuser` request.
+    messages:
+      - $ref: "#/channels/pnlByUser/messages/pnlByUserResponse"
+  pnlByUserReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/pnlByUser"
+    summary: Server-pushed per-account PnL reports, keyed by user id.
+    messages:
+      - $ref: "#/channels/pnlByUser/messages/pnlByUserNotification"
 
 components:
   securitySchemes:
@@ -984,6 +1068,59 @@ components:
       payload:
         $ref: "#/components/schemas/DebugNotifyNotification"
 
+    # ----- /orders/open/l2 -----
+    OrdersOpenL2Request:
+      name: OrdersOpenL2Request
+      title: /orders/open/l2 request
+      summary: Subscription change for `/orders/open/l2` (list + all-mode flag).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersOpenL2Request"
+    OrdersOpenL2Response:
+      name: OrdersOpenL2Response
+      title: /orders/open/l2 response
+      summary: The single response matching an `/orders/open/l2` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersOpenL2Response"
+    OrdersOpenL2Notification:
+      name: OrdersOpenL2Notification
+      title: /orders/open/l2 notification
+      summary: |
+        Server-pushed L2 open-order price levels. The notification `data` is a **map keyed
+        by order book id** (no wrapping field); each value is an array of price-level
+        records.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/OrdersOpenL2Notification"
+
+    # ----- /pnl/byuser -----
+    PnLByUserRequest:
+      name: PnLByUserRequest
+      title: /pnl/byuser request
+      summary: |
+        Subscribe/unsubscribe to per-account PnL reports for one or more users (auth
+        required). No `subscribe_all` — subscribe-all is not supported.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PnLByUserRequest"
+    PnLByUserResponse:
+      name: PnLByUserResponse
+      title: /pnl/byuser response
+      summary: The single response matching a `/pnl/byuser` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PnLByUserResponse"
+    PnLByUserNotification:
+      name: PnLByUserNotification
+      title: /pnl/byuser notification
+      summary: |
+        Server-pushed per-account PnL reports. `pnl` is a map keyed by user id; each value
+        is an array of account reports (same shape as the REST `Accounts` type).
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/PnLByUserNotification"
+
   schemas:
     # ----- common envelope fragments -----
 
@@ -1002,7 +1139,8 @@ components:
           type: string
           description: |
             Must start with `/`. One of: `/`, `/prices`, `/trades`, `/transactions`,
-            `/assets`, `/orderbook/stats`, `/charts/candles`, `/accounts/balance`,
+            `/assets`, `/orderbook/stats`, `/orders/open/l2`, `/charts/candles`,
+            `/accounts/balance`, `/pnl/byuser`,
             `/v1/user/leverage/accrued_interest/stream`, `/pools/balance`, `/orders/byuser`,
             `/coupon-payments/byuser`, `/debug/notify`.
           enum:
@@ -1011,8 +1149,10 @@ components:
             - "/trades"
             - "/assets"
             - "/orderbook/stats"
+            - "/orders/open/l2"
             - "/charts/candles"
             - "/accounts/balance"
+            - "/pnl/byuser"
             - "/pools/balance"
             - "/orders/byuser"
             - "/transactions"
@@ -1044,8 +1184,10 @@ components:
             - "/trades"
             - "/assets"
             - "/orderbook/stats"
+            - "/orders/open/l2"
             - "/charts/candles"
             - "/accounts/balance"
+            - "/pnl/byuser"
             - "/pools/balance"
             - "/orders/byuser"
             - "/transactions"
@@ -1080,8 +1222,10 @@ components:
             - "/trades"
             - "/assets"
             - "/orderbook/stats"
+            - "/orders/open/l2"
             - "/charts/candles"
             - "/accounts/balance"
+            - "/pnl/byuser"
             - "/pools/balance"
             - "/orders/byuser"
             - "/transactions"
@@ -2010,20 +2154,14 @@ components:
           type: string
           format: uuid
         base_quantity:
-          oneOf:
-            - type: number
-            - type: string
-          description: Base-asset quantity (numeric or decimal string).
+          type: number
+          description: Base-asset quantity.
         quote_quantity:
-          oneOf:
-            - type: number
-            - type: string
-          description: Quote-asset quantity (numeric or decimal string).
+          type: number
+          description: Quote-asset quantity.
         shares_quantity:
-          oneOf:
-            - type: number
-            - type: string
-          description: LP shares quantity (numeric or decimal string).
+          type: number
+          description: LP shares quantity.
 
     PoolsBalanceNotificationData:
       type: object
@@ -2688,3 +2826,304 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/DebugNotifyNotificationData"
+
+    # ----- /orders/open/l2 -----
+
+    OrdersOpenL2Request:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change. Same shape as `/orderbook/stats`: a `subscribed`
+                list of order book ids plus a `subscribed_all` flag.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds order book ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes order book ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all:
+                  type: boolean
+                  description: When `true`, streams levels for every order book.
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, turns all-mode off.
+              additionalProperties: false
+
+    OrdersOpenL2ResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: [array, "null"]
+          description: The current subscribed list after the change. `null` when `subscribed_all` is on.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+
+    OrdersOpenL2Response:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrdersOpenL2ResponseData"
+
+    L2Price:
+      type: object
+      description: One aggregated open-order price level for an order book.
+      required: [side, price, quantity]
+      properties:
+        side:
+          type: string
+          enum: [BUY, SELL]
+        price:
+          type: string
+          description: Decimal price as a string.
+        quantity:
+          type: string
+          description: Decimal quantity as a string.
+
+    OrdersOpenL2NotificationData:
+      type: object
+      description: |
+        The notification `data` is directly a **map keyed by order book id** (there is no
+        wrapping field). Each value is an array of price-level records for that book.
+      additionalProperties:
+        type: array
+        items:
+          $ref: "#/components/schemas/L2Price"
+
+    OrdersOpenL2Notification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/OrdersOpenL2NotificationData"
+
+    # ----- /pnl/byuser -----
+
+    PnLByUserRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscribe/unsubscribe to per-account PnL reports for one or more users. No
+                `subscribe_all` — subscribe-all is not supported.
+              properties:
+                subscribe:
+                  type: array
+                  description: Additive — adds user ids to the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: Subtractive — removes user ids from the subscribed list.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, removes every subscribed user.
+              additionalProperties: false
+
+    PnLByUserResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: array
+          description: The current subscribed list of user ids after the change.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+          description: Always `false` — subscribe-all is not supported on this path.
+
+    PnLByUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PnLByUserResponseData"
+
+    PnLMargin:
+      type: object
+      required: [available, used, remaining]
+      properties:
+        available:
+          type: string
+        used:
+          type: string
+        remaining:
+          type: string
+
+    PnLSummary:
+      type: object
+      required:
+        - leverage
+        - account_equity
+        - available
+        - ltv
+        - health
+        - realized_pl
+        - unrealized_pl
+      properties:
+        leverage:
+          type: string
+          description: Blended leverage factor across all assets in the account.
+        account_equity:
+          type: string
+          description: Total available equity from the assets in the account.
+        available:
+          type: string
+          description: Total available currency in the account (available + locked).
+        ltv:
+          type: string
+          description: Loan-to-value ratio (borrowed notional / liquidation threshold).
+        health:
+          type: string
+          description: Health factor of the account (1 / LTV).
+        realized_pl:
+          type: string
+          description: Realized profit and loss since account inception.
+        unrealized_pl:
+          type: string
+          description: Unrealized profit and loss for the account's open positions.
+
+    PnLAsset:
+      type: object
+      description: One asset position within a PnL account.
+      required:
+        - id
+        - kind
+        - symbol
+        - side
+        - avg_entry_price
+        - mark_price
+        - liquidation_price
+        - available
+        - locked
+        - borrowed
+        - impending_borrows
+        - margin
+        - unrealized_pl
+        - leverage_limit
+        - initial_capital
+        - unused_collateral
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          description: Asset kind (e.g. `CURRENCY`, `BOND`).
+        symbol:
+          type: string
+        side:
+          type: string
+          description: Whether the position is long or short.
+        avg_entry_price:
+          type: string
+          description: Average entry price of the position.
+        mark_price:
+          type: string
+          description: Current mark price (close price at 00:00 UTC of the current day).
+        liquidation_price:
+          type: string
+          description: Weighted-average liquidation price (partial liquidations).
+        available:
+          type: string
+          description: Size of the position held.
+        locked:
+          type: string
+          description: Size of the position locked.
+        borrowed:
+          type: string
+          description: Size of the position currently borrowed.
+        impending_borrows:
+          type: string
+          description: Reserved borrowing on pending leveraged orders.
+        margin:
+          $ref: "#/components/schemas/PnLMargin"
+        unrealized_pl:
+          type: string
+          description: Unrealized profit and loss for the position.
+        leverage_limit:
+          type: string
+          description: Maximum leverage used for this asset position.
+        tp:
+          type: string
+          description: Take-profit price, when set (omitted otherwise).
+        sl:
+          type: string
+          description: Stop-loss price, when set (omitted otherwise).
+        initial_capital:
+          type: string
+        unused_collateral:
+          type: string
+
+    PnLAccount:
+      type: object
+      description: |
+        One account (global or isolated) in a user's PnL report. Same shape as the
+        REST `pl.Account` type.
+      required: [account_id, is_global, assets, summary]
+      properties:
+        account_id:
+          type: string
+          description: The collection of asset positions grouped into this account.
+        account_name:
+          type: string
+          description: Human-friendly name for the account, when available (omitted otherwise).
+        is_global:
+          type: boolean
+          description: "`true` for the main/global account, `false` for an isolated subaccount."
+        assets:
+          type: array
+          description: Asset positions in the account.
+          items:
+            $ref: "#/components/schemas/PnLAsset"
+        summary:
+          $ref: "#/components/schemas/PnLSummary"
+
+    PnLByUserNotificationData:
+      type: object
+      required: [pnl]
+      properties:
+        pnl:
+          type: object
+          description: |
+            Map keyed by user id; each value is an array of per-account PnL reports for
+            that user.
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/PnLAccount"
+
+    PnLByUserNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PnLByUserNotificationData"
