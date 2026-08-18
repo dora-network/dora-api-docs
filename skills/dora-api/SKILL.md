@@ -1,7 +1,7 @@
 ---
 name: dora-api
 description: Interact with Dora Network API and multiplexed WebSocket (wsplex) using environment-configured endpoints
-version: 1.10.0
+version: 1.11.0
 author: Dora Network
 platforms: [linux, macos, windows]
 ---
@@ -17,18 +17,22 @@ This skill provides guidance on interacting with the Dora Network API using envi
 The Dora Network API supports two auth schemes. Both are accepted on any endpoint that requires authentication:
 
 **API Key** — `Authorization: ApiKey <key>`
+
 - Works for: all authenticated endpoints (`/v1/trades`, `/v1/assets`, `/v1/orderbooks/*`, `/v1/charts/*`, `/v1/user`, `/v1/pl/self`, `/v1/ledger/*`, `/v1/realized_pnl_settlements`)
 - Set via `DORA_*_API_KEY` env vars
 
 **JWT Bearer** — `Authorization: Bearer <token>`
+
 - Accepted on all authenticated endpoints as an alternative to API Key
 - ⚠️ **Not currently available to integration partners**
 
 Set environment variables in your environment for each environment:
+
 - `DORA_STAGING_BASE_URL` and `DORA_STAGING_API_KEY` for staging
 - `DORA_PROD_BASE_URL` and `DORA_PROD_API_KEY` for production
 
 Example:
+
 ```
 DORA_STAGING_BASE_URL=https://staging.dora.co/
 DORA_STAGING_API_KEY=your_dora_staging_key
@@ -37,9 +41,11 @@ DORA_STAGING_API_KEY=your_dora_staging_key
 These environment variables **override** any base URLs defined in the OpenAPI spec. If the `*_BASE_URL` variables are not set, the base URLs from the OpenAPI spec are used as defaults.
 
 ### WebSocket Endpoints
+
 WebSocket endpoints are derived from the base URL by replacing `https://` with `wss://`.
 For WebSocket authentication, pass the API key as the `x-api-key` query parameter on the endpoint path.
 For example, if your base URL is `$DORA_BASE_URL`:
+
 - REST API: `$DORA_BASE_URL`
 - WebSocket API: `${DORA_BASE_URL/https:/wss:}` (replace https with wss)
 - WebSocket with auth: `${DORA_BASE_URL/https:/wss:}/v1/orderbooks/{id}/stream?x-api-key=$DORA_API_KEY`
@@ -47,6 +53,7 @@ For example, if your base URL is `$DORA_BASE_URL`:
 ## Usage Pattern
 
 Before making API calls, set your environment variables:
+
 ```bash
 # For staging
 export DORA_BASE_URL=$DORA_STAGING_BASE_URL
@@ -58,6 +65,7 @@ export DORA_API_KEY=$DORA_PROD_API_KEY
 ```
 
 Or use them directly in commands:
+
 ```bash
 curl -L -H "Authorization: ApiKey $DORA_STAGING_API_KEY" "$DORA_STAGING_BASE_URL/v1/assets?limit=10"
 ```
@@ -65,6 +73,7 @@ curl -L -H "Authorization: ApiKey $DORA_STAGING_API_KEY" "$DORA_STAGING_BASE_URL
 ## Common Operations
 
 ### List Assets
+
 Get a paginated list of assets with filtering options.
 
 ```bash
@@ -86,6 +95,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 ### Get Asset Details
+
 Retrieve details for a specific asset by its UUID.
 
 ```bash
@@ -94,6 +104,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 ### Get Asset YTM (Yield to Maturity)
+
 Get annualized yield to maturity for a bond asset.
 
 ```bash
@@ -102,6 +113,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 ### Get Coupon Payments
+
 Get coupon payments for a bond asset.
 
 ```bash
@@ -126,6 +138,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 ### Market Data
+
 Get orderbook (L3 market depth) data:
 
 ```bash
@@ -159,6 +172,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 **Pagination**: iterate `page=N` until response has fewer than `limit` items. Max per-page is 100.
 
 **Trade object fields**:
+
 - `transaction_id` — UUID  
 - `created_at` — ISO timestamp  
 - `price`, `quantity_0` — string, parse as float  
@@ -177,9 +191,63 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 
 Returns current price, 24h high/low, change %, volume base and USD.
 
+### Cash Reserve
+
+Get the minimum USD cash reserve requirement for a user.
+
+```bash
+# Logged-in user
+curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+     "$DORA_BASE_URL/v1/accounts/self/cash_reserve"
+
+# Specific user (admin / integrator / self)
+curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+     "$DORA_BASE_URL/v1/accounts/USER_UUID/cash_reserve"
+```
+
+### Integrator KYC
+
+Set or clear a user's KYC completion timestamp (integrator-scoped).
+
+```bash
+# completed_kyc=true sets kyc_completed_at to now; false clears it
+curl -L -X POST -H "Authorization: ApiKey $DORA_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"completed_kyc":true}' \
+     "$DORA_BASE_URL/v1/integrators/user/USER_UUID/kyc"
+```
+
+### Trading Challenges (admin)
+
+Create, list, and manage trading challenges (`type`: `TOURNAMENT` or `CASH`; `status`: `PENDING`, `ACTIVE`, `COMPLETED`).
+
+```bash
+# Create a challenge (required: name, tenant_id, type, max_users, start, end, initial_user_balance)
+curl -L -X POST -H "Authorization: ApiKey $DORA_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"tenant_id":"TENANT_UUID","name":"Q3 Cup","type":"TOURNAMENT","max_users":100,"start":"2026-09-01T00:00:00Z","end":"2026-09-30T23:59:59Z","initial_user_balance":"100000"}' \
+     "$DORA_BASE_URL/v1/trading_challenges"
+
+# List challenges (filters: tenant_id, type, status, start, end)
+curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+     "$DORA_BASE_URL/v1/trading_challenges?tenant_id=TENANT_UUID&status=ACTIVE"
+
+# Add / remove users (body: {"trading_challenge_id":"...","users":["..."]})
+curl -L -X PUT -H "Authorization: ApiKey $DORA_API_KEY" -H "Content-Type: application/json" \
+     -d '{"trading_challenge_id":"CHALLENGE_UUID","users":["USER_UUID"]}' \
+     "$DORA_BASE_URL/v1/trading_challenges/add_users"
+
+# Get / claim
+GET  /v1/trading_challenges/{id}                 # challenge by id
+GET  /v1/trading_challenges/{id}/results          # final standings
+GET  /v1/trading_challenges/{id}/daily_snapshots   # per-day snapshots
+POST /v1/trading_challenges/{id}/claim            # claim prize (no body)
+```
+
 ## WebSocket Connections
 
 ### Orderbook stats stream
+
 ```bash
 # Derive WS URL from base URL
 WS_URL="${DORA_BASE_URL/https:/wss:}"
@@ -189,23 +257,51 @@ wscat -c "$WS_URL/v1/orderbooks/123e4567-e89b-12d3-a456-426614174000/stats/strea
 
 ### Multiplexed WebSocket (`wsplex`) — preferred for new integrations
 
-DORA's multiplexed WebSocket protocol, `wsplex`, lets a single connection carry requests, responses, and server-pushed notifications for multiple endpoints (currently `/prices` and `/trades`) over one socket. Prefer it over the legacy per-stream endpoints above for new integrations.
+DORA's multiplexed WebSocket protocol, `wsplex`, lets a single connection carry requests, responses, and server-pushed notifications for many channels over one socket. Prefer it over the legacy per-stream endpoints above for new integrations.
+
+**Available channels** (wire path → what it streams):
+
+| Path | Streams | Auth |
+|------|---------|------|
+| `/` | one-shot list of all wsplex routes | public |
+| `/prices` | real-time prices, keyed by asset id | public |
+| `/trades` | real-time trades, by order book ± user | public |
+| `/assets` | full asset updates, keyed by asset id | public |
+| `/orderbook/stats` | market stats, keyed by order book id | public |
+| `/charts/candles` | streaming candles per resolution | public |
+| `/pools/balance` | pool balances, keyed by order book id | public |
+| `/orders/open/l2` | L2 open-order price levels, keyed by order book id | public |
+| `/transactions` | public transaction updates (array) | public / scoped |
+| `/debug/notify` | echoes request `data` after `delay` ns | public |
+| `/accounts/balance` | account balances, keyed by user id | **required** |
+| `/orders/byuser` | order updates for one user | **required** |
+| `/coupon-payments/byuser` | coupon payments + per-asset rollups | **required** |
+| `/pnl/byuser` | per-account P&L reports, keyed by user id | **required** |
+| `/v1/user/leverage/accrued_interest/stream` | leverage accrued-interest (LAI) updates | **required** |
+
+**Auth column:** `required` = the token must have access to the requested user(s) — admin, same-tenant integrator, or the user themselves. `/transactions` is public for unfiltered `subscribe_all` / `unsubscribe_all` but scoped (admin / integrator / self) when filtering by specific user ids.
+
+**Subscription shapes vary per channel:** a flag-overrides-list of ids (`/prices`, `/orderbook/stats`, `/pools/balance`, `/orders/open/l2`), a boolean toggle (`/assets`), a per-resolution set (`/charts/candles`), or a user-id list (the auth-required rows — several reject `subscribe_all`). Pull the exact request schema per channel from the AsyncAPI spec as shown in the Reference section. The two most-used channels are detailed below.
 
 **Endpoint:** `wss://<environment_base_url>/plex` (e.g. `wss://staging.dora.co/plex`).
 
 **Auth:** the API key is sent as the standard HTTP header on the WebSocket upgrade request:
+
 ```
 Authorization: ApiKey <key>
 ```
+
 `Authorization: Bearer <token>` works identically.
 
 **Protocol shape (one connection, many paths):**
+
 - Request: `{"id": "<uuidv7>", "path": "/prices", "data": {...}}`. The `data` field is **required** — omitting it returns an error response and still consumes the request id.
 - Response: `{"id": ..., "kind": "response", "path": ..., "data": ...}` or `{"id": ..., "kind": "response", "path": ..., "error": "..."}`. Exactly one response per request, matched by `id`; an error response keeps the same envelope shape and swaps `data` for `error`.
 - Notification (server-pushed): `{"id": ..., "kind": "notification", "path": ..., "data": ...}`.
 - Request ids are **single-use per connection** — generate a fresh UUIDv7 for every request, including retries. Reusing an id returns a duplicate-request error.
 
 **Quick test with `wscat`:**
+
 ```bash
 # Subscribe to /prices for a specific asset
 WS_URL="${DORA_BASE_URL/https:/wss:}"
@@ -213,12 +309,15 @@ wscat -c "$WS_URL/plex" \
     -H "Authorization: ApiKey $DORA_API_KEY" \
     -x '{"id":"019ed20f-cfcb-7167-a318-4b42d0582517","path":"/prices","data":{"subscribe":["<asset-id>"]}}'
 ```
+
 You should receive one response (matching `id`) followed by a stream of notifications on `/prices`.
 
 **Subscriptions on `/prices` follow a flag-overrides-list model:**
-- A **subscribed list** of asset ids, mutated by `subscribe` (add) and `unsubscribe` (remove).
-- A `subscribed_to_all` **flag** — when true, every asset's prices stream and the list is reset to `null`.
-The flag overrides the list: setting `subscribed_to_all: true` or `unsubscribed_to_all: true` resets the list to `null`. `subscribe` is a no-op while `subscribed_to_all` is `true`. `unsubscribe` in `subscribed_to_all` mode returns an error. After toggling all-mode off, re-send `subscribe` to rebuild the list.
+
+- A **subscribed list** of asset ids (server state), mutated by `subscribe` (add) and `unsubscribe` (remove).
+- A `subscribed_all` **flag** (server state) — when true, every asset's prices stream and the list is reset to `null`.
+- Mutate all-mode with the request flags `subscribe_all: true` (on) or `unsubscribe_all: true` (off). Validation: cannot combine `subscribe` with `subscribe_all`, `unsubscribe` with `unsubscribe_all`, or `unsubscribe` with `subscribe_all`.
+The flag overrides the list: turning all-mode on resets the list to `null`. `subscribe` is a no-op while `subscribed_all` is `true`; `unsubscribe` in all-mode returns an error. After toggling all-mode off, re-send `subscribe` to rebuild the list.
 
 **Subscriptions on `/trades` follow the same flag-overrides-list model per axis** (order-book and user). `users_all: true` is implicit when neither user field is set. All-mode axes can be cleared via `unsubscribe` (e.g., `{"unsubscribe":[{"order_books_all":true}]}` returns `[]`). There is no need to close the connection to reset.
 
@@ -227,7 +326,9 @@ The flag overrides the list: setting `subscribed_to_all: true` or `unsubscribed_
 For the full protocol reference, see `multiplex-websocket/README.md` in this repo. The AsyncAPI specification is bundled at `skill_view(name='dora-api', file_path='references/asyncapi.yaml')`. When building wsplex requests, use `yq` to extract the specific channel or schema you need (see `### AsyncAPI Specification` in the Reference section).
 
 ## Error Handling
+
 The API returns standard HTTP status codes:
+
 - 200: Success
 - 201: Created
 - 204: No Content
@@ -242,16 +343,20 @@ The API returns standard HTTP status codes:
 Error responses follow the `ResponseEnvelope` schema.
 
 ## Pagination
+
 List endpoints use page-based pagination:
+
 - `page`: Page number (starts at 1)
 - `limit`: Items per page (default 100, check spec for max)
 
 Check response metadata for total pages/items if available.
 
 ## Rate Limiting
+
 Be aware of rate limits. If you receive 429 responses, implement exponential backoff and retry-after handling.
 
 ## Using with Terminal
+
 You can interact with the Dora Network API using curl from your terminal:
 
 ```bash
@@ -265,6 +370,7 @@ curl -L -s -H "Authorization: ApiKey $DORA_API_KEY" "$DORA_BASE_URL/v1/assets/$(
 ## Reference
 
 ### OpenAPI Specification
+
 The full OpenAPI specification is bundled as a linked file within this skill. Load it with:
 
 ```
@@ -272,6 +378,7 @@ skill_view(name='dora-api', file_path='references/openapi.json')
 ```
 
 ### Exploring the Spec
+
 To explore the spec manually using `jq`, first resolve the skill directory path via `skill_view(name='dora-api')` (which returns `skill_dir`), then:
 
 ```bash
@@ -285,6 +392,7 @@ jq '.components.schemas.UserCreatedResponse' <skill_dir>/references/openapi.json
 Replace `<skill_dir>` with the resolved path from `skill_view`.
 
 ### AsyncAPI Specification
+
 The full AsyncAPI 3.x specification for the wsplex protocol is bundled as a YAML file. Resolve the skill directory path via `skill_view(name='dora-api')` (which returns `skill_dir`), then use `yq` to extract only the section you need. **Do not load the whole file** — these one-shot queries return just the relevant slice:
 
 ```bash
@@ -308,12 +416,15 @@ yq -o=json '.components.schemas.Price.properties.price.description' <skill_dir>/
 `yq -o=json` outputs valid JSON, so you can pipe to `jq` for further filtering.
 
 **Fallback** — if `yq` is not available, use the harness's `search` and `read` tools to fetch a specific line range instead of loading the whole file:
+
 ```bash
 search "PricesRequest" <skill_dir>/references/asyncapi.yaml   # find the line range
 read   <skill_dir>/references/asyncapi.yaml:<start>-<end>     # read just those lines
 ```
+
 Replace `<skill_dir>` with the resolved path from `skill_view`.
 
 ### Additional References
+
 - `skill_view(name='dora-api', file_path='references/openapi-exploration.md')` — guided exploration notes
 - `skill_view(name='dora-api', file_path='references/trade-analysis.md')` — methodology for investigating blowout/drawdown trading days
