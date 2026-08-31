@@ -9,6 +9,7 @@ All URIs are relative to *https://staging.dora.co*
 |------------ | ------------- | ------------- | -------------|
 | *DefaultApi* | [**addTradingChallengeUsers**](Apis/DefaultApi.md#addTradingChallengeUsers) | **PUT** /v1/trading_challenges/add_users | Add users to a trading challenge |
 *DefaultApi* | [**approveLedgerWithdrawRequest**](Apis/DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
+*DefaultApi* | [**approveTradingChallengeRegistrationRequest**](Apis/DefaultApi.md#approveTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/approve | Approve a trading challenge registration request |
 *DefaultApi* | [**cancelAllOpenOrders**](Apis/DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user's orders on specific orderbook |
 *DefaultApi* | [**cancelLedgerWithdrawRequest**](Apis/DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 *DefaultApi* | [**cancelOrderById**](Apis/DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
@@ -73,6 +74,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getTransactionsStream**](Apis/DefaultApi.md#getTransactionsStream) | **GET** /v1/transactions/stream | Get transactions since a specific time, and open a stream for further updates |
 *DefaultApi* | [**getUserById**](Apis/DefaultApi.md#getUserById) | **GET** /v1/user/{user_id} | Get user by ID (admin only) |
 *DefaultApi* | [**getUserCouponPaymentsStream**](Apis/DefaultApi.md#getUserCouponPaymentsStream) | **GET** /v1/user/{user_id}/coupon_payments/stream | Stream user's coupon payment accruals in real time |
+*DefaultApi* | [**getUserDeactivation**](Apis/DefaultApi.md#getUserDeactivation) | **GET** /v1/user/{user_id}/deactivation | Get the latest account deactivation request for a user |
 *DefaultApi* | [**getUserLedgerStream**](Apis/DefaultApi.md#getUserLedgerStream) | **GET** /v1/user/{user_id}/ledger/stream | Get a snapshot of user's ledger updates since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUserLeverageAccruedInterestStream**](Apis/DefaultApi.md#getUserLeverageAccruedInterestStream) | **GET** /v1/user/{user_id}/leverage/accrued_interest/stream | Stream user's current leverage accrued interest in real time |
 *DefaultApi* | [**getUserOrderUpdatesStream**](Apis/DefaultApi.md#getUserOrderUpdatesStream) | **GET** /v1/user/{user_id}/orders/{order_book_id}/updates/stream | Get a snapshot of user's order updates for the given order book since a specific time, and opens a stream for further updates |
@@ -100,9 +102,12 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**listOrderBooks**](Apis/DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 *DefaultApi* | [**listOrders**](Apis/DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 *DefaultApi* | [**listPositionAccountsSelf**](Apis/DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
+*DefaultApi* | [**listTradingChallengeRegistrationRequests**](Apis/DefaultApi.md#listTradingChallengeRegistrationRequests) | **GET** /v1/trading_challenges/registration_requests | List trading challenge registration requests |
 *DefaultApi* | [**listTradingChallenges**](Apis/DefaultApi.md#listTradingChallenges) | **GET** /v1/trading_challenges | List trading challenges |
+*DefaultApi* | [**listUserDeactivations**](Apis/DefaultApi.md#listUserDeactivations) | **GET** /v1/user/deactivations | Get the current deactivation status across all users |
 *DefaultApi* | [**payLeverageGetAccruedInterest**](Apis/DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 *DefaultApi* | [**rejectLedgerWithdrawRequest**](Apis/DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
+*DefaultApi* | [**rejectTradingChallengeRegistrationRequest**](Apis/DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
 *DefaultApi* | [**removeTradingChallengeUsers**](Apis/DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 *DefaultApi* | [**repayUSD**](Apis/DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
 *DefaultApi* | [**revokeAPIKeyForUser**](Apis/DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
@@ -115,8 +120,11 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**streamOrderBookBalances**](Apis/DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
 *DefaultApi* | [**streamOrderbookOpenOrders**](Apis/DefaultApi.md#streamOrderbookOpenOrders) | **GET** /v1/orderbooks/{order_book_id}/open/stream | Get a snapshot of open orders in an order book and open a stream for real-time updates |
 *DefaultApi* | [**streamTrades**](Apis/DefaultApi.md#streamTrades) | **GET** /v1/trades/{order_book_id}/stream | Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates |
+*DefaultApi* | [**terminateOwnTradingChallengeParticipation**](Apis/DefaultApi.md#terminateOwnTradingChallengeParticipation) | **POST** /v1/trading_challenges/{trading_challenge_id}/participants/self/terminate | Leave a trading challenge |
+*DefaultApi* | [**terminateTradingChallengeParticipation**](Apis/DefaultApi.md#terminateTradingChallengeParticipation) | **POST** /v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate | Terminate a participation in a trading challenge |
 *DefaultApi* | [**transferAccountBalancesV2**](Apis/DefaultApi.md#transferAccountBalancesV2) | **POST** /v2/accounts/transfer_balances | Transfer available balance between a user's accounts |
 *DefaultApi* | [**transferAvailableBalances**](Apis/DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user's accounts (e.g. global to isolated position) |
+*DefaultApi* | [**updateTradingChallenge**](Apis/DefaultApi.md#updateTradingChallenge) | **PUT** /v1/trading_challenges/{trading_challenge_id} | Update a trading challenge |
 *DefaultApi* | [**updateUserConfig**](Apis/DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 *DefaultApi* | [**updateUserConfigSelf**](Apis/DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
 *DefaultApi* | [**updateUserKYC**](Apis/DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user's KYC completion timestamp |
@@ -153,6 +161,7 @@ All URIs are relative to *https://staging.dora.co*
  - [BalancesResponse](./Models/BalancesResponse.md)
  - [Bond](./Models/Bond.md)
  - [BondKind](./Models/BondKind.md)
+ - [BondRunStatus](./Models/BondRunStatus.md)
  - [CancelOrderResponseEnvelope](./Models/CancelOrderResponseEnvelope.md)
  - [Candle](./Models/Candle.md)
  - [CandleResolution](./Models/CandleResolution.md)
@@ -184,6 +193,7 @@ All URIs are relative to *https://staging.dora.co*
  - [CreateOrderRequest](./Models/CreateOrderRequest.md)
  - [CreateOrderResponseEnvelope](./Models/CreateOrderResponseEnvelope.md)
  - [CreateTradingChallengeRequest](./Models/CreateTradingChallengeRequest.md)
+ - [CreditRating](./Models/CreditRating.md)
  - [CurrentLeverageAccruedInterest](./Models/CurrentLeverageAccruedInterest.md)
  - [CurrentLeverageAccruedInterestResponseEnvelope](./Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
  - [DefundUserRequest](./Models/DefundUserRequest.md)
@@ -294,6 +304,7 @@ All URIs are relative to *https://staging.dora.co*
  - [RepayUSDResult](./Models/RepayUSDResult.md)
  - [ResponseEnvelope](./Models/ResponseEnvelope.md)
  - [ResponseEnvelopeOfListAssets](./Models/ResponseEnvelopeOfListAssets.md)
+ - [ReviewTradingChallengeRegistrationRequest](./Models/ReviewTradingChallengeRegistrationRequest.md)
  - [RevokeAPIKeyData](./Models/RevokeAPIKeyData.md)
  - [RevokeAPIKeyResponseEnvelope](./Models/RevokeAPIKeyResponseEnvelope.md)
  - [SettleLeverageAccruedInterest](./Models/SettleLeverageAccruedInterest.md)
@@ -326,6 +337,8 @@ All URIs are relative to *https://staging.dora.co*
  - [SupplyRequest](./Models/SupplyRequest.md)
  - [SupplyResponseEnvelope](./Models/SupplyResponseEnvelope.md)
  - [TenantRestrictions](./Models/TenantRestrictions.md)
+ - [TerminateTradingChallengeResponse](./Models/TerminateTradingChallengeResponse.md)
+ - [TerminateTradingChallengeResponseEnvelope](./Models/TerminateTradingChallengeResponseEnvelope.md)
  - [Trade](./Models/Trade.md)
  - [TradeRequestError](./Models/TradeRequestError.md)
  - [TradeResponseEnvelope](./Models/TradeResponseEnvelope.md)
@@ -333,6 +346,9 @@ All URIs are relative to *https://staging.dora.co*
  - [TradingChallengeDailySnapshot](./Models/TradingChallengeDailySnapshot.md)
  - [TradingChallengeDailySnapshotsResponseEnvelope](./Models/TradingChallengeDailySnapshotsResponseEnvelope.md)
  - [TradingChallengeListResponseEnvelope](./Models/TradingChallengeListResponseEnvelope.md)
+ - [TradingChallengeRegistrationRequest](./Models/TradingChallengeRegistrationRequest.md)
+ - [TradingChallengeRegistrationRequestListResponseEnvelope](./Models/TradingChallengeRegistrationRequestListResponseEnvelope.md)
+ - [TradingChallengeRegistrationRequestResponseEnvelope](./Models/TradingChallengeRegistrationRequestResponseEnvelope.md)
  - [TradingChallengeResponseEnvelope](./Models/TradingChallengeResponseEnvelope.md)
  - [TradingChallengeResult](./Models/TradingChallengeResult.md)
  - [TradingChallengeResultsResponseEnvelope](./Models/TradingChallengeResultsResponseEnvelope.md)
@@ -358,8 +374,12 @@ All URIs are relative to *https://staging.dora.co*
  - [UnitePositionResponseEnvelope](./Models/UnitePositionResponseEnvelope.md)
  - [UnitedPosition](./Models/UnitedPosition.md)
  - [UpdateFieldBoolean](./Models/UpdateFieldBoolean.md)
+ - [UpdateFieldDateTime](./Models/UpdateFieldDateTime.md)
+ - [UpdateFieldDecimal](./Models/UpdateFieldDecimal.md)
+ - [UpdateFieldInteger](./Models/UpdateFieldInteger.md)
  - [UpdateFieldString](./Models/UpdateFieldString.md)
  - [UpdateRolesString](./Models/UpdateRolesString.md)
+ - [UpdateTradingChallengeRequest](./Models/UpdateTradingChallengeRequest.md)
  - [UpdateUserConfigRequest](./Models/UpdateUserConfigRequest.md)
  - [UpdateUserKYCRequest](./Models/UpdateUserKYCRequest.md)
  - [UpdateUserKYCResponse](./Models/UpdateUserKYCResponse.md)
@@ -372,6 +392,9 @@ All URIs are relative to *https://staging.dora.co*
  - [UserCouponPaymentAssetSummary](./Models/UserCouponPaymentAssetSummary.md)
  - [UserCouponPaymentsResponseData](./Models/UserCouponPaymentsResponseData.md)
  - [UserCreatedResponseEnvelope](./Models/UserCreatedResponseEnvelope.md)
+ - [UserDeactivation](./Models/UserDeactivation.md)
+ - [UserDeactivationListResponseEnvelope](./Models/UserDeactivationListResponseEnvelope.md)
+ - [UserDeactivationResponseEnvelope](./Models/UserDeactivationResponseEnvelope.md)
  - [UserDeletedResponseEnvelope](./Models/UserDeletedResponseEnvelope.md)
  - [UserEnvelope](./Models/UserEnvelope.md)
  - [UserExistsResponse](./Models/UserExistsResponse.md)

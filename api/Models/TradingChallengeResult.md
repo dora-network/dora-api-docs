@@ -17,6 +17,7 @@
 | **status** | **String** |  | [optional] [default to null] |
 | **crown** | **String** |  | [optional] [default to null] |
 | **created\_at** | **Date** |  | [optional] [default to null] |
+| **deactivation\_status** | **String** |  | [optional] [default to null] |
 | **current\_day\_daily\_volume** | **BigDecimal** |  | [optional] [default to null] |
 | **current\_day\_daily\_pnl** | **BigDecimal** |  | [optional] [default to null] |
 | **current\_day\_trading\_date** | **date** |  | [optional] [default to null] |

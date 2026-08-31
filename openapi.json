@@ -921,6 +921,180 @@
         }
       }
     },
+    "/v1/user/{user_id}/deactivation": {
+      "get": {
+        "summary": "Get the latest account deactivation request for a user",
+        "description": "Returns the user's latest deactivation request, i.e. their current deactivation status. Integrators may only request users belonging to their own tenant.",
+        "operationId": "getUserDeactivation",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest deactivation request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDeactivationResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. the user does not belong to the integrator's tenant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No deactivation found for this user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/user/deactivations": {
+      "get": {
+        "summary": "Get the current deactivation status across all users",
+        "description": "Returns each user's latest deactivation request, i.e. their current status. Users with no deactivation history are absent. Ordered by request creation time, newest first. Integrators only see users of their own tenant, unless that tenant is global.",
+        "operationId": "listUserDeactivations",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Only return users whose latest request has this status.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "FAILED",
+                "COMPLETED",
+                "REACTIVATED"
+              ]
+            }
+          },
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "description": "Only return users belonging to this tenant. At most one of tenant_id, trading_challenge_id and user_ids may be passed; combining them is rejected. An integrator whose tenant is not global may only pass their own tenant.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trading_challenge_id",
+            "in": "query",
+            "required": false,
+            "description": "Only return participants of this trading challenge. Mutually exclusive with tenant_id and user_ids.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "user_ids",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated user IDs to return. Mutually exclusive with tenant_id and trading_challenge_id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest deactivation request per user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDeactivationListResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status, trading_challenge_id or user_ids value, or multiple selectors passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Integrator requested a tenant other than their own",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/user/ranking": {
       "get": {
         "summary": "Get top traders by PnL",
@@ -4675,8 +4849,7 @@
             "name": "tenant_id",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             }
           },
           {
@@ -7302,6 +7475,7 @@
     "/v1/trading_challenges": {
       "post": {
         "summary": "Create a trading challenge",
+        "description": "Create a new trading challenge. Allowed for ADMIN and INTEGRATOR only.",
         "operationId": "createTradingChallenge",
         "requestBody": {
           "required": true,
@@ -7358,6 +7532,7 @@
       },
       "get": {
         "summary": "List trading challenges",
+        "description": "List trading challenges. COMPETITION_MANAGER callers only receive challenges present in their managed_competition_ids.",
         "operationId": "listTradingChallenges",
         "parameters": [
           {
@@ -7440,6 +7615,7 @@
     "/v1/trading_challenges/add_users": {
       "put": {
         "summary": "Add users to a trading challenge",
+        "description": "Add existing users to a trading challenge. For COMPETITION_MANAGER, the challenge must be assigned in managed_competition_ids. A user must have an empty ledger to join: deposits and withdrawals are barred from enrolment until the challenge is over, so that challenge credits are the only thing a participant holds and the teardown sweep cannot destroy funds of their own.",
         "operationId": "addTradingChallengeUsers",
         "requestBody": {
           "required": true,
@@ -7498,6 +7674,7 @@
     "/v1/trading_challenges/remove_users": {
       "put": {
         "summary": "Remove users from a trading challenge",
+        "description": "Remove users from a trading challenge. For COMPETITION_MANAGER, the challenge must be assigned in managed_competition_ids.",
         "operationId": "removeTradingChallengeUsers",
         "requestBody": {
           "required": true,
@@ -7556,6 +7733,7 @@
     "/v1/trading_challenges/{trading_challenge_id}": {
       "get": {
         "summary": "Get trading challenge by ID",
+        "description": "Fetch one trading challenge. COMPETITION_MANAGER can access only assigned challenge IDs.",
         "operationId": "getTradingChallengeByID",
         "parameters": [
           {
@@ -7620,11 +7798,100 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Update a trading challenge",
+        "description": "Partially update a trading challenge: a field that is absent from the body is left unchanged. Which fields may be updated depends on the challenge status. PENDING accepts every field. ACTIVE accepts only name, max_users, end and the three prize quantities, because participants are already funded and being measured. COMPLETED accepts none. A request that touches a field the current status does not allow is rejected as a whole with 409. ADMIN may update any challenge, INTEGRATOR only challenges of its own tenant, and COMPETITION_MANAGER only assigned challenge IDs.",
+        "operationId": "updateTradingChallenge",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTradingChallengeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Trading challenge updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: the field is not updatable in the current status, or the update clashes with another challenge or its participants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/trading_challenges/{trading_challenge_id}/daily_snapshots": {
       "get": {
         "summary": "Get trading challenge daily snapshots",
+        "description": "List participant daily snapshots for a challenge. COMPETITION_MANAGER can access only assigned challenge IDs.",
         "operationId": "getTradingChallengeDailySnapshots",
         "parameters": [
           {
@@ -7694,6 +7961,7 @@
     "/v1/trading_challenges/{trading_challenge_id}/results": {
       "get": {
         "summary": "Get trading challenge results",
+        "description": "List challenge leaderboard/results. COMPETITION_MANAGER can access only assigned challenge IDs.",
         "operationId": "getTradingChallengeResults",
         "parameters": [
           {
@@ -7813,6 +8081,481 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "description": "Claim the prize of a challenge the caller is eligible for. A TOURNAMENT claim credits the prize matching the crown and reactivates the account. A CASH claim winds the account down, sweeps every remaining challenge credit and awards the CASH_CROWN: the account is left deactivated with a zero balance, and the reward is redeemed out of band. Both mark the participation PRIZE_CLAIMED."
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate": {
+      "post": {
+        "summary": "Terminate a participation in a trading challenge",
+        "operationId": "terminateTradingChallengeParticipation",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participation terminated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminateTradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Challenge, user or participation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the participation already settled or another deactivation is in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "description": "End a participant's run in a challenge before its own rules would: the participant leaves, or an operator removes them. No prize is paid, even to a participant who could have claimed one -- claim the prize first if that is what you want. The account is wound down, every remaining challenge credit is swept, and the participation is marked TERMINATED and frozen: from then on it takes no further daily snapshots and never appears in the results ranking again. The user is left deactivated with no challenge balance, and is free to register for another challenge. Participants may only terminate their own run; terminating someone else's requires admin, integrator (same tenant) or challenge manager (assigned challenge) rights."
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/participants/self/terminate": {
+      "post": {
+        "summary": "Leave a trading challenge",
+        "operationId": "terminateOwnTradingChallengeParticipation",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Participation terminated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerminateTradingChallengeResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Challenge, user or participation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the participation already settled or another deactivation is in progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "description": "Convenience alias that terminates the caller's own participation; redirects to /v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate. End a participant's run in a challenge before its own rules would: the participant leaves, or an operator removes them. No prize is paid, even to a participant who could have claimed one -- claim the prize first if that is what you want. The account is wound down, every remaining challenge credit is swept, and the participation is marked TERMINATED and frozen: from then on it takes no further daily snapshots and never appears in the results ranking again. The user is left deactivated with no challenge balance, and is free to register for another challenge. Participants may only terminate their own run; terminating someone else's requires admin, integrator (same tenant) or challenge manager (assigned challenge) rights."
+      }
+    },
+    "/v1/trading_challenges/registration_requests": {
+      "get": {
+        "summary": "List trading challenge registration requests",
+        "operationId": "listTradingChallengeRegistrationRequests",
+        "description": "The review queue. Admins see every tenant and may filter to one, an integrator is pinned to their own tenant, and a competition manager only sees the requests of the challenges assigned to them.",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Only requests for this challenge."
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Only requests from this user."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "APPROVED",
+                "REJECTED"
+              ]
+            },
+            "description": "Only requests in this state."
+          },
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Admins only; an integrator may only name their own tenant."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000
+            },
+            "description": "Page size, capped at 1000."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Rows to skip."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching requests, newest first",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeRegistrationRequestListResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid filter or an over-long reason",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: the caller may not administer this challenge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/registration_requests/{request_id}/approve": {
+      "post": {
+        "summary": "Approve a trading challenge registration request",
+        "operationId": "approveTradingChallengeRegistrationRequest",
+        "description": "Accessible to admins (any challenge), integrators (their own tenant only) and competition managers (their assigned challenges only). Enrolment runs the same checks as add_users, so a challenge that filled up, now overlaps another of the user's challenges, or whose applicant no longer has an empty ledger is rejected with a 409 and the request stays open.",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTradingChallengeRegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The settled request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeRegistrationRequestResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid filter or an over-long reason",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: the caller may not administer this challenge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registration request not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request was already settled, or the challenge cannot take the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/registration_requests/{request_id}/reject": {
+      "post": {
+        "summary": "Reject a trading challenge registration request",
+        "operationId": "rejectTradingChallengeRegistrationRequest",
+        "description": "Accessible to admins (any challenge), integrators (their own tenant only) and competition managers (their assigned challenges only).",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTradingChallengeRegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The settled request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeRegistrationRequestResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid filter or an over-long reason",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: the caller may not administer this challenge",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registration request not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The request was already settled, or the challenge cannot take the user",
             "content": {
               "application/json": {
                 "schema": {
@@ -8372,6 +9115,14 @@
           "bond_kind": {
             "$ref": "#/components/schemas/BondKind"
           },
+          "bond_run_status": {
+            "$ref": "#/components/schemas/BondRunStatus",
+            "nullable": true
+          },
+          "credit_rating": {
+            "$ref": "#/components/schemas/CreditRating",
+            "nullable": true
+          },
           "coupon_start_at": {
             "type": "string",
             "format": "date-time",
@@ -8721,6 +9472,40 @@
           "TREASURY"
         ]
       },
+      "BondRunStatus": {
+        "type": "string",
+        "enum": [
+          "ON_THE_RUN",
+          "OFF_THE_RUN"
+        ]
+      },
+      "CreditRating": {
+        "type": "string",
+        "enum": [
+          "AAA",
+          "AA+",
+          "AA",
+          "AA-",
+          "A+",
+          "A",
+          "A-",
+          "BBB+",
+          "BBB",
+          "BBB-",
+          "BB+",
+          "BB",
+          "BB-",
+          "B+",
+          "B",
+          "B-",
+          "CCC+",
+          "CCC",
+          "CCC-",
+          "CC",
+          "C",
+          "D"
+        ]
+      },
       "CouponKind": {
         "type": "string",
         "enum": [
@@ -8737,7 +9522,9 @@
           "BOND_PROVIDER",
           "LIQUIDITY_PROVIDER",
           "TRADER",
-          "INTEGRATOR"
+          "INTEGRATOR",
+          "INDEXER",
+          "COMPETITION_MANAGER"
         ]
       },
       "ListUsersResponseEnvelope": {
@@ -8796,6 +9583,11 @@
           },
           "timezone": {
             "type": "string"
+          },
+          "challenge_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Optional: sign the new user up for this trading challenge. This creates a PENDING registration request that an admin, the tenant's integrator or one of the challenge's managers must approve before the user is actually enrolled. The challenge must belong to the new user's tenant and still be open for entries, otherwise the whole sign-up fails."
           }
         },
         "oneOf": [
@@ -8953,6 +9745,113 @@
       "GetUserConfigResponse": {
         "$ref": "#/components/schemas/UserConfigResponseEnvelope"
       },
+      "UserDeactivation": {
+        "type": "object",
+        "description": "An admin-requested account deactivation. A non-REACTIVATED request blocks the user's trading, funding, and transfers.",
+        "properties": {
+          "deactivation_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requested_by": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Admin that requested the deactivation."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "FAILED",
+              "COMPLETED",
+              "REACTIVATED"
+            ],
+            "description": "PENDING: wind-down in progress. FAILED: wind-down gave up; admin can re-trigger. COMPLETED: account deactivated. REACTIVATED: blocks lifted."
+          },
+          "attempts": {
+            "type": "integer",
+            "description": "Wind-down attempts performed so far."
+          },
+          "result": {
+            "type": "string",
+            "nullable": true,
+            "description": "Latest wind-down outcome or error summary."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reactivated_by": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reactivated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "deactivation_id",
+          "user_id",
+          "requested_by",
+          "reason",
+          "status",
+          "attempts",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserDeactivationResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/UserDeactivation"
+              }
+            }
+          }
+        ]
+      },
+      "UserDeactivationListResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/UserDeactivation"
+                }
+              }
+            }
+          }
+        ]
+      },
       "User": {
         "type": "object",
         "properties": {
@@ -9003,6 +9902,14 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserRole"
+            }
+          },
+          "managed_competition_ids": {
+            "type": "array",
+            "description": "Competition IDs this user is explicitly allowed to manage when they have COMPETITION_MANAGER role. Empty means no competition-management access.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           "timezone": {
@@ -9228,6 +10135,59 @@
           },
           "value": {
             "type": "boolean",
+            "description": "The new value to set for the field."
+          }
+        },
+        "required": [
+          "update"
+        ]
+      },
+      "UpdateFieldDateTime": {
+        "type": "object",
+        "description": "A generic struct to handle optional updates for date-time fields in user requests.",
+        "properties": {
+          "update": {
+            "type": "boolean",
+            "description": "Whether to update the field."
+          },
+          "value": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The new value to set for the field."
+          }
+        },
+        "required": [
+          "update"
+        ]
+      },
+      "UpdateFieldInteger": {
+        "type": "object",
+        "description": "A generic struct to handle optional updates for integer fields in user requests.",
+        "properties": {
+          "update": {
+            "type": "boolean",
+            "description": "Whether to update the field."
+          },
+          "value": {
+            "type": "integer",
+            "description": "The new value to set for the field."
+          }
+        },
+        "required": [
+          "update"
+        ]
+      },
+      "UpdateFieldDecimal": {
+        "type": "object",
+        "description": "A generic struct to handle optional updates for decimal fields in user requests.",
+        "properties": {
+          "update": {
+            "type": "boolean",
+            "description": "Whether to update the field."
+          },
+          "value": {
+            "type": "string",
+            "format": "decimal",
             "description": "The new value to set for the field."
           }
         },
@@ -9505,6 +10465,11 @@
             "type": "string",
             "format": "decimal"
           },
+          "realized_pnl": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Cumulative realized PnL across the user's full trading lifetime."
+          },
           "total_trades": {
             "type": "integer"
           },
@@ -9517,16 +10482,44 @@
           "win_rate": {
             "type": "string",
             "format": "decimal"
+          },
+          "daily_trading_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Executed trading volume for the current UTC day."
+          },
+          "total_trading_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Cumulative executed trading volume across all UTC trading days."
+          },
+          "active_trading_days": {
+            "type": "integer",
+            "description": "Number of distinct UTC days on which the user has at least one executed fill."
+          },
+          "activated": {
+            "type": "boolean",
+            "description": "True once the user has traded on at least 5 distinct UTC days."
+          },
+          "kyc_approved": {
+            "type": "boolean",
+            "description": "Whether the user is currently considered KYC/verification approved."
           }
         },
         "required": [
           "user_id",
           "first_name",
           "total_pnl",
+          "realized_pnl",
           "total_trades",
           "winning_trades",
           "losing_trades",
-          "win_rate"
+          "win_rate",
+          "daily_trading_volume",
+          "total_trading_volume",
+          "active_trading_days",
+          "activated",
+          "kyc_approved"
         ]
       },
       "GetPnLRankingResponse": {
@@ -11834,7 +12827,12 @@
           "COLLATERALIZE",
           "DE-COLLATERALIZE",
           "COUPON_PAYMENT",
-          "INTERNAL_TRANSFER"
+          "INTERNAL_TRANSFER",
+          "ISOLATE_AVAILABLE",
+          "BORROW",
+          "TRADING_CHALLENGE_DEPOSIT",
+          "TRADING_CHALLENGE_WITHDRAW",
+          "TRADING_FEE"
         ]
       },
       "TransactionInternalTransfer": {
@@ -14326,6 +15324,64 @@
           }
         }
       },
+      "UpdateTradingChallengeRequest": {
+        "type": "object",
+        "description": "Request body for PUT /v1/trading_challenges/{trading_challenge_id}: partially update a trading challenge. A field that is omitted, or sent as null, is left unchanged. Each field accepts either the {update, value} object or the bare value on its own. PENDING challenges accept every field; ACTIVE challenges accept only name, max_users, end and the prize quantities; COMPLETED challenges accept none. tenant_id and status are never updatable, and the participant list is managed by add_users and remove_users.",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/UpdateFieldString",
+            "description": "Trading challenge name."
+          },
+          "type": {
+            "$ref": "#/components/schemas/UpdateFieldString",
+            "description": "CASH or TOURNAMENT. Only updatable while the challenge is PENDING."
+          },
+          "max_users": {
+            "$ref": "#/components/schemas/UpdateFieldInteger",
+            "description": "Must be > 0 and cannot be lowered below the number of users already registered."
+          },
+          "start": {
+            "$ref": "#/components/schemas/UpdateFieldDateTime",
+            "description": "Only updatable while the challenge is PENDING."
+          },
+          "end": {
+            "$ref": "#/components/schemas/UpdateFieldDateTime",
+            "description": "Must be after start and in the future."
+          },
+          "initial_user_balance": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be > 0. Only updatable while the challenge is PENDING."
+          },
+          "gold_prize_quantity": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be > 0 for a TOURNAMENT challenge."
+          },
+          "silver_prize_quantity": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be >= 0."
+          },
+          "bronze_prize_quantity": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be >= 0."
+          },
+          "pnl_condition": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be >= 0. Only updatable while the challenge is PENDING."
+          },
+          "total_volume_condition": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be >= 0. Only updatable while the challenge is PENDING."
+          },
+          "avg_daily_volume_condition": {
+            "$ref": "#/components/schemas/UpdateFieldDecimal",
+            "description": "Must be >= 0. Only updatable while the challenge is PENDING."
+          },
+          "minimum_equity_percentage_condition": {
+            "$ref": "#/components/schemas/UpdateFieldInteger",
+            "description": "In the range [0,100). Only updatable while the challenge is PENDING."
+          }
+        }
+      },
       "AddTradingChallengeUsersRequest": {
         "type": "object",
         "required": [
@@ -14612,7 +15668,8 @@
               "ACTIVE",
               "BUSTED",
               "COMPLETED",
-              "PRIZE_CLAIMED"
+              "PRIZE_CLAIMED",
+              "TERMINATED"
             ]
           },
           "crown": {
@@ -14627,12 +15684,20 @@
               "VOLUME_BRONZE",
               "IRON_GOLD",
               "IRON_SILVER",
-              "IRON_BRONZE"
+              "IRON_BRONZE",
+              "CASH_CROWN"
             ]
           },
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "deactivation_status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DEACTIVATED"
+            ]
           },
           "current_day_daily_volume": {
             "type": "string",
@@ -14700,6 +15765,173 @@
             "properties": {
               "data": {
                 "$ref": "#/components/schemas/ClaimTradingChallengeResponse"
+              }
+            }
+          }
+        ]
+      },
+      "TerminateTradingChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TERMINATED"
+            ]
+          }
+        },
+        "required": [
+          "trading_challenge_id",
+          "user_id",
+          "status"
+        ]
+      },
+      "TerminateTradingChallengeResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/TerminateTradingChallengeResponse"
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeRegistrationRequest": {
+        "type": "object",
+        "description": "A user's request to take part in a trading challenge, raised at sign-up and settled by an admin, the tenant's integrator or one of the challenge's managers. Approving it enrols the user; the row is kept after the decision as an audit trail.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trading_challenge_name": {
+            "type": "string"
+          },
+          "trading_challenge_type": {
+            "type": "string",
+            "enum": [
+              "TOURNAMENT",
+              "CASH"
+            ]
+          },
+          "trading_challenge_status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "ACTIVE",
+              "COMPLETED"
+            ]
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_email": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "reviewed_by": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Who settled the request. Absent while it is PENDING."
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it was settled. Absent while it is PENDING."
+          },
+          "review_reason": {
+            "type": "string",
+            "description": "Free-text note kept for the audit trail. Optional on both decisions."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "trading_challenge_id",
+          "user_id",
+          "tenant_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ReviewTradingChallengeRegistrationRequest": {
+        "type": "object",
+        "description": "Body of approve and reject. Optional: an empty body is accepted.",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Free-text note kept for the audit trail."
+          }
+        }
+      },
+      "TradingChallengeRegistrationRequestResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/TradingChallengeRegistrationRequest"
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeRegistrationRequestListResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TradingChallengeRegistrationRequest"
+                }
               }
             }
           }

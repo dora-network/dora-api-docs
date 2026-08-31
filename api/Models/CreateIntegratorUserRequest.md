@@ -13,6 +13,7 @@
 | **provider** | **String** |  | [optional] [default to null] |
 | **provider\_id** | **UUID** |  | [optional] [default to null] |
 | **timezone** | **String** |  | [optional] [default to null] |
+| **challenge\_id** | **UUID** | Optional: sign the new user up for this trading challenge. This creates a PENDING registration request that an admin, the tenant&#39;s integrator or one of the challenge&#39;s managers must approve before the user is actually enrolled. The challenge must belong to the new user&#39;s tenant and still be open for entries, otherwise the whole sign-up fails. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

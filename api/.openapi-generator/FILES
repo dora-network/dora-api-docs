@@ -26,6 +26,7 @@ Models/BalanceTransfer.md
 Models/BalancesResponse.md
 Models/Bond.md
 Models/BondKind.md
+Models/BondRunStatus.md
 Models/CancelOrderResponseEnvelope.md
 Models/Candle.md
 Models/CandleResolution.md
@@ -57,6 +58,7 @@ Models/CreateOrUpdateUserResponse.md
 Models/CreateOrderRequest.md
 Models/CreateOrderResponseEnvelope.md
 Models/CreateTradingChallengeRequest.md
+Models/CreditRating.md
 Models/CurrentLeverageAccruedInterest.md
 Models/CurrentLeverageAccruedInterestResponseEnvelope.md
 Models/DefundUserRequest.md
@@ -167,6 +169,7 @@ Models/RepayUSDResponseEnvelope.md
 Models/RepayUSDResult.md
 Models/ResponseEnvelope.md
 Models/ResponseEnvelopeOfListAssets.md
+Models/ReviewTradingChallengeRegistrationRequest.md
 Models/RevokeAPIKeyData.md
 Models/RevokeAPIKeyResponseEnvelope.md
 Models/SettleLeverageAccruedInterest.md
@@ -199,6 +202,8 @@ Models/Supply.md
 Models/SupplyRequest.md
 Models/SupplyResponseEnvelope.md
 Models/TenantRestrictions.md
+Models/TerminateTradingChallengeResponse.md
+Models/TerminateTradingChallengeResponseEnvelope.md
 Models/Trade.md
 Models/TradeRequestError.md
 Models/TradeResponseEnvelope.md
@@ -206,6 +211,9 @@ Models/TradingChallenge.md
 Models/TradingChallengeDailySnapshot.md
 Models/TradingChallengeDailySnapshotsResponseEnvelope.md
 Models/TradingChallengeListResponseEnvelope.md
+Models/TradingChallengeRegistrationRequest.md
+Models/TradingChallengeRegistrationRequestListResponseEnvelope.md
+Models/TradingChallengeRegistrationRequestResponseEnvelope.md
 Models/TradingChallengeResponseEnvelope.md
 Models/TradingChallengeResult.md
 Models/TradingChallengeResultsResponseEnvelope.md
@@ -231,8 +239,12 @@ Models/UnitePositionRequest.md
 Models/UnitePositionResponseEnvelope.md
 Models/UnitedPosition.md
 Models/UpdateFieldBoolean.md
+Models/UpdateFieldDateTime.md
+Models/UpdateFieldDecimal.md
+Models/UpdateFieldInteger.md
 Models/UpdateFieldString.md
 Models/UpdateRolesString.md
+Models/UpdateTradingChallengeRequest.md
 Models/UpdateUserConfigRequest.md
 Models/UpdateUserKYCRequest.md
 Models/UpdateUserKYCResponse.md
@@ -245,6 +257,9 @@ Models/UserCouponPayment.md
 Models/UserCouponPaymentAssetSummary.md
 Models/UserCouponPaymentsResponseData.md
 Models/UserCreatedResponseEnvelope.md
+Models/UserDeactivation.md
+Models/UserDeactivationListResponseEnvelope.md
+Models/UserDeactivationResponseEnvelope.md
 Models/UserDeletedResponseEnvelope.md
 Models/UserEnvelope.md
 Models/UserExistsResponse.md
