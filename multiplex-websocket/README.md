@@ -24,6 +24,7 @@ Currently documented paths:
 - [`/orders/byuser`](#path-ordersbyuser) — order updates for a single user (auth required).
 - [`/v1/user/leverage/accrued_interest/stream`](#path-v1userleverageaccrued_intereststream) — leverage accrued interest per user (auth required).
 - [`/coupon-payments/byuser`](#path-coupon-paymentsbyuser) — coupon payments per user (auth required).
+- [`/web3/deposits/byuser`](#path-web3depositsbyuser) — real-time USDC deposit updates for one user (auth required).
 - [`/debug/notify`](#path-debugnotify) — debug route that echoes `data` after a delay.
 
 Runnable examples in three languages:
@@ -991,6 +992,78 @@ Subscribe to real-time coupon-payment updates for selected users. **Auth require
           "asset_id": "019c3401-9737-7106-b3d3-b7a6e6eef0e6",
           "pending": "12.5",
           "completed": "1.25"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Path: `/web3/deposits/byuser`
+
+Streaming equivalent of `GET /v1/web3/deposits`, scoped to **one** user. **Auth required.** Each deposit object in a notification has the same shape that endpoint returns.
+
+A request names **zero or one** user, mirroring the single `?user_id=` the REST endpoint accepts; naming more than one is an error. Who may watch whom is decided by the same function that interprets `?user_id=`:
+
+| `subscribe` | admin caller | non-admin caller |
+| --- | --- | --- |
+| one user ID | that user | that user, if it is themselves, else forbidden |
+| empty | error: name a user | themselves |
+
+A connection watches exactly one user at a time, so naming a new one **replaces** whatever it was watching. `subscribe_all` is rejected: unlike the REST endpoint, which lets an admin omit `?user_id=` to page over every user, this route has no every-user scope. An admin who names no user is asked to name one.
+
+`unsubscribe_all` clears the subscription, as does naming the watched user in `unsubscribe`. Naming a user the connection is not watching leaves it alone.
+
+A notification carries the **full current deposit list** for the watched user, newest first, keyed by their user ID. Treat it as a replacement for that list, not a delta. Nothing is sent when the list has not changed, and a user with no deposits at all is reported once as an empty list. Because the whole list is compared, a deposit leaving `PENDING` for `FINALIZED`/`ORPHANED`/`DUST` — picking up a `transaction_id` — is pushed just like a brand-new deposit.
+
+`DORA_STREAM_DEPOSIT_LIMIT` (default 50) bounds each snapshot to that many deposits, matching the default page size of `GET /v1/web3/deposits`.
+
+### Request data
+
+| Field | Type | Notes |
+|---|---|---|
+| `subscribe` | `string[]` (user ids) | At most one. Adds that user to the watched slot. |
+| `unsubscribe` | `string[]` (user ids) | At most one. Removes that user from the watched slot. |
+| `subscribe_all` | `bool` | Rejected — this route has no every-user scope. |
+| `unsubscribe_all` | `bool` | When `true`, clears the watched user. |
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779bb0","path":"/web3/deposits/byuser","data":{"subscribe":["019c4d37-311e-7a2f-8d58-f17c39170865"]}}
+```
+
+### Response data
+
+```json
+{"id":"019ee189-87d7-7c69-802a-8070f3779bb0","kind":"response","path":"/web3/deposits/byuser","data":{"subscribed":["019c4d37-311e-7a2f-8d58-f17c39170865"],"subscribed_all":false}}
+```
+
+### Notification data
+
+`deposits` is a **map keyed by user id**; each value is the full current deposit list for that user, newest first:
+
+```json
+{
+  "kind": "notification",
+  "path": "/web3/deposits/byuser",
+  "id": "019ee189-87d7-7c69-802a-8070f3779bb1",
+  "data": {
+    "deposits": {
+      "019c4d37-311e-7a2f-8d58-f17c39170865": [
+        {
+          "network_chain_id": 1,
+          "network_name": "base-sepolia",
+          "chain_id": "84532",
+          "tx_hash": "0xaa01",
+          "log_index": 1,
+          "block_number": 1001,
+          "block_time": "2023-11-14T22:13:20Z",
+          "contract_address": "0xc0ff",
+          "depositor_address": "0xdead",
+          "user_id": "019c4d37-311e-7a2f-8d58-f17c39170865",
+          "quantity": "125.50",
+          "status": "FINALIZED",
+          "transaction_id": "019ee01d-f570-77de-a7ff-99aae476b4e5",
+          "observed_at": "2023-11-14T22:13:21Z"
         }
       ]
     }

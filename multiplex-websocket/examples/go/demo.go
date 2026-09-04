@@ -139,6 +139,13 @@ func main() {
 		fmt.Printf("[resp /coupon-payments/byuser subscribe] %s\n", string(resp))
 	}
 
+	// --- /web3/deposits/byuser (auth required; one user, single watch slot) ---
+	if resp, err := client.Request(ctx, "/web3/deposits/byuser", map[string]any{"subscribe": []string{userID}}, notif("/web3/deposits/byuser")); err != nil {
+		fmt.Fprintln(os.Stderr, "wsplex demo: /web3/deposits/byuser subscribe:", err)
+	} else {
+		fmt.Printf("[resp /web3/deposits/byuser subscribe] %s\n", string(resp))
+	}
+
 	// --- /debug/notify (echo a ping after 100ms) ---
 	debugReq := map[string]any{"delay": 100_000_000, "data": map[string]any{"ping": "pong", "asset_id": assetID}}
 	if resp, err := client.Request(ctx, "/debug/notify", debugReq, notif("/debug/notify")); err != nil {
@@ -176,6 +183,7 @@ func main() {
 	unsub("/pools/balance", map[string]any{"unsubscribe_all": true}, "/pools/balance")
 	unsub("/orders/byuser", map[string]any{"user_id": userID, "unsubscribe_all_orderbooks": true}, "/orders/byuser")
 	unsub("/v1/user/leverage/accrued_interest/stream", map[string]any{"unsubscribe": []string{userID}}, "/v1/user/leverage/accrued_interest/stream")
+	unsub("/web3/deposits/byuser", map[string]any{"unsubscribe_all": true}, "/web3/deposits/byuser")
 	unsub("/coupon-payments/byuser", map[string]any{"unsubscribe": []string{userID}}, "/coupon-payments/byuser")
 }
 func pickBaseURLAndKey() (string, string) {

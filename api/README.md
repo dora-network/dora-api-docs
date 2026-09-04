@@ -83,6 +83,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getUserTransactionsStream**](Apis/DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user's executed transactions since a specific time, and opens a stream for further updates |
 *DefaultApi* | [**getUsers**](Apis/DefaultApi.md#getUsers) | **GET** /v1/user | Get all users (admin only) |
 *DefaultApi* | [**getUsersAPIKeys**](Apis/DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user's api keys |
+*DefaultApi* | [**getWithdrawalFeeQuote**](Apis/DefaultApi.md#getWithdrawalFeeQuote) | **GET** /v1/web3/withdrawals/fee-quote | Estimate the network fee to withdraw USDC via web3 |
 *DefaultApi* | [**ledgerDeposit**](Apis/DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user's account from the outside world |
 *DefaultApi* | [**ledgerWithdraw**](Apis/DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 *DefaultApi* | [**ledgerWithdrawRequest**](Apis/DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
@@ -203,6 +204,8 @@ All URIs are relative to *https://staging.dora.co*
  - [DepositInstructionsResponse](./Models/DepositInstructionsResponse.md)
  - [DepositInstructionsResponseEnvelope](./Models/DepositInstructionsResponseEnvelope.md)
  - [DepositResponse](./Models/DepositResponse.md)
+ - [FeeQuoteResponse](./Models/FeeQuoteResponse.md)
+ - [FeeQuoteResponseEnvelope](./Models/FeeQuoteResponseEnvelope.md)
  - [FundUser](./Models/FundUser.md)
  - [FundUserRequest](./Models/FundUserRequest.md)
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)

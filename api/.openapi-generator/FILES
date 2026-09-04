@@ -68,6 +68,8 @@ Models/DepositInstructionForChain.md
 Models/DepositInstructionsResponse.md
 Models/DepositInstructionsResponseEnvelope.md
 Models/DepositResponse.md
+Models/FeeQuoteResponse.md
+Models/FeeQuoteResponseEnvelope.md
 Models/FundUser.md
 Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md

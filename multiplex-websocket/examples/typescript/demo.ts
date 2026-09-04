@@ -3,8 +3,8 @@
 // Demonstrates every documented path: /, /prices, /trades, /transactions,
 // /assets, /orderbook/stats, /charts/candles, /accounts/balance,
 // /pools/balance, /orders/byuser,
-// /v1/user/leverage/accrued_interest/stream, /coupon-payments/byuser, and
-// /debug/notify. The /prices notification payload is a map keyed by asset id
+// /v1/user/leverage/accrued_interest/stream, /coupon-payments/byuser,
+// /web3/deposits/byuser, and /debug/notify. The /prices notification payload is a map keyed by asset id
 // (not an array) — the handler prints it as-is.
 
 import { PlexClient } from "./client.js";
@@ -165,6 +165,14 @@ async function main(): Promise<number> {
       makeHandler("/coupon-payments/byuser"),
     );
 
+    // --- /web3/deposits/byuser (auth required; one user, single watch slot) ---
+    await req(
+      "/web3/deposits/byuser",
+      { subscribe: [userId] },
+      "/web3/deposits/byuser subscribe",
+      makeHandler("/web3/deposits/byuser"),
+    );
+
     // --- /debug/notify (echo a ping after 100ms) ---
     await req(
       "/debug/notify",
@@ -194,6 +202,7 @@ async function main(): Promise<number> {
     await unsub("/pools/balance", { unsubscribe_all: true }, "/pools/balance");
     await unsub("/orders/byuser", { user_id: userId, unsubscribe_all_orderbooks: true }, "/orders/byuser");
     await unsub("/v1/user/leverage/accrued_interest/stream", { unsubscribe: [userId] }, "/v1/user/leverage/accrued_interest/stream");
+    await unsub("/web3/deposits/byuser", { unsubscribe_all: true }, "/web3/deposits/byuser");
     await unsub("/coupon-payments/byuser", { unsubscribe: [userId] }, "/coupon-payments/byuser");
   } finally {
     await client.close();

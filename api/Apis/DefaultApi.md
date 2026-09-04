@@ -80,6 +80,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getUserTransactionsStream**](DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user&#39;s executed transactions since a specific time, and opens a stream for further updates |
 | [**getUsers**](DefaultApi.md#getUsers) | **GET** /v1/user | Get all users (admin only) |
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
+| [**getWithdrawalFeeQuote**](DefaultApi.md#getWithdrawalFeeQuote) | **GET** /v1/web3/withdrawals/fee-quote | Estimate the network fee to withdraw USDC via web3 |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 | [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
@@ -2076,6 +2077,34 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**APIKeyResponseEnvelope**](../Models/APIKeyResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getWithdrawalFeeQuote"></a>
+# **getWithdrawalFeeQuote**
+> FeeQuoteResponseEnvelope getWithdrawalFeeQuote(to, quantity)
+
+Estimate the network fee to withdraw USDC via web3
+
+    Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay when they make their withdrawal request. Restricted to DORA tenant users whose native asset is USDC.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **to** | **String**| The destination wallet address as a 0x-prefixed 20-byte hex string. Must not be the zero address. | [default to null] |
+| **quantity** | **BigDecimal**| Human-decimal USDC quantity to withdraw, e.g. &#39;100.50&#39;. Must be positive. | [default to null] |
+
+### Return type
+
+[**FeeQuoteResponseEnvelope**](../Models/FeeQuoteResponseEnvelope.md)
 
 ### Authorization
 

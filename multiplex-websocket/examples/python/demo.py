@@ -140,6 +140,11 @@ async def run() -> int:
                   "/coupon-payments/byuser subscribe",
                   notif=make_handler("/coupon-payments/byuser"))
 
+        # --- /web3/deposits/byuser (auth required; one user, single watch slot) ---
+        await req("/web3/deposits/byuser", {"subscribe": [user_id]},
+                  "/web3/deposits/byuser subscribe",
+                  notif=make_handler("/web3/deposits/byuser"))
+
         # --- /debug/notify (echo a ping after 100ms) ---
         await req("/debug/notify", {"delay": 100_000_000, "data": {"ping": "pong", "asset_id": asset_id}},
                   "/debug/notify", notif=make_handler("/debug/notify"))
@@ -170,6 +175,7 @@ async def run() -> int:
         await unsub("/pools/balance", {"unsubscribe_all": True}, "/pools/balance")
         await unsub("/orders/byuser", {"user_id": user_id, "unsubscribe_all_orderbooks": True}, "/orders/byuser")
         await unsub("/v1/user/leverage/accrued_interest/stream", {"unsubscribe": [user_id]}, "/v1/user/leverage/accrued_interest/stream")
+        await unsub("/web3/deposits/byuser", {"unsubscribe_all": True}, "/web3/deposits/byuser")
         await unsub("/coupon-payments/byuser", {"unsubscribe": [user_id]}, "/coupon-payments/byuser")
     finally:
         await client.close()

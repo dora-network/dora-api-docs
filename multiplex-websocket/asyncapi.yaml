@@ -316,6 +316,29 @@ channels:
       pnlByUserNotification:
         $ref: "#/components/messages/PnLByUserNotification"
 
+  depositsByUser:
+    address: /web3/deposits/byuser
+    description: |
+      Streaming equivalent of `GET /v1/web3/deposits`, scoped to **one** user.
+      **Auth required** — admins may watch any user; non-admin callers may only watch
+      themselves. A connection watches a single user at a time; naming a new user in
+      `subscribe` replaces whatever the connection was watching. `subscribe_all` is
+      rejected — this route has no every-user scope. An admin who omits the user ID
+      is asked to name one. `unsubscribe_all` clears the watch slot, as does naming the
+      watched user in `unsubscribe`. Notifications carry `deposits` as a **map keyed
+      by user id**; each value is the full current deposit list for that user,
+      newest first. Treat each notification as a replacement snapshot, not a delta;
+      nothing is sent when the list has not changed, and a user with no deposits is
+      reported once as an empty list. `DORA_STREAM_DEPOSIT_LIMIT` (default 50) bounds
+      each snapshot.
+    messages:
+      depositsByUserRequest:
+        $ref: "#/components/messages/DepositsByUserRequest"
+      depositsByUserResponse:
+        $ref: "#/components/messages/DepositsByUserResponse"
+      depositsByUserNotification:
+        $ref: "#/components/messages/DepositsByUserNotification"
+
 operations:
   rootRequest:
     action: send
@@ -699,6 +722,33 @@ operations:
     summary: Server-pushed per-account PnL reports, keyed by user id.
     messages:
       - $ref: "#/channels/pnlByUser/messages/pnlByUserNotification"
+
+  depositsByUserRequest:
+    action: send
+    channel:
+      $ref: "#/channels/depositsByUser"
+    summary: |
+      Subscribe/unsubscribe to the watched user on `/web3/deposits/byuser` (auth
+      required). At most one user at a time; `subscribe_all` is rejected.
+    messages:
+      - $ref: "#/channels/depositsByUser/messages/depositsByUserRequest"
+    traits:
+      - $ref: "#/components/operationTraits/RequestEnvelope"
+  depositsByUserReceiveResponse:
+    action: receive
+    channel:
+      $ref: "#/channels/depositsByUser"
+    summary: The single response matching a `/web3/deposits/byuser` request.
+    messages:
+      - $ref: "#/channels/depositsByUser/messages/depositsByUserResponse"
+  depositsByUserReceiveNotification:
+    action: receive
+    channel:
+      $ref: "#/channels/depositsByUser"
+    summary: |
+      Server-pushed full deposit list for the watched user, keyed by user id.
+    messages:
+      - $ref: "#/channels/depositsByUser/messages/depositsByUserNotification"
 
 components:
   securitySchemes:
@@ -1120,6 +1170,35 @@ components:
       contentType: application/json
       payload:
         $ref: "#/components/schemas/PnLByUserNotification"
+
+    # ----- /web3/deposits/byuser -----
+    DepositsByUserRequest:
+      name: DepositsByUserRequest
+      title: /web3/deposits/byuser request
+      summary: |
+        Subscribe/unsubscribe to the watched user on `/web3/deposits/byuser` (auth
+        required). At most one user at a time; naming a new user replaces the watched
+        slot. `subscribe_all` is rejected — this route has no every-user scope.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DepositsByUserRequest"
+    DepositsByUserResponse:
+      name: DepositsByUserResponse
+      title: /web3/deposits/byuser response
+      summary: The single response matching a `/web3/deposits/byuser` request.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DepositsByUserResponse"
+    DepositsByUserNotification:
+      name: DepositsByUserNotification
+      title: /web3/deposits/byuser notification
+      summary: |
+        Server-pushed full deposit list for the watched user, keyed by user id. Each
+        notification is a replacement snapshot, not a delta; nothing is sent when the
+        list has not changed.
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/DepositsByUserNotification"
 
   schemas:
     # ----- common envelope fragments -----
@@ -3127,3 +3206,171 @@ components:
           properties:
             data:
               $ref: "#/components/schemas/PnLByUserNotificationData"
+
+    # ----- /web3/deposits/byuser -----
+
+    DepositsByUserRequest:
+      allOf:
+        - $ref: "#/components/schemas/RequestEnvelope"
+        - type: object
+          properties:
+            data:
+              type: object
+              description: |
+                Subscription change. Names at most one user; naming a new user
+                replaces whatever the connection was watching. `subscribe_all` is
+                rejected — this route has no every-user scope. The schema is otherwise
+                the standard subscribe/unsubscribe/unsubscribe_all set.
+              properties:
+                subscribe:
+                  type: array
+                  description: |
+                    At most one user id. Adds that user to the watched slot,
+                    replacing whatever was watched before.
+                  items:
+                    type: string
+                    format: uuid
+                unsubscribe:
+                  type: array
+                  description: |
+                    At most one user id. Removes that user from the watched slot.
+                  items:
+                    type: string
+                    format: uuid
+                subscribe_all:
+                  type: boolean
+                  description: |
+                    Rejected — this route has no every-user scope. The REST
+                    equivalent lets an admin omit `?user_id=` to page over every user;
+                    there is deliberately no streaming equivalent.
+                unsubscribe_all:
+                  type: boolean
+                  description: When `true`, clears the watched user.
+              additionalProperties: false
+
+    DepositsByUserResponseData:
+      type: object
+      required: [subscribed, subscribed_all]
+      properties:
+        subscribed:
+          type: [array, "null"]
+          description: |
+            The current watched user, as a singleton list, after the change.
+            `null` when no user is watched.
+          items:
+            type: string
+            format: uuid
+        subscribed_all:
+          type: boolean
+          description: |
+            Always `false` on this route. The route has no every-user scope, so an
+            "all" mode is impossible.
+
+    DepositsByUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/ResponseEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DepositsByUserResponseData"
+
+    Web3Deposit:
+      type: object
+      description: |
+        One web3 deposit row, identical in shape to `GET /v1/web3/deposits`.
+        `quantity` is a decimal USDC string (base units divided by 10^6).
+      required:
+        - network_chain_id
+        - network_name
+        - chain_id
+        - tx_hash
+        - log_index
+        - block_number
+        - block_time
+        - contract_address
+        - depositor_address
+        - user_id
+        - quantity
+        - status
+        - observed_at
+      properties:
+        network_chain_id:
+          type: integer
+          format: int32
+          description: Dora internal network-chain identifier.
+        network_name:
+          type: string
+          description: Human-readable network name (e.g. `base-sepolia`).
+        chain_id:
+          type: string
+          description: EVM chain id as a decimal string.
+        tx_hash:
+          type: string
+          description: EVM transaction hash, hex-encoded.
+        log_index:
+          type: integer
+          format: int32
+          description: Log index within the transaction.
+        block_number:
+          type: integer
+          format: int64
+          description: Block number containing the deposit event.
+        block_time:
+          type: string
+          format: date-time
+          description: Block timestamp as an ISO-8601 string.
+        contract_address:
+          type: string
+          description: USDC contract address, hex-encoded.
+        depositor_address:
+          type: string
+          description: EVM address that initiated the deposit, hex-encoded.
+        user_id:
+          type: string
+          format: uuid
+          description: Dora user UUID the deposit was credited to.
+        quantity:
+          type: string
+          description: |
+            Human-decimal USDC amount as a string (base units divided by 10^6).
+        client_reference_id:
+          type: string
+          description: |
+            Optional client-supplied reference id attached to the deposit,
+            hex-encoded. Omitted when the deposit did not carry one.
+        status:
+          type: string
+          enum: [PENDING, FINALIZED, ORPHANED, DUST]
+        transaction_id:
+          type: string
+          format: uuid
+          description: |
+            Internal Dora transaction id once the deposit leaves `PENDING` for
+            `FINALIZED`/`ORPHANED`/`DUST`. Omitted while the deposit is still pending.
+        observed_at:
+          type: string
+          format: date-time
+          description: Timestamp the deposit was observed by the indexer.
+
+    DepositsByUserNotificationData:
+      type: object
+      description: |
+        The notification `data` carries `deposits` as a **map keyed by user id**;
+        each value is the full current deposit list for that user, newest first.
+        Treat it as a replacement snapshot, not a delta.
+      required: [deposits]
+      properties:
+        deposits:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/Web3Deposit"
+
+    DepositsByUserNotification:
+      allOf:
+        - $ref: "#/components/schemas/NotificationEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DepositsByUserNotificationData"

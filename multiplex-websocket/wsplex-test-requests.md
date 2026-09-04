@@ -719,3 +719,57 @@ User-scoped channels (`/accounts/balance`, `/orders/byuser`, and `/trades` with
 }
 ```
 
+## Path: `/web3/deposits/byuser`
+
+Streaming equivalent of `GET /v1/web3/deposits`, scoped to **one** user. Each connection watches a single user at a time; naming a new one replaces whatever was watched. Subscribe-all is rejected.
+
+### 46. /web3/deposits/byuser: subscribe to one user
+
+```json
+{
+  "id": "019f3c41-b16e-7e01-2a11-9f8d0b3c4e57",
+  "path": "/web3/deposits/byuser",
+  "data": {
+    "subscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 47. /web3/deposits/byuser: replace watched user
+
+Naming a different user in `subscribe` swaps the watch slot to that user:
+
+```json
+{
+  "id": "019f3c41-b16e-7f12-3b22-af9e1c4d5f68",
+  "path": "/web3/deposits/byuser",
+  "data": {
+    "subscribe": ["{{USER_ID_2}}"]
+  }
+}
+```
+
+### 48. /web3/deposits/byuser: unsubscribe the watched user
+
+```json
+{
+  "id": "019f3c41-b16e-7013-4c33-b0af2d5e6079",
+  "path": "/web3/deposits/byuser",
+  "data": {
+    "unsubscribe": ["{{USER_ID}}"]
+  }
+}
+```
+
+### 49. /web3/deposits/byuser: unsubscribe_all
+
+```json
+{
+  "id": "019f3c41-b16e-7114-5d44-c1b03e6f708a",
+  "path": "/web3/deposits/byuser",
+  "data": {
+    "unsubscribe_all": true
+  }
+}
+```
+
