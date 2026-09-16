@@ -23,6 +23,8 @@
 | **last\_processed\_at** | **Date** |  | [optional] [default to null] |
 | **users** | **List** |  | [optional] [default to null] |
 | **users\_count** | **Integer** |  | [default to null] |
+| **qr** | [**TradingChallengeQR**](TradingChallengeQR.md) |  | [optional] [default to null] |
+| **worst\_case\_exposure** | **BigDecimal** | For QR_PROMO, max_users multiplied by initial_user_balance plus max_reward_amount. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

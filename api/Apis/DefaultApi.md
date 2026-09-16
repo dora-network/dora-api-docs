@@ -7,21 +7,27 @@ All URIs are relative to *https://staging.dora.co*
 | [**addTradingChallengeUsers**](DefaultApi.md#addTradingChallengeUsers) | **PUT** /v1/trading_challenges/add_users | Add users to a trading challenge |
 | [**approveLedgerWithdrawRequest**](DefaultApi.md#approveLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/approve | Approve a pending withdrawal request |
 | [**approveTradingChallengeRegistrationRequest**](DefaultApi.md#approveTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/approve | Approve a trading challenge registration request |
+| [**assignAffiliateReferral**](DefaultApi.md#assignAffiliateReferral) | **POST** /v1/affiliate_referrals/self | Assign your affiliate referrer |
 | [**cancelAllOpenOrders**](DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user&#39;s orders on specific orderbook |
 | [**cancelLedgerWithdrawRequest**](DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 | [**cancelOrderById**](DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
 | [**claimLeverageGetAccruedInterest**](DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
+| [**claimPromoLink**](DefaultApi.md#claimPromoLink) | **POST** /v1/promo/claim/{token} | Claim a public QR promotion link |
 | [**claimTradingChallengePrize**](DefaultApi.md#claimTradingChallengePrize) | **POST** /v1/trading_challenges/{trading_challenge_id}/claim | Claim challenge prize |
 | [**closeIsolatedAccountV2**](DefaultApi.md#closeIsolatedAccountV2) | **POST** /v2/accounts/close | Close an isolated account, repaying the borrowed |
 | [**closeIsolatedPosition**](DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 | [**createAPIKeyForUser**](DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
 | [**createAPIKeyForUserID**](DefaultApi.md#createAPIKeyForUserID) | **POST** /v1/user/{user_id}/apikey | Create apikey for a user |
+| [**createAffiliateProgram**](DefaultApi.md#createAffiliateProgram) | **POST** /v1/affiliate_programs | Create an affiliate program |
 | [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
 | [**createTradingChallenge**](DefaultApi.md#createTradingChallenge) | **POST** /v1/trading_challenges | Create a trading challenge |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
+| [**createWithdrawal**](DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
+| [**exportPromoLinksCSV**](DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
+| [**getAffiliateProgram**](DefaultApi.md#getAffiliateProgram) | **GET** /v1/affiliate_programs/{program_id} | Get an affiliate program |
 | [**getAllAssetPrices**](DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
 | [**getAllPositions**](DefaultApi.md#getAllPositions) | **GET** /v1/ledger/positions | Get all users&#39; positions |
 | [**getAllWithdrawalRequests**](DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
@@ -58,6 +64,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getOrderbookTop**](DefaultApi.md#getOrderbookTop) | **GET** /v1/orderbooks/{order_book_id}/top | Get the top price levels for a specific orderbook (L1 market depth) |
 | [**getPLForSelfByAccount**](DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 | [**getPoolPrice**](DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
+| [**getPromoAttribution**](DefaultApi.md#getPromoAttribution) | **GET** /v1/trading_challenges/{trading_challenge_id}/attribution | Get promotional source attribution |
 | [**getRealizedPnlSettlements**](DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&amp;L settlements with filters |
 | [**getTopTradersByPnL**](DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 | [**getTradeById**](DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
@@ -80,7 +87,9 @@ All URIs are relative to *https://staging.dora.co*
 | [**getUserTransactionsStream**](DefaultApi.md#getUserTransactionsStream) | **GET** /v1/user/{user_id}/transactions/stream | Get a snapshot of user&#39;s executed transactions since a specific time, and opens a stream for further updates |
 | [**getUsers**](DefaultApi.md#getUsers) | **GET** /v1/user | Get all users (admin only) |
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
+| [**getWithdrawal**](DefaultApi.md#getWithdrawal) | **GET** /v1/web3/withdrawals/{withdrawal_id} | Get a USDC withdrawal by ID |
 | [**getWithdrawalFeeQuote**](DefaultApi.md#getWithdrawalFeeQuote) | **GET** /v1/web3/withdrawals/fee-quote | Estimate the network fee to withdraw USDC via web3 |
+| [**issuePromoLinkBatch**](DefaultApi.md#issuePromoLinkBatch) | **POST** /v1/trading_challenges/{trading_challenge_id}/link_batches | Issue a promotional link batch |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
 | [**ledgerWithdrawRequest**](DefaultApi.md#ledgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{user_id} | Initiate a withdrawal request for this user to the outside world |
@@ -95,21 +104,34 @@ All URIs are relative to *https://staging.dora.co*
 | [**liquidityAdd**](DefaultApi.md#liquidityAdd) | **POST** /v1/liquidity/pool/{pool_id}/add | Add liquidity to a pool |
 | [**liquiditySubtract**](DefaultApi.md#liquiditySubtract) | **POST** /v1/liquidity/pool/{pool_id}/remove | Subtract liquidity from a pool |
 | [**listAccountsSelfV2**](DefaultApi.md#listAccountsSelfV2) | **GET** /v2/user/self/accounts | List all accounts for the authenticated user |
+| [**listAffiliateCashFlows**](DefaultApi.md#listAffiliateCashFlows) | **GET** /v1/affiliate_programs/{program_id}/referrals/{user_id}/cash_flows | List a referred user&#39;s customer cash flows |
+| [**listAffiliatePrograms**](DefaultApi.md#listAffiliatePrograms) | **GET** /v1/affiliate_programs | List affiliate programs |
+| [**listAffiliateReferrals**](DefaultApi.md#listAffiliateReferrals) | **GET** /v1/affiliate_programs/{program_id}/referrals | List referred users and activity |
+| [**listAffiliateReferrers**](DefaultApi.md#listAffiliateReferrers) | **GET** /v1/affiliate_programs/{program_id}/referrers | List program referrers |
 | [**listAssets**](DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
 | [**listDeposits**](DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
 | [**listOrderBooks**](DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
+| [**listOwnAffiliateMemberships**](DefaultApi.md#listOwnAffiliateMemberships) | **GET** /v1/affiliate_referrers/self | List your affiliate memberships |
 | [**listPositionAccountsSelf**](DefaultApi.md#listPositionAccountsSelf) | **GET** /v1/user/self/position_accounts | List all position accounts for the authenticated user |
+| [**listPromoLinkBatches**](DefaultApi.md#listPromoLinkBatches) | **GET** /v1/trading_challenges/{trading_challenge_id}/link_batches | List promotional link batches |
+| [**listPromoLinks**](DefaultApi.md#listPromoLinks) | **GET** /v1/link_batches/{batch_id}/links | List promotional links |
 | [**listTradingChallengeRegistrationRequests**](DefaultApi.md#listTradingChallengeRegistrationRequests) | **GET** /v1/trading_challenges/registration_requests | List trading challenge registration requests |
 | [**listTradingChallenges**](DefaultApi.md#listTradingChallenges) | **GET** /v1/trading_challenges | List trading challenges |
 | [**listUserDeactivations**](DefaultApi.md#listUserDeactivations) | **GET** /v1/user/deactivations | Get the current deactivation status across all users |
+| [**listWithdrawals**](DefaultApi.md#listWithdrawals) | **GET** /v1/web3/withdrawals | List USDC withdrawals |
+| [**lookupAffiliateCode**](DefaultApi.md#lookupAffiliateCode) | **GET** /v1/affiliate_codes/{code} | Look up a reusable referral code |
 | [**payLeverageGetAccruedInterest**](DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
+| [**registerAffiliateReferrer**](DefaultApi.md#registerAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers | Register an existing user as a referrer |
 | [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 | [**rejectTradingChallengeRegistrationRequest**](DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
 | [**removeTradingChallengeUsers**](DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
+| [**renderPromoLinkQR**](DefaultApi.md#renderPromoLinkQR) | **GET** /v1/promo_links/{link_id}/qr | Render a promotional link QR code |
 | [**repayUSD**](DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
+| [**resolvePromoClaim**](DefaultApi.md#resolvePromoClaim) | **GET** /v1/promo/claim/{token} | Resolve a public QR promotion claim link |
 | [**revokeAPIKeyForUser**](DefaultApi.md#revokeAPIKeyForUser) | **PUT** /v1/user/apikey/{key_id}/revoke | Revoke apikey for a user |
 | [**revokeAPIKeyForUserID**](DefaultApi.md#revokeAPIKeyForUserID) | **PUT** /v1/user/{user_id}/apikey/{key_id}/revoke | Revoke apikey for a user: admin or integrator only |
+| [**revokePromoLink**](DefaultApi.md#revokePromoLink) | **POST** /v1/promo_links/{link_id}/revoke | Revoke a promotional link |
 | [**settleLeverageAccruedInterest**](DefaultApi.md#settleLeverageAccruedInterest) | **POST** /v1/leverage/accrued_interest/settle | Settle current accrued leverage interest for a specific user |
 | [**settleRealizedPnlRecord**](DefaultApi.md#settleRealizedPnlRecord) | **PUT** /v1/realized_pnl_settlements/{settlement_id} | Mark a realized P&amp;L settlement as settled |
 | [**settleTransactionsSettlements**](DefaultApi.md#settleTransactionsSettlements) | **PUT** /v1/transactions/settlements | Settle multiple transactions settlements in batch |
@@ -122,6 +144,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**terminateTradingChallengeParticipation**](DefaultApi.md#terminateTradingChallengeParticipation) | **POST** /v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate | Terminate a participation in a trading challenge |
 | [**transferAccountBalancesV2**](DefaultApi.md#transferAccountBalancesV2) | **POST** /v2/accounts/transfer_balances | Transfer available balance between a user&#39;s accounts |
 | [**transferAvailableBalances**](DefaultApi.md#transferAvailableBalances) | **POST** /v1/positions/transfer_balances | Transfer available balance between a user&#39;s accounts (e.g. global to isolated position) |
+| [**updateAffiliateProgram**](DefaultApi.md#updateAffiliateProgram) | **PUT** /v1/affiliate_programs/{program_id} | Update an affiliate program |
 | [**updateTradingChallenge**](DefaultApi.md#updateTradingChallenge) | **PUT** /v1/trading_challenges/{trading_challenge_id} | Update a trading challenge |
 | [**updateUserConfig**](DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 | [**updateUserConfigSelf**](DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
@@ -203,6 +226,33 @@ Approve a trading challenge registration request
 ### Return type
 
 [**TradingChallengeRegistrationRequestResponseEnvelope**](../Models/TradingChallengeRegistrationRequestResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="assignAffiliateReferral"></a>
+# **assignAffiliateReferral**
+> AffiliateAttributionEnvelope assignAffiliateReferral(AssignAffiliateReferralRequest)
+
+Assign your affiliate referrer
+
+    Authenticated existing users may assign a referral code once, within their own tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **AssignAffiliateReferralRequest** | [**AssignAffiliateReferralRequest**](../Models/AssignAffiliateReferralRequest.md)|  | |
+
+### Return type
+
+[**AffiliateAttributionEnvelope**](../Models/AffiliateAttributionEnvelope.md)
 
 ### Authorization
 
@@ -313,6 +363,32 @@ Claim current accrued leverage interest for a specific user
 ### Authorization
 
 [apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="claimPromoLink"></a>
+# **claimPromoLink**
+> PromoClaimResponseEnvelope claimPromoLink(token, claimPromoLink\_request)
+
+Claim a public QR promotion link
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **token** | **String**| Opaque bearer claim token | [default to null] |
+| **claimPromoLink\_request** | [**claimPromoLink_request**](../Models/claimPromoLink_request.md)|  | |
+
+### Return type
+
+[**PromoClaimResponseEnvelope**](../Models/PromoClaimResponseEnvelope.md)
+
+### Authorization
+
+No authorization required
 
 ### HTTP request headers
 
@@ -447,6 +523,33 @@ Create apikey for a user
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="createAffiliateProgram"></a>
+# **createAffiliateProgram**
+> AffiliateProgramEnvelope createAffiliateProgram(CreateAffiliateProgramRequest)
+
+Create an affiliate program
+
+    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. tenant_id is required. Set is_active to true to create an active program.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateAffiliateProgramRequest** | [**CreateAffiliateProgramRequest**](../Models/CreateAffiliateProgramRequest.md)|  | |
+
+### Return type
+
+[**AffiliateProgramEnvelope**](../Models/AffiliateProgramEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="createConditionalOrder"></a>
 # **createConditionalOrder**
 > CreateConditionalOrderResponseEnvelope createConditionalOrder(CreateConditionalOrderRequest)
@@ -549,6 +652,33 @@ Create a new user
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="createWithdrawal"></a>
+# **createWithdrawal**
+> WithdrawalResponseEnvelope createWithdrawal(CreateWithdrawalRequest)
+
+Create a USDC withdrawal request
+
+    Reserves the requested quantity against the caller&#39;s available balance (moving it to pending_withdrawal) and creates a PENDING withdrawal. No fee quote is required and no fee is reserved: the withdrawal&#39;s fee is quoted and locked later, as part of approval. Idempotent on withdrawal_id: a repeat request carrying the same to_address and quantity reserves nothing further and returns the existing withdrawal with 200. Reusing a withdrawal_id with a different to_address or quantity is a conflict (409), not a replay, and reserves nothing. Restricted to DORA tenant users whose native asset is USDC.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateWithdrawalRequest** | [**CreateWithdrawalRequest**](../Models/CreateWithdrawalRequest.md)|  | |
+
+### Return type
+
+[**WithdrawalResponseEnvelope**](../Models/WithdrawalResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="deleteUser"></a>
 # **deleteUser**
 > UserDeletedResponseEnvelope deleteUser(user\_id)
@@ -574,6 +704,33 @@ Delete user by ID
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="exportPromoLinksCSV"></a>
+# **exportPromoLinksCSV**
+> String exportPromoLinksCSV(batch\_id)
+
+Export promotional links as CSV
+
+    Stream private claim URLs with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **batch\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+**String**
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: text/csv
+
 <a name="getAPIKeysForUserID"></a>
 # **getAPIKeysForUserID**
 > APIKeyResponseEnvelope getAPIKeysForUserID(user\_id)
@@ -589,6 +746,33 @@ Get user&#39;s api keys: admin or integrator only
 ### Return type
 
 [**APIKeyResponseEnvelope**](../Models/APIKeyResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getAffiliateProgram"></a>
+# **getAffiliateProgram**
+> AffiliateProgramEnvelope getAffiliateProgram(program\_id)
+
+Get an affiliate program
+
+    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. 
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**AffiliateProgramEnvelope**](../Models/AffiliateProgramEnvelope.md)
 
 ### Authorization
 
@@ -804,6 +988,8 @@ No authorization required
 > ListCandlesResponseEnvelope getCandleData(order\_book\_id, start, end, resolution)
 
 Get candlestick data for an orderbook
+
+    Returns candle data in the requested [start, end) range for the selected resolution. Responses are capped to the most recent 5,000 candles per request.
 
 ### Parameters
 
@@ -1491,6 +1677,33 @@ Get the current price of a pool
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getPromoAttribution"></a>
+# **getPromoAttribution**
+> PromoAttributionResponse getPromoAttribution(trading\_challenge\_id)
+
+Get promotional source attribution
+
+    Return the QR source funnel and decimal totals in one bounded aggregate query. ADMIN and same-tenant INTEGRATOR only.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**PromoAttributionResponse**](../Models/PromoAttributionResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getRealizedPnlSettlements"></a>
 # **getRealizedPnlSettlements**
 > GetRealizedPnlSettlementsResponseEnvelope getRealizedPnlSettlements(user\_id, tenant\_id, position\_id, created\_after, created\_before, settled\_after, settled\_before, is\_settled)
@@ -2087,13 +2300,40 @@ This endpoint does not need any parameter.
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getWithdrawal"></a>
+# **getWithdrawal**
+> WithdrawalResponseEnvelope getWithdrawal(withdrawal\_id)
+
+Get a USDC withdrawal by ID
+
+    Returns a single USDC withdrawal. A caller may read its own withdrawals; admins may read any user&#39;s.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **withdrawal\_id** | **UUID**| The withdrawal ID. | [default to null] |
+
+### Return type
+
+[**WithdrawalResponseEnvelope**](../Models/WithdrawalResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getWithdrawalFeeQuote"></a>
 # **getWithdrawalFeeQuote**
 > FeeQuoteResponseEnvelope getWithdrawalFeeQuote(to, quantity)
 
 Estimate the network fee to withdraw USDC via web3
 
-    Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay when they make their withdrawal request. Restricted to DORA tenant users whose native asset is USDC.
+    Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay for a withdrawal. The fee is not charged when the withdrawal is requested; the quote is redeemed later, when the fee is locked as part of approval. Restricted to DORA tenant users whose native asset is USDC.
 
 ### Parameters
 
@@ -2113,6 +2353,35 @@ Estimate the network fee to withdraw USDC via web3
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="issuePromoLinkBatch"></a>
+# **issuePromoLinkBatch**
+> IssuePromoLinkBatchResponse issuePromoLinkBatch(trading\_challenge\_id, Idempotency-Key, IssuePromoLinkBatchRequest)
+
+Issue a promotional link batch
+
+    Atomically reserve QR campaign capacity and create opaque, encrypted promotional links. ADMIN and same-tenant INTEGRATOR only. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+| **Idempotency-Key** | **String**|  | [default to null] |
+| **IssuePromoLinkBatchRequest** | [**IssuePromoLinkBatchRequest**](../Models/IssuePromoLinkBatchRequest.md)|  | |
+
+### Return type
+
+[**IssuePromoLinkBatchResponse**](../Models/IssuePromoLinkBatchResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="ledgerDeposit"></a>
@@ -2484,6 +2753,125 @@ This endpoint does not need any parameter.
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="listAffiliateCashFlows"></a>
+# **listAffiliateCashFlows**
+> AffiliateCashFlowReportEnvelope listAffiliateCashFlows(program\_id, user\_id, limit, page)
+
+List a referred user&#39;s customer cash flows
+
+    Authenticated access. ADMIN can inspect all programs. INTEGRATOR is limited to its own tenant. Other users must be registered referrers and see only their own referrals. Deactivation retains historical reports. Currency EXTERNAL_DEPOSIT and EXTERNAL_WITHDRAW ledger events only. Pending withdrawals and promotional credits are excluded. Amounts are positive native asset units identified by asset_symbol. The date is when the completed movement was recorded in the ledger. Only events at or after the user&#39;s referral assignment are included.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **user\_id** | **UUID**|  | [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending. | [optional] [default to 1] |
+
+### Return type
+
+[**AffiliateCashFlowReportEnvelope**](../Models/AffiliateCashFlowReportEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listAffiliatePrograms"></a>
+# **listAffiliatePrograms**
+> AffiliateProgramListEnvelope listAffiliatePrograms(tenant\_id, limit, page)
+
+List affiliate programs
+
+    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Admins without a tenant filter list all tenants. Inactive programs are included.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **tenant\_id** | **String**| Integrators default to their own tenant and cannot select another. Admins may select any tenant. | [optional] [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending. | [optional] [default to 1] |
+
+### Return type
+
+[**AffiliateProgramListEnvelope**](../Models/AffiliateProgramListEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listAffiliateReferrals"></a>
+# **listAffiliateReferrals**
+> AffiliateReferralReportEnvelope listAffiliateReferrals(program\_id, date, referrer\_id, limit, page)
+
+List referred users and activity
+
+    Authenticated access. ADMIN can inspect all programs. INTEGRATOR is limited to its own tenant. Other users must be registered referrers and see only their own referrals. Deactivation retains historical reports. date defaults to the current UTC day. Daily volume and realized PnL use the selected UTC day; monthly volume and realized PnL use its UTC calendar month. Trade activity, PnL and currency cash-flow counts/dates include only events at or after attributed_at. Signup and KYC fields describe the user profile. Promotional and trading-challenge credits, non-currency assets, pending and rejected withdrawals are excluded from customer cash flows. Discord status is unknown until an integration exists.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **date** | **date**|  | [optional] [default to null] |
+| **referrer\_id** | **UUID**|  | [optional] [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by attribution created_at then user_id descending. | [optional] [default to 1] |
+
+### Return type
+
+[**AffiliateReferralReportEnvelope**](../Models/AffiliateReferralReportEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listAffiliateReferrers"></a>
+# **listAffiliateReferrers**
+> AffiliateReferrerListEnvelope listAffiliateReferrers(program\_id, limit, page)
+
+List program referrers
+
+    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Includes registrations in inactive programs.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending. | [optional] [default to 1] |
+
+### Return type
+
+[**AffiliateReferrerListEnvelope**](../Models/AffiliateReferrerListEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="listAssets"></a>
 # **listAssets**
 > ResponseEnvelopeOfListAssets listAssets(created\_after, created\_before, asset\_kind, can\_add\_liquidity, can\_direct\_borrow, can\_onboard, can\_trade, can\_virtual\_borrow, page, limit)
@@ -2610,6 +2998,34 @@ List all orders
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="listOwnAffiliateMemberships"></a>
+# **listOwnAffiliateMemberships**
+> AffiliateMembershipListEnvelope listOwnAffiliateMemberships(limit, page)
+
+List your affiliate memberships
+
+    Returns only the authenticated user&#39;s memberships and reusable codes, including inactive programs.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending. | [optional] [default to 1] |
+
+### Return type
+
+[**AffiliateMembershipListEnvelope**](../Models/AffiliateMembershipListEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="listPositionAccountsSelf"></a>
 # **listPositionAccountsSelf**
 > ListPositionAccountsResponseEnvelope listPositionAccountsSelf()
@@ -2622,6 +3038,64 @@ This endpoint does not need any parameter.
 ### Return type
 
 [**ListPositionAccountsResponseEnvelope**](../Models/ListPositionAccountsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listPromoLinkBatches"></a>
+# **listPromoLinkBatches**
+> PromoLinkBatchListResponse listPromoLinkBatches(trading\_challenge\_id)
+
+List promotional link batches
+
+    Return source metadata and ISSUED, CLAIMED, and REVOKED counts for each batch. ADMIN and same-tenant INTEGRATOR only.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**PromoLinkBatchListResponse**](../Models/PromoLinkBatchListResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listPromoLinks"></a>
+# **listPromoLinks**
+> PromoLinkListResponse listPromoLinks(batch\_id, limit, cursor, status, reveal)
+
+List promotional links
+
+    Keyset-paginated batch links. URLs are omitted by default and decrypted only when reveal&#x3D;true. ADMIN and same-tenant INTEGRATOR only.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **batch\_id** | **UUID**|  | [default to null] |
+| **limit** | **Integer**|  | [optional] [default to 100] |
+| **cursor** | **String**|  | [optional] [default to null] |
+| **status** | [**PromoLinkStatus**](../Models/.md)|  | [optional] [default to null] [enum: ISSUED, CLAIMED, REVOKED] |
+| **reveal** | **Boolean**|  | [optional] [default to false] |
+
+### Return type
+
+[**PromoLinkListResponse**](../Models/PromoLinkListResponse.md)
 
 ### Authorization
 
@@ -2677,7 +3151,7 @@ List trading challenges
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **tenant\_id** | **String**|  | [optional] [default to null] |
-| **type** | [**TradingChallengeType**](../Models/.md)|  | [optional] [default to null] [enum: TOURNAMENT, CASH] |
+| **type** | [**TradingChallengeType**](../Models/.md)|  | [optional] [default to null] [enum: TOURNAMENT, CASH, QR_PROMO] |
 | **status** | [**TradingChallengeStatus**](../Models/.md)|  | [optional] [default to null] [enum: PENDING, ACTIVE, COMPLETED] |
 | **start** | **Date**|  | [optional] [default to null] |
 | **end** | **Date**|  | [optional] [default to null] |
@@ -2725,6 +3199,64 @@ Get the current deactivation status across all users
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="listWithdrawals"></a>
+# **listWithdrawals**
+> ListWithdrawalsResponseEnvelope listWithdrawals(user\_id, status, page, limit)
+
+List USDC withdrawals
+
+    Lists USDC withdrawals ordered by created_at descending. Non-admin callers are always scoped to their own withdrawals. Admin callers get every user&#39;s withdrawals by default, and may narrow to one user with &#x60;user_id&#x60;.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **user\_id** | **UUID**| Filter by user ID. Non-admin callers may only specify their own user ID. | [optional] [default to null] |
+| **status** | [**Web3WithdrawalStatus**](../Models/.md)| Filter by withdrawal status. | [optional] [default to null] [enum: PENDING, APPROVED_WITHOUT_FEE, APPROVED, BROADCAST, SUBMITTED, CONFIRMED, REJECTED, FAILED] |
+| **page** | **Long**|  | [optional] [default to 1] |
+| **limit** | **Long**|  | [optional] [default to 50] |
+
+### Return type
+
+[**ListWithdrawalsResponseEnvelope**](../Models/ListWithdrawalsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="lookupAffiliateCode"></a>
+# **lookupAffiliateCode**
+> AffiliateReferrerEnvelope lookupAffiliateCode(code, tenant\_id)
+
+Look up a reusable referral code
+
+    ADMIN or INTEGRATOR required, within tenant permissions. Admins must supply tenant_id. Case-insensitive lookup requires an active program and never consumes the code. Attribution happens separately at signup or through POST /v1/affiliate_referrals/self.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **code** | **String**|  | [default to null] |
+| **tenant\_id** | **String**| Integrators default to their own tenant and cannot select another. Admins may select any tenant. | [optional] [default to null] |
+
+### Return type
+
+[**AffiliateReferrerEnvelope**](../Models/AffiliateReferrerEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="payLeverageGetAccruedInterest"></a>
 # **payLeverageGetAccruedInterest**
 > PayLeverageAccruedInterestResponseEnvelope payLeverageGetAccruedInterest(PayLeverageAccruedInterestRequest)
@@ -2740,6 +3272,34 @@ Pay current accrued leverage interest for a specific user
 ### Return type
 
 [**PayLeverageAccruedInterestResponseEnvelope**](../Models/PayLeverageAccruedInterestResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="registerAffiliateReferrer"></a>
+# **registerAffiliateReferrer**
+> AffiliateReferrerEnvelope registerAffiliateReferrer(program\_id, RegisterAffiliateReferrerRequest)
+
+Register an existing user as a referrer
+
+    ADMIN or INTEGRATOR required, within tenant permissions. Accepts an optional custom referral_code and generates one when omitted or empty. Codes are stored uppercase and globally unique. Duplicate membership or code returns 409. Users may supply the code at signup or assign it later through POST /v1/affiliate_referrals/self.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **RegisterAffiliateReferrerRequest** | [**RegisterAffiliateReferrerRequest**](../Models/RegisterAffiliateReferrerRequest.md)|  | |
+
+### Return type
+
+[**AffiliateReferrerEnvelope**](../Models/AffiliateReferrerEnvelope.md)
 
 ### Authorization
 
@@ -2833,6 +3393,36 @@ Remove users from a trading challenge
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="renderPromoLinkQR"></a>
+# **renderPromoLinkQR**
+> String renderPromoLinkQR(link\_id, size, format, ec)
+
+Render a promotional link QR code
+
+    Render the exact private claim URL as PNG with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **link\_id** | **UUID**|  | [default to null] |
+| **size** | **Integer**|  | [optional] [default to 512] |
+| **format** | **String**|  | [optional] [default to png] [enum: png] |
+| **ec** | **String**|  | [optional] [default to M] [enum: L, M, Q, H] |
+
+### Return type
+
+**String**
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: image/png
+
 <a name="repayUSD"></a>
 # **repayUSD**
 > RepayUSDResponseEnvelope repayUSD(RepayUSDRequest)
@@ -2856,6 +3446,31 @@ Repay borrowed USD, then accrue and pay leverage interest
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="resolvePromoClaim"></a>
+# **resolvePromoClaim**
+> PromoClaimResponseEnvelope resolvePromoClaim(token)
+
+Resolve a public QR promotion claim link
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **token** | **String**| Opaque bearer claim token | [default to null] |
+
+### Return type
+
+[**PromoClaimResponseEnvelope**](../Models/PromoClaimResponseEnvelope.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 <a name="revokeAPIKeyForUser"></a>
@@ -2907,6 +3522,34 @@ Revoke apikey for a user: admin or integrator only
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="revokePromoLink"></a>
+# **revokePromoLink**
+> RevokePromoLinkResponse revokePromoLink(link\_id, RevokePromoLinkRequest)
+
+Revoke a promotional link
+
+    Revoke an unclaimed link and return one unit of QR campaign capacity. Repeating an already-revoked request is idempotent; claimed links return 409.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **link\_id** | **UUID**|  | [default to null] |
+| **RevokePromoLinkRequest** | [**RevokePromoLinkRequest**](../Models/RevokePromoLinkRequest.md)|  | |
+
+### Return type
+
+[**RevokePromoLinkResponse**](../Models/RevokePromoLinkResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="settleLeverageAccruedInterest"></a>
@@ -3211,6 +3854,34 @@ Transfer available balance between a user&#39;s accounts (e.g. global to isolate
 ### Return type
 
 [**TransferBalancesResponseEnvelope**](../Models/TransferBalancesResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="updateAffiliateProgram"></a>
+# **updateAffiliateProgram**
+> AffiliateProgramEnvelope updateAffiliateProgram(program\_id, UpdateAffiliateProgramRequest)
+
+Update an affiliate program
+
+    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Omitted and null fields are preserved. Fields accept direct values or {update, value} objects. Tenant ownership cannot be changed. Deactivation preserves codes and registrations.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **UpdateAffiliateProgramRequest** | [**UpdateAffiliateProgramRequest**](../Models/UpdateAffiliateProgramRequest.md)|  | |
+
+### Return type
+
+[**AffiliateProgramEnvelope**](../Models/AffiliateProgramEnvelope.md)
 
 ### Authorization
 

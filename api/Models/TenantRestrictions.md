@@ -4,7 +4,7 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **tenant\_id** | **String** | Tenant ID | [default to null] |
-| **deposit\_limit** | **BigDecimal** | Maximum allowed deposit for the tenant. | [default to null] |
+| **daily\_deposit\_limit** | **BigDecimal** | Maximum allowed deposit for the tenant per day. | [default to null] |
 | **trade\_limit** | **BigDecimal** | Maximum allowed trade amount for the tenant. | [default to null] |
 | **updated\_at** | **Date** | Last update timestamp for the restrictions. | [default to null] |
 

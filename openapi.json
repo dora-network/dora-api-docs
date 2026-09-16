@@ -31,6 +31,1227 @@
     }
   ],
   "paths": {
+    "/v1/affiliate_programs": {
+      "post": {
+        "summary": "Create an affiliate program",
+        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. tenant_id is required. Set is_active to true to create an active program.",
+        "operationId": "createAffiliateProgram",
+        "responses": {
+          "201": {
+            "description": "Create an affiliate program",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAffiliateProgramRequest"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List affiliate programs",
+        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Admins without a tenant filter list all tenants. Inactive programs are included.",
+        "operationId": "listAffiliatePrograms",
+        "responses": {
+          "200": {
+            "description": "List affiliate programs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramListEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "description": "Owning tenant for administration. This does not define a referral destination."
+            },
+            "description": "Integrators default to their own tenant and cannot select another. Admins may select any tenant."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending."
+          }
+        ]
+      }
+    },
+    "/v1/affiliate_programs/{program_id}": {
+      "get": {
+        "summary": "Get an affiliate program",
+        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. ",
+        "operationId": "getAffiliateProgram",
+        "responses": {
+          "200": {
+            "description": "Get an affiliate program",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update an affiliate program",
+        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Omitted and null fields are preserved. Fields accept direct values or {update, value} objects. Tenant ownership cannot be changed. Deactivation preserves codes and registrations.",
+        "operationId": "updateAffiliateProgram",
+        "responses": {
+          "200": {
+            "description": "Update an affiliate program",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateProgramEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAffiliateProgramRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/affiliate_programs/{program_id}/referrers": {
+      "post": {
+        "summary": "Register an existing user as a referrer",
+        "description": "ADMIN or INTEGRATOR required, within tenant permissions. Accepts an optional custom referral_code and generates one when omitted or empty. Codes are stored uppercase and globally unique. Duplicate membership or code returns 409. Users may supply the code at signup or assign it later through POST /v1/affiliate_referrals/self.",
+        "operationId": "registerAffiliateReferrer",
+        "responses": {
+          "201": {
+            "description": "Register an existing user as a referrer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Inactive program, duplicate membership, or referral code already in use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAffiliateReferrerRequest"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List program referrers",
+        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Includes registrations in inactive programs.",
+        "operationId": "listAffiliateReferrers",
+        "responses": {
+          "200": {
+            "description": "List program referrers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerListEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending."
+          }
+        ]
+      }
+    },
+    "/v1/affiliate_codes/{code}": {
+      "get": {
+        "summary": "Look up a reusable referral code",
+        "description": "ADMIN or INTEGRATOR required, within tenant permissions. Admins must supply tenant_id. Case-insensitive lookup requires an active program and never consumes the code. Attribution happens separately at signup or through POST /v1/affiliate_referrals/self.",
+        "operationId": "lookupAffiliateCode",
+        "responses": {
+          "200": {
+            "description": "Look up a reusable referral code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions; code lookup also excludes inactive programs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{2,63}$",
+              "description": "Reusable referral code, stored uppercase. Letters, digits, hyphens and underscores are accepted; the first character must be a letter or digit. Matching is case-insensitive. Separate from QR claim tokens."
+            }
+          },
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "description": "Owning tenant for administration. This does not define a referral destination."
+            },
+            "description": "Integrators default to their own tenant and cannot select another. Admins may select any tenant."
+          }
+        ]
+      }
+    },
+    "/v1/affiliate_referrals/self": {
+      "post": {
+        "summary": "Assign your affiliate referrer",
+        "description": "Authenticated existing users may assign a referral code once, within their own tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.",
+        "operationId": "assignAffiliateReferral",
+        "responses": {
+          "201": {
+            "description": "Referral assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateAttributionEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid code, inactive program, code from another tenant, or self-referral",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found within tenant permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A different referrer is already assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Same code was already assigned; original assignment is returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateAttributionEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignAffiliateReferralRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/affiliate_referrers/self": {
+      "get": {
+        "summary": "List your affiliate memberships",
+        "description": "Returns only the authenticated user's memberships and reusable codes, including inactive programs.",
+        "operationId": "listOwnAffiliateMemberships",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List your affiliate memberships",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateMembershipListEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/affiliate_programs/{program_id}/referrals": {
+      "get": {
+        "summary": "List referred users and activity",
+        "description": "Authenticated access. ADMIN can inspect all programs. INTEGRATOR is limited to its own tenant. Other users must be registered referrers and see only their own referrals. Deactivation retains historical reports. date defaults to the current UTC day. Daily volume and realized PnL use the selected UTC day; monthly volume and realized PnL use its UTC calendar month. Trade activity, PnL and currency cash-flow counts/dates include only events at or after attributed_at. Signup and KYC fields describe the user profile. Promotional and trading-challenge credits, non-currency assets, pending and rejected withdrawals are excluded from customer cash flows. Discord status is unknown until an integration exists.",
+        "operationId": "listAffiliateReferrals",
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "referrer_id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by attribution created_at then user_id descending."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List referred users and activity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferralReportEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Program, referrer or referred user is not visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/affiliate_programs/{program_id}/referrals/{user_id}/cash_flows": {
+      "get": {
+        "summary": "List a referred user's customer cash flows",
+        "description": "Authenticated access. ADMIN can inspect all programs. INTEGRATOR is limited to its own tenant. Other users must be registered referrers and see only their own referrals. Deactivation retains historical reports. Currency EXTERNAL_DEPOSIT and EXTERNAL_WITHDRAW ledger events only. Pending withdrawals and promotional credits are excluded. Amounts are positive native asset units identified by asset_symbol. The date is when the completed movement was recorded in the ledger. Only events at or after the user's referral assignment are included.",
+        "operationId": "listAffiliateCashFlows",
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List a referred user's customer cash flows",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateCashFlowReportEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or missing tenant/user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Role or requested tenant is forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Program, referrer or referred user is not visible to the caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/promo/claim/{token}": {
+      "get": {
+        "summary": "Resolve a public QR promotion claim link",
+        "operationId": "resolvePromoClaim",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Opaque bearer claim token",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current claim-link state and offer details when disclosure is safe",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoClaimResponseEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-IP rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Claim resolution temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Claim a public QR promotion link",
+        "operationId": "claimPromoLink",
+        "security": [],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "description": "Opaque bearer claim token",
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 512
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Claim accepted and a pending challenge account created",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoClaimResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or non-email-only request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Claim link not found or not yet safely disclosable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Link, campaign, or email can no longer be claimed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Link revoked or campaign ended",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Per-IP or durable per-token attempt limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Claim processing failed without committing account state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Encrypted login delivery is not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/assets": {
       "get": {
         "summary": "List assets",
@@ -314,6 +1535,16 @@
           }
         },
         "responses": {
+          "409": {
+            "description": "User already exists or attempted addition/reassignment of signup attribution.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
           "201": {
             "description": "User created",
             "content": {
@@ -2013,7 +3244,7 @@
             }
           },
           "403": {
-            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve",
+            "description": "Forbidden, e.g. the user's Global Account USD balance is below the required minimum cash reserve, or the order would take their position in the order book's base asset above the tenant limit for that asset",
             "content": {
               "application/json": {
                 "schema": {
@@ -2518,6 +3749,7 @@
     "/v1/charts/{order_book_id}/candle": {
       "get": {
         "summary": "Get candlestick data for an orderbook",
+        "description": "Returns candle data in the requested [start, end) range for the selected resolution. Responses are capped to the most recent 5,000 candles per request.",
         "operationId": "getCandleData",
         "security": [],
         "parameters": [
@@ -7612,6 +8844,445 @@
         }
       }
     },
+    "/v1/trading_challenges/{trading_challenge_id}/link_batches": {
+      "post": {
+        "summary": "Issue a promotional link batch",
+        "description": "Atomically reserve QR campaign capacity and create opaque, encrypted promotional links. ADMIN and same-tenant INTEGRATOR only. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.",
+        "operationId": "issuePromoLinkBatch",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssuePromoLinkBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exact idempotent replay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuePromoLinkBatchResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Batch and links created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuePromoLinkBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request or missing/duplicate idempotency key"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "QR campaign not found"
+          },
+          "409": {
+            "description": "Capacity exceeded, campaign completed, or idempotency key reused with a different payload"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "List promotional link batches",
+        "description": "Return source metadata and ISSUED, CLAIMED, and REVOKED counts for each batch. ADMIN and same-tenant INTEGRATOR only.",
+        "operationId": "listPromoLinkBatches",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotional link batches",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoLinkBatchListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "QR campaign not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/link_batches/{batch_id}/links": {
+      "get": {
+        "summary": "List promotional links",
+        "description": "Keyset-paginated batch links. URLs are omitted by default and decrypted only when reveal=true. ADMIN and same-tenant INTEGRATOR only.",
+        "operationId": "listPromoLinks",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 100
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/PromoLinkStatus"
+            }
+          },
+          {
+            "name": "reveal",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Promotional links",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoLinkListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed filter or cursor"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "Batch not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/link_batches/{batch_id}/links.csv": {
+      "get": {
+        "summary": "Export promotional links as CSV",
+        "description": "Stream private claim URLs with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.",
+        "operationId": "exportPromoLinksCSV",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV stream. Read the X-Promo-Export-Status trailer after consuming the body; only complete confirms a full export. HTTP 200 alone does not indicate success.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-store"
+                }
+              },
+              "Trailer": {
+                "description": "Declares the export-status trailer before streaming starts.",
+                "schema": {
+                  "type": "string",
+                  "const": "X-Promo-Export-Status"
+                }
+              },
+              "X-Promo-Export-Status": {
+                "description": "HTTP trailer sent after the CSV body, not an initial response header. complete means the full export was written; error means the stream failed. A missing trailer must not be treated as success.",
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "complete",
+                    "error"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "Batch not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/promo_links/{link_id}/qr": {
+      "get": {
+        "summary": "Render a promotional link QR code",
+        "description": "Render the exact private claim URL as PNG with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.",
+        "operationId": "renderPromoLinkQR",
+        "parameters": [
+          {
+            "name": "link_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 128,
+              "maximum": 2048,
+              "default": 512
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "png"
+              ],
+              "default": "png"
+            }
+          },
+          {
+            "name": "ec",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "L",
+                "M",
+                "Q",
+                "H"
+              ],
+              "default": "M"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "QR PNG",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-store"
+                }
+              }
+            },
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "contentEncoding": "base64"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed QR parameter"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/promo_links/{link_id}/revoke": {
+      "post": {
+        "summary": "Revoke a promotional link",
+        "description": "Revoke an unclaimed link and return one unit of QR campaign capacity. Repeating an already-revoked request is idempotent; claimed links return 409.",
+        "operationId": "revokePromoLink",
+        "parameters": [
+          {
+            "name": "link_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokePromoLinkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Link revoked or already revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokePromoLinkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request or reason"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "409": {
+            "description": "Claimed link or inconsistent campaign capacity"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/attribution": {
+      "get": {
+        "summary": "Get promotional source attribution",
+        "description": "Return the QR source funnel and decimal totals in one bounded aggregate query. ADMIN and same-tenant INTEGRATOR only.",
+        "operationId": "getPromoAttribution",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Source attribution funnel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoAttributionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request"
+          },
+          "403": {
+            "description": "Caller cannot administer this tenant"
+          },
+          "404": {
+            "description": "QR campaign not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/v1/trading_challenges/add_users": {
       "put": {
         "summary": "Add users to a trading challenge",
@@ -8580,7 +10251,7 @@
     "/v1/web3/withdrawals/fee-quote": {
       "get": {
         "summary": "Estimate the network fee to withdraw USDC via web3",
-        "description": "Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay when they make their withdrawal request. Restricted to DORA tenant users whose native asset is USDC.",
+        "description": "Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay for a withdrawal. The fee is not charged when the withdrawal is requested; the quote is redeemed later, when the fee is locked as part of approval. Restricted to DORA tenant users whose native asset is USDC.",
         "operationId": "getWithdrawalFeeQuote",
         "parameters": [
           {
@@ -8686,6 +10357,265 @@
           }
         }
       }
+    },
+    "/v1/web3/withdrawals": {
+      "post": {
+        "summary": "Create a USDC withdrawal request",
+        "description": "Reserves the requested quantity against the caller's available balance (moving it to pending_withdrawal) and creates a PENDING withdrawal. No fee quote is required and no fee is reserved: the withdrawal's fee is quoted and locked later, as part of approval. Idempotent on withdrawal_id: a repeat request carrying the same to_address and quantity reserves nothing further and returns the existing withdrawal with 200. Reusing a withdrawal_id with a different to_address or quantity is a conflict (409), not a replay, and reserves nothing. Restricted to DORA tenant users whose native asset is USDC.",
+        "operationId": "createWithdrawal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWithdrawalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Withdrawal created and funds reserved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponseEnvelope"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Idempotent replay: a request with the same withdrawal_id, to_address and quantity; the existing withdrawal is returned unchanged",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid body, destination address, or quantity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or the withdrawal would leave the caller below the minimum cash reserve.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. insufficient available balance, no USD ledger account to withdraw from, an unhealthy account, overdue coupon payments, a withdrawal_id already in use by another user, or a withdrawal_id reused with a to_address or quantity that does not match the existing withdrawal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List USDC withdrawals",
+        "description": "Lists USDC withdrawals ordered by created_at descending. Non-admin callers are always scoped to their own withdrawals. Admin callers get every user's withdrawals by default, and may narrow to one user with `user_id`.",
+        "operationId": "listWithdrawals",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Filter by user ID. Non-admin callers may only specify their own user ID."
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Web3WithdrawalStatus"
+            },
+            "description": "Filter by withdrawal status."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 1,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of withdrawals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListWithdrawalsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid user_id, status, or pagination parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. a non-admin user requesting another user's withdrawals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/web3/withdrawals/{withdrawal_id}": {
+      "get": {
+        "summary": "Get a USDC withdrawal by ID",
+        "description": "Returns a single USDC withdrawal. A caller may read its own withdrawals; admins may read any user's.",
+        "operationId": "getWithdrawal",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The withdrawal ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The withdrawal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid withdrawal_id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8709,6 +10639,728 @@
       }
     },
     "schemas": {
+      "AssignAffiliateReferralRequest": {
+        "type": "object",
+        "properties": {
+          "referral_code": {
+            "type": "string",
+            "description": "Existing code, trimmed and matched case-insensitively. Required and nonempty.",
+            "example": "TEAM-42"
+          }
+        },
+        "required": [
+          "referral_code"
+        ],
+        "additionalProperties": false
+      },
+      "AffiliateAttribution": {
+        "type": "object",
+        "properties": {
+          "referred_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referrer_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referrer_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "signup_source": {
+            "type": "string",
+            "description": "Signup hostname when assigned at signup; empty for an assignment made later."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Immutable assignment time; activity begins counting from this timestamp."
+          },
+          "referral_code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$"
+          }
+        },
+        "required": [
+          "referred_user_id",
+          "program_id",
+          "referrer_id",
+          "referrer_user_id",
+          "tenant_id",
+          "signup_source",
+          "created_at",
+          "referral_code"
+        ]
+      },
+      "AffiliateAttributionEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AffiliateAttribution"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateProgram": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Owning tenant for administration. This does not define a referral destination."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "No surrounding whitespace or control characters."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2048,
+            "description": "Must not contain NUL characters."
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Inactive programs retain registrations, but cannot issue or resolve codes."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "name",
+          "description",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AffiliateReferrer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Owning tenant for administration. This does not define a referral destination."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referral_code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$",
+            "description": "Reusable referral code, stored uppercase. Letters, digits, hyphens and underscores are accepted; the first character must be a letter or digit. Matching is case-insensitive. Separate from QR claim tokens."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "program_id",
+          "tenant_id",
+          "user_id",
+          "referral_code",
+          "created_at"
+        ]
+      },
+      "CreateAffiliateProgramRequest": {
+        "type": "object",
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Owning tenant for administration. This does not define a referral destination."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "No surrounding whitespace or control characters."
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048,
+            "default": "",
+            "description": "Omitted or null defaults to an empty description."
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Inactive programs retain registrations, but cannot issue or resolve codes. Set true to create an active program.",
+            "default": false
+          }
+        },
+        "required": [
+          "tenant_id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateAffiliateProgramRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Updated names must contain 1 to 128 characters, without surrounding whitespace or control characters. Omitted, null, or update=false leaves the field unchanged.",
+            "oneOf": [
+              {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "minLength": 1,
+                "maxLength": 128
+              },
+              {
+                "$ref": "#/components/schemas/UpdateFieldString"
+              }
+            ]
+          },
+          "description": {
+            "description": "Updated descriptions must not exceed 2048 characters or contain NUL. Omitted, null, or update=false leaves the field unchanged.",
+            "oneOf": [
+              {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 2048
+              },
+              {
+                "$ref": "#/components/schemas/UpdateFieldString"
+              }
+            ]
+          },
+          "is_active": {
+            "description": "Inactive programs retain registrations, but cannot issue or resolve codes. Omitted, null, or update=false leaves the field unchanged.",
+            "oneOf": [
+              {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              {
+                "$ref": "#/components/schemas/UpdateFieldBoolean"
+              }
+            ]
+          }
+        }
+      },
+      "RegisterAffiliateReferrerRequest": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Existing, nonzero DORA user ID in the program owning tenant."
+          },
+          "referral_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional custom code: 3 to 64 letters, digits, hyphens or underscores after trimming, starting with a letter or digit. Stored uppercase and unique across all programs and tenants. Omitted, null or empty generates a random code.",
+            "example": "TEAM-42"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "additionalProperties": false
+      },
+      "AffiliateError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "error",
+          "metadata"
+        ]
+      },
+      "AffiliateProgramEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AffiliateProgram"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateProgramListEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateProgram"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateReferrerEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AffiliateReferrer"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateReferrerListEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateReferrer"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateReferral": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referrer_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referrer_user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "signup_source": {
+            "type": "string",
+            "description": "Client-reported signup hostname. Empty means unknown."
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "signed_up_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kyc_completed": {
+            "type": "boolean"
+          },
+          "kyc_completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "discord_status": {
+            "type": "string",
+            "enum": [
+              "unknown"
+            ],
+            "description": "No Discord membership integration is currently available. Unknown must not be interpreted as not joined."
+          },
+          "deposit_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "withdrawal_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "has_traded": {
+            "type": "boolean"
+          },
+          "first_deposit_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "last_deposit_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "first_withdrawal_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "last_withdrawal_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "daily_volume_usd": {
+            "type": "string",
+            "description": "Sum of absolute executed FILL quantity1 on USD-quoted trades during the selected UTC day. Both buy and sell executions count, once per user-side fill."
+          },
+          "monthly_volume_usd": {
+            "type": "string",
+            "description": "Same executed USD quote-notional definition for the calendar month containing date."
+          },
+          "daily_realized_pnl_usd": {
+            "type": "string",
+            "description": "Sum of realized_pnl_settlements.realized_usd created during the selected UTC day, matching the existing PnL ranking convention. Excludes unrealized PnL; this is not total account equity change."
+          },
+          "attributed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Immutable referral assignment time. Earlier activity is excluded from affiliate metrics and cash flows."
+          },
+          "monthly_realized_pnl_usd": {
+            "type": "string",
+            "description": "Realized PnL for the UTC calendar month containing date, including only settlements at or after attributed_at."
+          }
+        },
+        "required": [
+          "user_id",
+          "program_id",
+          "referrer_id",
+          "referrer_user_id",
+          "signup_source",
+          "first_name",
+          "last_name",
+          "email",
+          "signed_up_at",
+          "kyc_completed",
+          "kyc_completed_at",
+          "discord_status",
+          "deposit_count",
+          "withdrawal_count",
+          "has_traded",
+          "first_deposit_at",
+          "last_deposit_at",
+          "first_withdrawal_at",
+          "last_withdrawal_at",
+          "daily_volume_usd",
+          "monthly_volume_usd",
+          "daily_realized_pnl_usd",
+          "attributed_at",
+          "monthly_realized_pnl_usd"
+        ],
+        "description": "User profile and affiliate activity. Trade metrics, realized PnL and cash-flow counts/dates include only events at or after attributed_at. Signup and KYC fields describe the user profile."
+      },
+      "AffiliateReferralReport": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "referrals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateReferral"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "date",
+          "referrals",
+          "has_more"
+        ]
+      },
+      "AffiliateCashFlow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "EXTERNAL_DEPOSIT",
+              "EXTERNAL_WITHDRAW"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "asset_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asset_symbol": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Decimal value, without binary floating-point rounding."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "created_at",
+          "asset_id",
+          "asset_symbol",
+          "amount"
+        ]
+      },
+      "AffiliateCashFlowReport": {
+        "type": "object",
+        "properties": {
+          "cash_flows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateCashFlow"
+            }
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "cash_flows",
+          "has_more"
+        ]
+      },
+      "AffiliateMembership": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Owning tenant for administration. This does not define a referral destination."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referral_code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$",
+            "description": "Reusable referral code, stored uppercase. Letters, digits, hyphens and underscores are accepted; the first character must be a letter or digit. Matching is case-insensitive. Separate from QR claim tokens."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "program_name": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "program_id",
+          "tenant_id",
+          "user_id",
+          "referral_code",
+          "created_at",
+          "program_name",
+          "is_active"
+        ]
+      },
+      "AffiliateReferralReportEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AffiliateReferralReport"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateCashFlowReportEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AffiliateCashFlowReport"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "AffiliateMembershipListEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AffiliateMembership"
+            }
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/Metadata"
+          }
+        },
+        "required": [
+          "data",
+          "metadata"
+        ]
+      },
+      "PromoClaimState": {
+        "type": "string",
+        "enum": [
+          "NOT_FOUND",
+          "VALID",
+          "CLAIMED",
+          "REVOKED",
+          "EXPIRED",
+          "CAMPAIGN_ENDED",
+          "CAMPAIGN_FULL"
+        ]
+      },
+      "PromoClaimResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "$ref": "#/components/schemas/PromoClaimState"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "campaign_name": {
+                    "type": "string"
+                  },
+                  "promo_credit": {
+                    "type": "string"
+                  },
+                  "min_reward_amount": {
+                    "type": "string"
+                  },
+                  "max_reward_amount": {
+                    "type": "string"
+                  },
+                  "target_equity": {
+                    "type": "string"
+                  },
+                  "expires_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "source_name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "state"
+                ]
+              }
+            }
+          }
+        ]
+      },
       "Web3EventStatus": {
         "type": "string",
         "description": "Processing status of an observed on-chain event.",
@@ -9661,6 +12313,15 @@
       "CreateIntegratorUserRequest": {
         "type": "object",
         "properties": {
+          "referral_code": {
+            "type": "string",
+            "description": "Optional affiliate code, normalized to uppercase. Accepted only when creating a new account in the program owning tenant. One immutable attribution per user account; a later signup/linking call cannot add or replace it. Invalid or inactive codes fail signup atomically. Independent of QR acquisition attribution. Existing unassigned users can instead use POST /v1/affiliate_referrals/self; earlier activity is excluded."
+          },
+          "signup_source": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional client-reported HTTP(S) signup site URL, used only with referral_code. When omitted, a valid HTTP(S) Origin header is used; other origins are ignored. Only the hostname is stored, without path, query, credentials or fragment. Unknown if neither supplies a usable hostname. Ignored when referral_code is empty. It does not select or authenticate the tenant."
+          },
           "email": {
             "type": "string"
           },
@@ -10632,6 +13293,43 @@
           "kyc_approved"
         ]
       },
+      "PnLRankingSummary": {
+        "type": "object",
+        "properties": {
+          "all_users_daily_trading_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Sum of daily_trading_volume across all users matching ranking filters before pagination."
+          },
+          "all_users_total_trading_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Sum of total_trading_volume across all users matching ranking filters before pagination."
+          }
+        },
+        "required": [
+          "all_users_daily_trading_volume",
+          "all_users_total_trading_volume"
+        ]
+      },
+      "PnLRankingResponses": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/PnLRankingSummary"
+          },
+          "rankings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PnLRankingResponse"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "rankings"
+        ]
+      },
       "GetPnLRankingResponse": {
         "allOf": [
           {
@@ -10641,10 +13339,7 @@
             "type": "object",
             "properties": {
               "data": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/PnLRankingResponse"
-                }
+                "$ref": "#/components/schemas/PnLRankingResponses"
               }
             }
           }
@@ -11308,10 +14003,10 @@
             "type": "string",
             "description": "Tenant ID"
           },
-          "deposit_limit": {
+          "daily_deposit_limit": {
             "type": "string",
             "format": "decimal",
-            "description": "Maximum allowed deposit for the tenant."
+            "description": "Maximum allowed deposit for the tenant per day."
           },
           "trade_limit": {
             "type": "string",
@@ -11326,7 +14021,7 @@
         },
         "required": [
           "tenant_id",
-          "deposit_limit",
+          "daily_deposit_limit",
           "trade_limit",
           "updated_at"
         ]
@@ -15359,7 +18054,8 @@
         "type": "string",
         "enum": [
           "TOURNAMENT",
-          "CASH"
+          "CASH",
+          "QR_PROMO"
         ]
       },
       "TradingChallengeStatus": {
@@ -15443,12 +18139,495 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "qr": {
+            "$ref": "#/components/schemas/CreateTradingChallengeQRRequest",
+            "description": "Required for QR_PROMO and rejected for other challenge types. QR_PROMO requests must omit users."
           }
         }
       },
+      "CreateTradingChallengeQRRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "min_reward_amount",
+          "max_reward_amount"
+        ],
+        "properties": {
+          "min_reward_amount": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Must be greater than zero and greater than initial_user_balance."
+          },
+          "max_reward_amount": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Must be greater than or equal to min_reward_amount."
+          },
+          "reward_claim_grace_days": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "default": 14
+          }
+        }
+      },
+      "TradingChallengeQR": {
+        "type": "object",
+        "required": [
+          "min_reward_amount",
+          "max_reward_amount",
+          "reward_claim_grace_days",
+          "claimed_links_count",
+          "issued_links_count"
+        ],
+        "properties": {
+          "min_reward_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "max_reward_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "reward_claim_grace_days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimed_links_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issued_links_count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PromoSourceType": {
+        "type": "string",
+        "enum": [
+          "KOL",
+          "PARTNER",
+          "EVENT",
+          "DORA"
+        ]
+      },
+      "PromoLinkStatus": {
+        "type": "string",
+        "enum": [
+          "ISSUED",
+          "CLAIMED",
+          "REVOKED"
+        ]
+      },
+      "IssuePromoLinkBatchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_type",
+          "source_id",
+          "allocation"
+        ],
+        "properties": {
+          "source_type": {
+            "$ref": "#/components/schemas/PromoSourceType"
+          },
+          "source_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{0,63}$"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "allocation": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "description": "Cannot exceed the configured max_links_per_batch or remaining campaign capacity."
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Defaults to challenge end and must fall between challenge start and end in the future."
+          }
+        }
+      },
+      "IssuedPromoLink": {
+        "type": "object",
+        "required": [
+          "id",
+          "token_prefix",
+          "url",
+          "qr_url",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token_prefix": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Private claim URL. Do not log or cache."
+          },
+          "qr_url": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IssuePromoLinkBatchResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": [
+                  "batch_id",
+                  "source_id",
+                  "allocation",
+                  "links"
+                ],
+                "properties": {
+                  "batch_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "source_id": {
+                    "type": "string"
+                  },
+                  "allocation": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/IssuedPromoLink"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PromoLinkBatchSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "source_type",
+          "source_id",
+          "source_name",
+          "allocation",
+          "issued",
+          "claimed",
+          "revoked",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source_type": {
+            "$ref": "#/components/schemas/PromoSourceType"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "source_name": {
+            "type": "string"
+          },
+          "allocation": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issued": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "revoked": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PromoLinkBatchListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": [
+                  "batches"
+                ],
+                "properties": {
+                  "batches": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PromoLinkBatchSummary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PromoLinkAdmin": {
+        "type": "object",
+        "required": [
+          "id",
+          "token_prefix",
+          "status",
+          "expires_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "token_prefix": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Only present when reveal=true. Private; do not log or cache."
+          },
+          "status": {
+            "$ref": "#/components/schemas/PromoLinkStatus"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "claimed_email": {
+            "type": "string",
+            "description": "Masked as the first character, three asterisks, and domain."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PromoLinkListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": [
+                  "links"
+                ],
+                "properties": {
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PromoLinkAdmin"
+                    }
+                  },
+                  "next_cursor": {
+                    "type": "string",
+                    "description": "Opaque unpadded base64url keyset cursor."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "RevokePromoLinkRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          }
+        }
+      },
+      "RevokePromoLinkResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "status",
+                  "repeated"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "REVOKED"
+                    ]
+                  },
+                  "repeated": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PromoAttributionSource": {
+        "type": "object",
+        "required": [
+          "source_type",
+          "source_id",
+          "source_name",
+          "links_issued",
+          "links_claimed",
+          "users_funded",
+          "users_traded",
+          "users_busted",
+          "users_reward_eligible",
+          "users_rewarded",
+          "total_volume",
+          "total_pnl",
+          "promo_credit_issued",
+          "rewards_paid"
+        ],
+        "properties": {
+          "source_type": {
+            "$ref": "#/components/schemas/PromoSourceType"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "source_name": {
+            "type": "string"
+          },
+          "links_issued": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "links_claimed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users_funded": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users_traded": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users_busted": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users_reward_eligible": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "users_rewarded": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_volume": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "total_pnl": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "promo_credit_issued": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "rewards_paid": {
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
+      "PromoAttributionResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "required": [
+                  "sources"
+                ],
+                "properties": {
+                  "sources": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/PromoAttributionSource"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
       "UpdateTradingChallengeRequest": {
         "type": "object",
-        "description": "Request body for PUT /v1/trading_challenges/{trading_challenge_id}: partially update a trading challenge. A field that is omitted, or sent as null, is left unchanged. Each field accepts either the {update, value} object or the bare value on its own. PENDING challenges accept every field; ACTIVE challenges accept only name, max_users, end and the prize quantities; COMPLETED challenges accept none. tenant_id and status are never updatable, and the participant list is managed by add_users and remove_users.",
+        "description": "Request body for PUT /v1/trading_challenges/{trading_challenge_id}: partially update a trading challenge. A field that is omitted, or sent as null, is left unchanged. Each field accepts either the {update, value} object or the bare value on its own. PENDING CASH and TOURNAMENT challenges accept every field; ACTIVE CASH and TOURNAMENT challenges accept only name, max_users, end and the prize quantities; QR_PROMO challenges accept only name, max_users and end while PENDING or ACTIVE; COMPLETED challenges accept none. tenant_id and status are never updatable, and the participant list is managed by add_users and remove_users.",
         "properties": {
           "name": {
             "$ref": "#/components/schemas/UpdateFieldString",
@@ -15679,6 +18858,14 @@
           },
           "users_count": {
             "type": "integer"
+          },
+          "qr": {
+            "$ref": "#/components/schemas/TradingChallengeQR"
+          },
+          "worst_case_exposure": {
+            "type": "string",
+            "format": "decimal",
+            "description": "For QR_PROMO, max_users multiplied by initial_user_balance plus max_reward_amount."
           }
         },
         "required": [
@@ -16004,6 +19191,157 @@
             "properties": {
               "data": {
                 "$ref": "#/components/schemas/FeeQuoteResponse"
+              }
+            }
+          }
+        ]
+      },
+      "Web3WithdrawalStatus": {
+        "type": "string",
+        "description": "Lifecycle state of a web3 USDC withdrawal.\n\nA withdrawal is created as `PENDING` with its quantity reserved against the account's available balance. Requesting a withdrawal is free, so no fee is reserved at that point and `fee` is 0. The reservation is consumed at `CONFIRMED` and released back to available at `REJECTED` or `FAILED`.\n\nThe usual path is `PENDING` -> `APPROVED_WITHOUT_FEE` -> `APPROVED` -> `BROADCAST` -> `SUBMITTED` -> `CONFIRMED`. `REJECTED` is reachable from `PENDING` and `APPROVED_WITHOUT_FEE`, the two states no fee has been locked against; `FAILED` only after a fee is locked. `CONFIRMED`, `REJECTED`, and `FAILED` are terminal.\n\n- `PENDING`: awaiting admin review. The quantity is reserved but not yet spent, and no fee has been quoted.\n- `APPROVED_WITHOUT_FEE`: an admin approved the request, but its fee has not been quoted or locked yet, so it is not queued for on-chain submission. Every admin approval lands here. Locking the quoted fee reserves it on top of the quantity and moves the withdrawal to `APPROVED`; until then the approval is still reversible and the withdrawal may be rejected.\n- `APPROVED`: approved and fee-locked; it is queued for on-chain submission.\n- `BROADCAST`: the on-chain withdraw() transaction has been signed and sent, and `tx_hash` is set. The transaction is in the mempool and has not yet been seen in a block.\n- `SUBMITTED`: the transaction has been observed in a block and the funds have left the vault. Not yet final: if that block is reorganized out, the withdrawal returns to `BROADCAST` to be observed again.\n- `CONFIRMED`: the on-chain withdrawal finalized and the reservation was settled into an external debit (`settlement_transaction_id` is set).\n- `REJECTED`: an admin rejected the request while it was `PENDING` or `APPROVED_WITHOUT_FEE`. Nothing was sent on-chain and the reservation has been returned to the available balance. A withdrawal rejected after approval keeps its `approved_by`/`approved_at`.\n- `FAILED`: the withdrawal could not be executed after approval. The reservation has been returned to the available balance.",
+        "enum": [
+          "PENDING",
+          "APPROVED_WITHOUT_FEE",
+          "APPROVED",
+          "BROADCAST",
+          "SUBMITTED",
+          "CONFIRMED",
+          "REJECTED",
+          "FAILED"
+        ]
+      },
+      "CreateWithdrawalRequest": {
+        "type": "object",
+        "description": "Request to create a USDC withdrawal. No fee quote is required: creating the request reserves the quantity only, and the withdrawal's fee is quoted and locked later, as part of approval.",
+        "properties": {
+          "withdrawal_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Client-supplied idempotency key (also the on-chain correlation key). Repeating a request with the same withdrawal_id has no additional effect."
+          },
+          "to_address": {
+            "type": "string",
+            "description": "Destination wallet address as a 0x-prefixed hex string. Must not be the zero address."
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Human-decimal USDC quantity to withdraw. Must be positive and no finer than USDC's 6 on-chain decimals."
+          }
+        },
+        "required": [
+          "withdrawal_id",
+          "to_address",
+          "quantity"
+        ]
+      },
+      "WithdrawalResponse": {
+        "type": "object",
+        "description": "A single USDC withdrawal request.",
+        "properties": {
+          "withdrawal_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "network_chain_id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Internal numeric identifier of the chain."
+          },
+          "network_name": {
+            "type": "string",
+            "description": "Human-readable network name."
+          },
+          "chain_id": {
+            "type": "string",
+            "description": "EVM chain ID."
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "to_address": {
+            "type": "string",
+            "description": "Destination wallet address as a 0x-prefixed hex string."
+          },
+          "quantity": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Human-decimal USDC quantity to withdraw (base units divided by 10^6)."
+          },
+          "fee": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Human-decimal USDC network fee (base units divided by 10^6). 0 until the requester locks a quoted fee as part of approval."
+          },
+          "status": {
+            "$ref": "#/components/schemas/Web3WithdrawalStatus"
+          },
+          "tx_hash": {
+            "type": "string",
+            "description": "Broadcast withdraw() transaction hash as a 0x-prefixed hex string. Present from `BROADCAST` onward."
+          },
+          "failure_reason": {
+            "type": "string",
+            "description": "Reason the withdrawal was rejected or failed. Present for REJECTED/FAILED."
+          },
+          "approved_by": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Admin who approved the withdrawal. Present once approved."
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the withdrawal was approved. Present once approved."
+          },
+          "settlement_transaction_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Ledger settlement transaction. Present once confirmed."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WithdrawalResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/WithdrawalResponse"
+              }
+            }
+          }
+        ]
+      },
+      "ListWithdrawalsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WithdrawalResponse"
+                }
               }
             }
           }
