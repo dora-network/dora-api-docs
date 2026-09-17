@@ -69,6 +69,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getTopTradersByPnL**](DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 | [**getTradeById**](DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 | [**getTrades**](DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
+| [**getTradingChallengeAllResults**](DefaultApi.md#getTradingChallengeAllResults) | **GET** /v1/trading_challenges/all/results | Get combined results across all trading challenge |
 | [**getTradingChallengeByID**](DefaultApi.md#getTradingChallengeByID) | **GET** /v1/trading_challenges/{trading_challenge_id} | Get trading challenge by ID |
 | [**getTradingChallengeDailySnapshots**](DefaultApi.md#getTradingChallengeDailySnapshots) | **GET** /v1/trading_challenges/{trading_challenge_id}/daily_snapshots | Get trading challenge daily snapshots |
 | [**getTradingChallengeResults**](DefaultApi.md#getTradingChallengeResults) | **GET** /v1/trading_challenges/{trading_challenge_id}/results | Get trading challenge results |
@@ -1822,6 +1823,36 @@ Get a filtered, paginated list of trades
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="getTradingChallengeAllResults"></a>
+# **getTradingChallengeAllResults**
+> TradingChallengeAllResultsResponseEnvelope getTradingChallengeAllResults(board, start, end, trading\_challenge\_type)
+
+Get combined results across all trading challenge
+
+    List trading challenge leaderboard/results filtered by board, trading_challenge_type, start date and end date across all challenges.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **board** | **String**| Leaderboard board selector. | [default to null] [enum: TOP_PNL, TOP_VOLUME, IRON_TRADER] |
+| **start** | **date**| Inclusive start date in YYYY-MM-DD format. | [default to null] |
+| **end** | **date**| Inclusive end date in YYYY-MM-DD format. | [default to null] |
+| **trading\_challenge\_type** | [**TradingChallengeType**](../Models/.md)| Challenge type to include in aggregation. | [default to null] [enum: TOURNAMENT, CASH, QR_PROMO] |
+
+### Return type
+
+[**TradingChallengeAllResultsResponseEnvelope**](../Models/TradingChallengeAllResultsResponseEnvelope.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="getTradingChallengeByID"></a>
 # **getTradingChallengeByID**
 > TradingChallengeResponseEnvelope getTradingChallengeByID(trading\_challenge\_id)
@@ -1882,7 +1913,7 @@ Get trading challenge daily snapshots
 
 Get trading challenge results
 
-    List challenge leaderboard/results. COMPETITION_MANAGER can access only assigned challenge IDs.
+    List challenge leaderboard/results. Public endpoint.
 
 ### Parameters
 
@@ -1897,7 +1928,7 @@ Get trading challenge results
 
 ### Authorization
 
-[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+No authorization required
 
 ### HTTP request headers
 

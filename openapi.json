@@ -9632,7 +9632,7 @@
     "/v1/trading_challenges/{trading_challenge_id}/results": {
       "get": {
         "summary": "Get trading challenge results",
-        "description": "List challenge leaderboard/results. COMPETITION_MANAGER can access only assigned challenge IDs.",
+        "description": "List challenge leaderboard/results. Public endpoint.",
         "operationId": "getTradingChallengeResults",
         "parameters": [
           {
@@ -9681,16 +9681,6 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResponseEnvelope"
-                }
-              }
-            }
-          },
           "404": {
             "description": "Not found",
             "content": {
@@ -9711,7 +9701,93 @@
               }
             }
           }
-        }
+        },
+        "security": []
+      }
+    },
+    "/v1/trading_challenges/all/results": {
+      "get": {
+        "summary": "Get combined results across all trading challenge",
+        "description": "List trading challenge leaderboard/results filtered by board, trading_challenge_type, start date and end date across all challenges.",
+        "operationId": "getTradingChallengeAllResults",
+        "parameters": [
+          {
+            "name": "board",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TOP_PNL",
+                "TOP_VOLUME",
+                "IRON_TRADER"
+              ]
+            },
+            "description": "Leaderboard board selector."
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclusive start date in YYYY-MM-DD format."
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "description": "Inclusive end date in YYYY-MM-DD format."
+          },
+          {
+            "name": "trading_challenge_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TradingChallengeType"
+            },
+            "description": "Challenge type to include in aggregation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All trading challenge results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradingChallengeAllResultsResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "security": []
       }
     },
     "/v1/trading_challenges/{trading_challenge_id}/claim": {
@@ -19081,6 +19157,40 @@
           }
         }
       },
+      "TradingChallengeAllResult": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "cum_volume": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "cum_pnl": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "active_days": {
+            "type": "integer"
+          },
+          "cum_trades": {
+            "type": "integer"
+          },
+          "account_value": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "pnl_pct": {
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
       "TradingChallengeResultsResponseEnvelope": {
         "allOf": [
           {
@@ -19093,6 +19203,24 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/TradingChallengeResult"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TradingChallengeAllResultsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TradingChallengeAllResult"
                 }
               }
             }

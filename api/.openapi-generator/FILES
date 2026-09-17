@@ -256,6 +256,8 @@ Models/Trade.md
 Models/TradeRequestError.md
 Models/TradeResponseEnvelope.md
 Models/TradingChallenge.md
+Models/TradingChallengeAllResult.md
+Models/TradingChallengeAllResultsResponseEnvelope.md
 Models/TradingChallengeDailySnapshot.md
 Models/TradingChallengeDailySnapshotsResponseEnvelope.md
 Models/TradingChallengeListResponseEnvelope.md

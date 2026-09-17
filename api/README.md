@@ -72,6 +72,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getTopTradersByPnL**](Apis/DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 *DefaultApi* | [**getTradeById**](Apis/DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
+*DefaultApi* | [**getTradingChallengeAllResults**](Apis/DefaultApi.md#getTradingChallengeAllResults) | **GET** /v1/trading_challenges/all/results | Get combined results across all trading challenge |
 *DefaultApi* | [**getTradingChallengeByID**](Apis/DefaultApi.md#getTradingChallengeByID) | **GET** /v1/trading_challenges/{trading_challenge_id} | Get trading challenge by ID |
 *DefaultApi* | [**getTradingChallengeDailySnapshots**](Apis/DefaultApi.md#getTradingChallengeDailySnapshots) | **GET** /v1/trading_challenges/{trading_challenge_id}/daily_snapshots | Get trading challenge daily snapshots |
 *DefaultApi* | [**getTradingChallengeResults**](Apis/DefaultApi.md#getTradingChallengeResults) | **GET** /v1/trading_challenges/{trading_challenge_id}/results | Get trading challenge results |
@@ -415,6 +416,8 @@ All URIs are relative to *https://staging.dora.co*
  - [TradeRequestError](./Models/TradeRequestError.md)
  - [TradeResponseEnvelope](./Models/TradeResponseEnvelope.md)
  - [TradingChallenge](./Models/TradingChallenge.md)
+ - [TradingChallengeAllResult](./Models/TradingChallengeAllResult.md)
+ - [TradingChallengeAllResultsResponseEnvelope](./Models/TradingChallengeAllResultsResponseEnvelope.md)
  - [TradingChallengeDailySnapshot](./Models/TradingChallengeDailySnapshot.md)
  - [TradingChallengeDailySnapshotsResponseEnvelope](./Models/TradingChallengeDailySnapshotsResponseEnvelope.md)
  - [TradingChallengeListResponseEnvelope](./Models/TradingChallengeListResponseEnvelope.md)
