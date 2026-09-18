@@ -121,6 +121,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**listTradingChallenges**](DefaultApi.md#listTradingChallenges) | **GET** /v1/trading_challenges | List trading challenges |
 | [**listUserDeactivations**](DefaultApi.md#listUserDeactivations) | **GET** /v1/user/deactivations | Get the current deactivation status across all users |
 | [**listWithdrawals**](DefaultApi.md#listWithdrawals) | **GET** /v1/web3/withdrawals | List USDC withdrawals |
+| [**lockWithdrawalFee**](DefaultApi.md#lockWithdrawalFee) | **PUT** /v1/web3/withdrawals/{withdrawal_id} | Lock the network fee for an approved USDC withdrawal |
 | [**lookupAffiliateCode**](DefaultApi.md#lookupAffiliateCode) | **GET** /v1/affiliate_codes/{code} | Look up a reusable referral code |
 | [**payLeverageGetAccruedInterest**](DefaultApi.md#payLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/pay | Pay current accrued leverage interest for a specific user |
 | [**registerAffiliateReferrer**](DefaultApi.md#registerAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers | Register an existing user as a referrer |
@@ -141,6 +142,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**streamOrderBookBalances**](DefaultApi.md#streamOrderBookBalances) | **GET** /v1/orderbooks/{order_book_id}/balances/stream | Get a snapshot of base and quote balances for an order book and open a stream for real-time updates |
 | [**streamOrderbookOpenOrders**](DefaultApi.md#streamOrderbookOpenOrders) | **GET** /v1/orderbooks/{order_book_id}/open/stream | Get a snapshot of open orders in an order book and open a stream for real-time updates |
 | [**streamTrades**](DefaultApi.md#streamTrades) | **GET** /v1/trades/{order_book_id}/stream | Get a snapshot of trades executed on the given order book from a specific date and open a stream for real-time updates |
+| [**tenantGuaranteeFundHistory**](DefaultApi.md#tenantGuaranteeFundHistory) | **GET** /v1/tenants/{tenant_id}/guarantee_fund | List guarantee fund ledger rows and totals by transaction kind for a tenant. |
 | [**terminateOwnTradingChallengeParticipation**](DefaultApi.md#terminateOwnTradingChallengeParticipation) | **POST** /v1/trading_challenges/{trading_challenge_id}/participants/self/terminate | Leave a trading challenge |
 | [**terminateTradingChallengeParticipation**](DefaultApi.md#terminateTradingChallengeParticipation) | **POST** /v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate | Terminate a participation in a trading challenge |
 | [**transferAccountBalancesV2**](DefaultApi.md#transferAccountBalancesV2) | **POST** /v2/accounts/transfer_balances | Transfer available balance between a user&#39;s accounts |
@@ -934,7 +936,7 @@ No authorization required
 
 Get yield chart data for an asset
 
-    Returns complete yield buckets starting at &#x60;start&#x60;; &#x60;end&#x60; is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets.
+    Returns complete yield buckets starting at &#x60;start&#x60;; &#x60;end&#x60; is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets. Public callers may query only the last month. Authenticated callers may query up to the last six months. If credentials are supplied but invalid, the request is rejected as unauthorized.
 
 ### Parameters
 
@@ -951,7 +953,7 @@ Get yield chart data for an asset
 
 ### Authorization
 
-No authorization required
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -990,7 +992,7 @@ No authorization required
 
 Get candlestick data for an orderbook
 
-    Returns candle data in the requested [start, end) range for the selected resolution. Responses are capped to the most recent 5,000 candles per request.
+    Returns candle data in the requested [start, end) range for the selected resolution, capped to the most recent 5,000 candles per request. Public callers may query data from up to the last month, while authenticated callers may query up to the last six months (requests with invalid credentials will be rejected as unauthorized).
 
 ### Parameters
 
@@ -1007,7 +1009,7 @@ Get candlestick data for an orderbook
 
 ### Authorization
 
-No authorization required
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -1799,6 +1801,8 @@ No authorization required
 
 Get a filtered, paginated list of trades
 
+    Role-based date window: public callers are limited to the last month; authenticated callers may query up to the last six months. If &#x60;start&#x60; is omitted it defaults to the role-based minimum. If credentials are supplied but invalid, the request is rejected as unauthorized.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
@@ -1966,6 +1970,8 @@ No authorization required
 
 Get a filtered, paginated list of transactions
 
+    Role-based date window: public callers are limited to the last month; authenticated callers may query up to the last six months. If &#x60;start&#x60; is omitted it defaults to the role-based minimum. If credentials are supplied but invalid, the request is rejected as unauthorized.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
@@ -1985,7 +1991,7 @@ Get a filtered, paginated list of transactions
 
 ### Authorization
 
-No authorization required
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -2360,18 +2366,17 @@ Get a USDC withdrawal by ID
 
 <a name="getWithdrawalFeeQuote"></a>
 # **getWithdrawalFeeQuote**
-> FeeQuoteResponseEnvelope getWithdrawalFeeQuote(to, quantity)
+> FeeQuoteResponseEnvelope getWithdrawalFeeQuote(withdrawal\_id)
 
 Estimate the network fee to withdraw USDC via web3
 
-    Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay for a withdrawal. The fee is not charged when the withdrawal is requested; the quote is redeemed later, when the fee is locked as part of approval. Restricted to DORA tenant users whose native asset is USDC.
+    Examines on-chain conditions and simulates the named withdrawal to estimate the network fee the user must reserve before it can be submitted on-chain. The withdrawal must already exist, belong to the caller, and have been approved by an admin (status APPROVED_WITHOUT_FEE); its destination and quantity are read from the row, not taken from the request. The returned quote token is bound to that one withdrawal and is redeemed at PUT /v1/web3/withdrawals/{withdrawal_id}, which reserves the fee and moves the withdrawal to APPROVED. Restricted to DORA tenant users whose native asset is USDC.
 
 ### Parameters
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **to** | **String**| The destination wallet address as a 0x-prefixed 20-byte hex string. Must not be the zero address. | [default to null] |
-| **quantity** | **BigDecimal**| Human-decimal USDC quantity to withdraw, e.g. &#39;100.50&#39;. Must be positive. | [default to null] |
+| **withdrawal\_id** | **UUID**| The withdrawal to quote a fee for. It must belong to the caller and be in status APPROVED_WITHOUT_FEE; the destination and quantity are read from it rather than supplied here. | [default to null] |
 
 ### Return type
 
@@ -3260,6 +3265,34 @@ List USDC withdrawals
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="lockWithdrawalFee"></a>
+# **lockWithdrawalFee**
+> WithdrawalResponseEnvelope lockWithdrawalFee(withdrawal\_id, LockWithdrawalFeeRequest)
+
+Lock the network fee for an approved USDC withdrawal
+
+    Redeems a fee quote against a withdrawal an admin has approved. The quoted fee is reserved on top of the quantity reserved when the request was created, so the same risk checks the request cleared are run again for it: an active trading challenge, a deactivated account, account health, the minimum cash reserve, and overdue coupon payments. A fee that would take the caller below the minimum cash reserve is refused and nothing is reserved.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **withdrawal\_id** | **UUID**| The withdrawal to redeem the quote against. It must be owned by the caller and be in status APPROVED_WITHOUT_FEE. | [default to null] |
+| **LockWithdrawalFeeRequest** | [**LockWithdrawalFeeRequest**](../Models/LockWithdrawalFeeRequest.md)|  | |
+
+### Return type
+
+[**WithdrawalResponseEnvelope**](../Models/WithdrawalResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="lookupAffiliateCode"></a>
 # **lookupAffiliateCode**
 > AffiliateReferrerEnvelope lookupAffiliateCode(code, tenant\_id)
@@ -3784,6 +3817,36 @@ Get a snapshot of trades executed on the given order book from a specific date a
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="tenantGuaranteeFundHistory"></a>
+# **tenantGuaranteeFundHistory**
+> TenantGuaranteeFundHistoryResponseEnvelope tenantGuaranteeFundHistory(tenant\_id, start\_date, end\_date, tx\_kind)
+
+List guarantee fund ledger rows and totals by transaction kind for a tenant.
+
+    Returns guarantee fund ledger rows for a tenant filtered by updated_at range and tx_kind, with totals_by_tx_kind summary.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **tenant\_id** | **String**|  | [default to null] |
+| **start\_date** | **Date**| Optional inclusive lower bound for updated_at (RFC3339). | [optional] [default to null] |
+| **end\_date** | **Date**| Optional inclusive upper bound for updated_at (RFC3339). | [optional] [default to null] |
+| **tx\_kind** | **String**| Optional transaction kind filter. | [optional] [default to null] [enum: DEPOSIT, WITHDRAWAL, SETTLEMENT] |
+
+### Return type
+
+[**TenantGuaranteeFundHistoryResponseEnvelope**](../Models/TenantGuaranteeFundHistoryResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

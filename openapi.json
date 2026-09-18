@@ -3749,9 +3749,17 @@
     "/v1/charts/{order_book_id}/candle": {
       "get": {
         "summary": "Get candlestick data for an orderbook",
-        "description": "Returns candle data in the requested [start, end) range for the selected resolution. Responses are capped to the most recent 5,000 candles per request.",
+        "description": "Returns candle data in the requested [start, end) range for the selected resolution, capped to the most recent 5,000 candles per request. Public callers may query data from up to the last month, while authenticated callers may query up to the last six months (requests with invalid credentials will be rejected as unauthorized).",
         "operationId": "getCandleData",
-        "security": [],
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuthHeader": []
+          }
+        ],
         "parameters": [
           {
             "name": "order_book_id",
@@ -3834,9 +3842,17 @@
     "/v1/charts/{asset_id}/yield": {
       "get": {
         "summary": "Get yield chart data for an asset",
-        "description": "Returns complete yield buckets starting at `start`; `end` is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets.",
+        "description": "Returns complete yield buckets starting at `start`; `end` is exclusive and a trailing partial bucket is omitted. Requests are limited to 10,000 complete buckets. Public callers may query only the last month. Authenticated callers may query up to the last six months. If credentials are supplied but invalid, the request is rejected as unauthorized.",
         "operationId": "getAssetYieldData",
-        "security": [],
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuthHeader": []
+          }
+        ],
         "parameters": [
           {
             "name": "asset_id",
@@ -6027,8 +6043,17 @@
     "/v1/transactions": {
       "get": {
         "summary": "Get a filtered, paginated list of transactions",
+        "description": "Role-based date window: public callers are limited to the last month; authenticated callers may query up to the last six months. If `start` is omitted it defaults to the role-based minimum. If credentials are supplied but invalid, the request is rejected as unauthorized.",
         "operationId": "getTransactions",
-        "security": [],
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuthHeader": []
+          }
+        ],
         "parameters": [
           {
             "name": "pools",
@@ -6384,7 +6409,17 @@
     "/v1/trades": {
       "get": {
         "summary": "Get a filtered, paginated list of trades",
+        "description": "Role-based date window: public callers are limited to the last month; authenticated callers may query up to the last six months. If `start` is omitted it defaults to the role-based minimum. If credentials are supplied but invalid, the request is rejected as unauthorized.",
         "operationId": "getTrades",
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuthHeader": []
+          }
+        ],
         "parameters": [
           {
             "name": "order_book_ids",
@@ -10327,27 +10362,18 @@
     "/v1/web3/withdrawals/fee-quote": {
       "get": {
         "summary": "Estimate the network fee to withdraw USDC via web3",
-        "description": "Examines on-chain conditions and simulates a withdrawal transaction to estimate the fee a user needs to pay for a withdrawal. The fee is not charged when the withdrawal is requested; the quote is redeemed later, when the fee is locked as part of approval. Restricted to DORA tenant users whose native asset is USDC.",
+        "description": "Examines on-chain conditions and simulates the named withdrawal to estimate the network fee the user must reserve before it can be submitted on-chain. The withdrawal must already exist, belong to the caller, and have been approved by an admin (status APPROVED_WITHOUT_FEE); its destination and quantity are read from the row, not taken from the request. The returned quote token is bound to that one withdrawal and is redeemed at PUT /v1/web3/withdrawals/{withdrawal_id}, which reserves the fee and moves the withdrawal to APPROVED. Restricted to DORA tenant users whose native asset is USDC.",
         "operationId": "getWithdrawalFeeQuote",
         "parameters": [
           {
-            "name": "to",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The destination wallet address as a 0x-prefixed 20-byte hex string. Must not be the zero address."
-          },
-          {
-            "name": "quantity",
+            "name": "withdrawal_id",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "decimal"
+              "format": "uuid"
             },
-            "description": "Human-decimal USDC quantity to withdraw, e.g. '100.50'. Must be positive."
+            "description": "The withdrawal to quote a fee for. It must belong to the caller and be in status APPROVED_WITHOUT_FEE; the destination and quantity are read from it rather than supplied here."
           }
         ],
         "responses": {
@@ -10362,7 +10388,7 @@
             }
           },
           "400": {
-            "description": "Bad request, e.g. invalid or missing to address, or invalid or non-positive quantity",
+            "description": "Bad request: the withdrawal_id query parameter is missing or is not a UUID",
             "content": {
               "application/json": {
                 "schema": {
@@ -10383,6 +10409,26 @@
           },
           "403": {
             "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC. Admin and indexer API keys have no native asset and are also denied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal not found, or it belongs to another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: the withdrawal is not APPROVED_WITHOUT_FEE (not yet approved, already paid for, or terminal), or it is bound to a chain other than the registered one",
             "content": {
               "application/json": {
                 "schema": {
@@ -10672,6 +10718,228 @@
           },
           "404": {
             "description": "Withdrawal not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Lock the network fee for an approved USDC withdrawal",
+        "description": "Redeems a fee quote against a withdrawal an admin has approved. The quoted fee is reserved on top of the quantity reserved when the request was created, so the same risk checks the request cleared are run again for it: an active trading challenge, a deactivated account, account health, the minimum cash reserve, and overdue coupon payments. A fee that would take the caller below the minimum cash reserve is refused and nothing is reserved.",
+        "operationId": "lockWithdrawalFee",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The withdrawal to redeem the quote against. It must be owned by the caller and be in status APPROVED_WITHOUT_FEE."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LockWithdrawalFeeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fee reserved; the withdrawal is now APPROVED and eligible for submission",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. an invalid body or withdrawal_id, an unparseable or unauthentic quote token, or a quote issued for a different destination, quantity, or chain",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or reserving the fee would leave the caller below the minimum cash reserve.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal not found, or it belongs to another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, e.g. the withdrawal is not APPROVED_WITHOUT_FEE (not yet approved, already paid for, or terminal), the available balance cannot cover the fee, there is no USD ledger account to reserve the fee from, an unhealthy account, overdue coupon payments, or a concurrent balance change kept the reservation from being recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "The quote token has expired; request a new fee quote",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Fee locking is not configured on this deployment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tenants/{tenant_id}/guarantee_fund": {
+      "get": {
+        "summary": "List guarantee fund ledger rows and totals by transaction kind for a tenant.",
+        "operationId": "tenantGuaranteeFundHistory",
+        "description": "Returns guarantee fund ledger rows for a tenant filtered by updated_at range and tx_kind, with totals_by_tx_kind summary.",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Optional inclusive lower bound for updated_at (RFC3339)."
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Optional inclusive upper bound for updated_at (RFC3339)."
+          },
+          {
+            "name": "tx_kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DEPOSIT",
+                "WITHDRAWAL",
+                "SETTLEMENT"
+              ]
+            },
+            "description": "Optional transaction kind filter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant guarantee fund history and summary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantGuaranteeFundHistoryResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -15702,14 +15970,13 @@
           "REPAY",
           "SUPPLY",
           "WITHDRAW",
-          "ISOLATE_COLLATERAL",
+          "ISOLATE_AVAILABLE",
           "ISOLATE_POSITION",
           "UNITE_POSITION",
           "COLLATERALIZE",
           "DE-COLLATERALIZE",
           "COUPON_PAYMENT",
           "INTERNAL_TRANSFER",
-          "ISOLATE_AVAILABLE",
           "BORROW",
           "TRADING_CHALLENGE_DEPOSIT",
           "TRADING_CHALLENGE_WITHDRAW",
@@ -19265,16 +19532,21 @@
       },
       "FeeQuoteResponse": {
         "type": "object",
-        "description": "The estimated network fee to withdraw USDC via web3, alongside a signed, TTL-bound quote token the client submits with a later withdrawal so the server can validate the fee it was quoted.",
+        "description": "The estimated network fee for one approved USDC withdrawal, alongside a signed, TTL-bound quote token bound to that withdrawal. Submit the token to PUT /v1/web3/withdrawals/{withdrawal_id} to reserve the quoted fee.",
         "properties": {
+          "withdrawal_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The withdrawal this quote was issued for. The quote token is bound to it and cannot be redeemed against any other withdrawal."
+          },
           "to": {
             "type": "string",
-            "description": "The withdrawal destination address, echoed from the request."
+            "description": "The withdrawal destination address, read from the withdrawal row."
           },
           "quantity": {
             "type": "string",
             "format": "decimal",
-            "description": "Human-decimal USDC withdrawal quantity, echoed from the request."
+            "description": "Human-decimal USDC withdrawal quantity, read from the withdrawal row."
           },
           "fee": {
             "type": "string",
@@ -19291,7 +19563,7 @@
           },
           "quote_token": {
             "type": "string",
-            "description": "Signed, TTL-bound quote token to submit with a later withdrawal so the server can validate the fee it was quoted."
+            "description": "Signed, TTL-bound quote token to submit to PUT /v1/web3/withdrawals/{withdrawal_id} so the server can validate the fee it quoted. It names the withdrawal it was issued for."
           },
           "expires_at": {
             "type": "string",
@@ -19300,6 +19572,7 @@
           }
         },
         "required": [
+          "withdrawal_id",
           "to",
           "quantity",
           "fee",
@@ -19361,6 +19634,19 @@
           "withdrawal_id",
           "to_address",
           "quantity"
+        ]
+      },
+      "LockWithdrawalFeeRequest": {
+        "type": "object",
+        "description": "Request to lock the network fee for an approved USDC withdrawal. The withdrawal is named by the path, and the fee itself is not part of the body: it is read from the signed quote token, so a client cannot choose what its own withdrawal costs.",
+        "properties": {
+          "quote_token": {
+            "type": "string",
+            "description": "The signed quote token returned by GET /v1/web3/withdrawals/fee-quote. It must still be within its TTL and must have been issued for this withdrawal's destination, quantity, and chain."
+          }
+        },
+        "required": [
+          "quote_token"
         ]
       },
       "WithdrawalResponse": {
@@ -19637,6 +19923,95 @@
                 "items": {
                   "$ref": "#/components/schemas/TradingChallengeRegistrationRequest"
                 }
+              }
+            }
+          }
+        ]
+      },
+      "TenantGuaranteeFundRow": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenant_id": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "available": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "tx_kind": {
+            "type": "string",
+            "enum": [
+              "DEPOSIT",
+              "WITHDRAWAL",
+              "SETTLEMENT"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "seq",
+          "available",
+          "tx_kind",
+          "updated_at"
+        ]
+      },
+      "TenantGuaranteeFundSummary": {
+        "type": "object",
+        "properties": {
+          "totals_by_tx_kind": {
+            "type": "object",
+            "description": "Summed balance movement amounts by tx_kind for the filtered result set.",
+            "additionalProperties": {
+              "type": "string",
+              "format": "decimal"
+            }
+          }
+        },
+        "required": [
+          "totals_by_tx_kind"
+        ]
+      },
+      "TenantGuaranteeFundHistory": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantGuaranteeFundRow"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TenantGuaranteeFundSummary"
+          }
+        },
+        "required": [
+          "rows",
+          "summary"
+        ]
+      },
+      "TenantGuaranteeFundHistoryResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/TenantGuaranteeFundHistory"
               }
             }
           }

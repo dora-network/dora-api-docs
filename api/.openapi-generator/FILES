@@ -141,6 +141,7 @@ Models/ListUserCouponPaymentsResponseEnvelope.md
 Models/ListUsersResponseEnvelope.md
 Models/ListWithdrawalsResponseEnvelope.md
 Models/LiveOrderbook.md
+Models/LockWithdrawalFeeRequest.md
 Models/Margin.md
 Models/Metadata.md
 Models/ModuleBalance.md
@@ -249,6 +250,10 @@ Models/StreamUserCouponPaymentsResponse.md
 Models/Supply.md
 Models/SupplyRequest.md
 Models/SupplyResponseEnvelope.md
+Models/TenantGuaranteeFundHistory.md
+Models/TenantGuaranteeFundHistoryResponseEnvelope.md
+Models/TenantGuaranteeFundRow.md
+Models/TenantGuaranteeFundSummary.md
 Models/TenantRestrictions.md
 Models/TerminateTradingChallengeResponse.md
 Models/TerminateTradingChallengeResponseEnvelope.md
