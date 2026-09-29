@@ -37,6 +37,13 @@ DORA also exposes a **multiplexed WebSocket** protocol at `wss://<environment_ba
 
 For full documentation — protocol shape, request/response/notification semantics, and runnable examples in Go, Python, and TypeScript — see the [Multiplexed WebSocket Streams guide](./multiplex-websocket/README.md).
 
+## Collateral Auto-Rebalance
+
+Isolated margin accounts can be opted in to automatic USD collateral rebalancing. When an account's utilization rises above its configured maximum, DORA automatically transfers USD from your other opted-in accounts (and, last, your global cash account) to bring it back to its minimum threshold.
+
+For how the service works, configuration, and the `/v2/accounts/auto_rebalance` API reference, see the [Collateral Auto-Rebalance guide](./collateral-auto-rebalance/README.md).
+
+
 ## AI Agent Integration
 
 This repository ships with a [Dora Network API Skill](../skills/dora-api/) designed for AI agent integration. The skill enables integrators and their users to interact with the Dora REST API using environment-specific base URLs and API keys.
