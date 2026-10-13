@@ -23,12 +23,14 @@
 | **show\_tutorial\_cards** | **Boolean** |  | [default to null] |
 | **notifications\_enabled** | **Boolean** |  | [default to null] |
 | **tenant\_id** | **String** |  | [default to null] |
+| **used\_referral\_code** | **String** | Exact affiliate code this user applied at signup or later. Empty when no code has been applied; distinct from codes the user owns. | [default to null] |
 | **allow\_email\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_liquidations\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_deposit\_withdrawal\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_orders\_notifications** | **Boolean** |  | [default to null] |
 | **allow\_copy\_trading** | **Boolean** |  | [default to null] |
 | **kyc\_completed\_at** | **Date** | When the user completed KYC. Omitted/null if KYC has not been completed. Set via POST /v1/integrators/user/{user_id}/kyc. | [optional] [default to null] |
+| **tag** | [**List**](UsersTag.md) | Tags assigned to the user by an admin. Set via PUT /v1/users/{user_id}/tag. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

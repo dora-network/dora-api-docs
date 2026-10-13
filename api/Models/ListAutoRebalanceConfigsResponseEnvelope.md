@@ -1,9 +1,9 @@
-# TradingChallengeAllResultsResponseEnvelope
+# ListAutoRebalanceConfigsResponseEnvelope
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **data** | [**List**](TradingChallengeAllResult.md) |  | [optional] [default to null] |
+| **data** | [**AutoRebalanceConfigsData**](AutoRebalanceConfigsData.md) |  | [optional] [default to null] |
 | **error** | **String** | The error message. Present for error (non-2xx) responses. | [optional] [default to null] |
 | **metadata** | [**Metadata**](Metadata.md) | Metadata about the response, including status code and trace information. | [default to null] |
 

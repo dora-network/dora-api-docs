@@ -10,7 +10,7 @@
 | **last\_name** | **String** |  | [optional] [default to null] |
 | **user\_name** | **String** |  | [optional] [default to null] |
 | **country\_of\_domicile** | [**CountryCode**](CountryCode.md) |  | [optional] [default to null] |
-| **native\_asset\_id** | **UUID** | Optional: the user&#39;s native asset ID. Must be a CURRENCY asset; defaults to USD. The USDC asset is never allowed for integrator-created users. | [optional] [default to null] |
+| **native\_asset\_id** | **UUID** | Optional: the user&#39;s native asset ID. Must be a CURRENCY asset; defaults to USD. The USDC asset is only allowed for users created under a tenant with is_web3_enabled set, and their accounts and positions still use the USD asset. | [optional] [default to null] |
 | **photo\_url** | **String** |  | [optional] [default to null] |
 | **provider** | **String** |  | [optional] [default to null] |
 | **provider\_id** | **UUID** |  | [optional] [default to null] |

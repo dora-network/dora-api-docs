@@ -14,9 +14,11 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**cancelAllOpenOrders**](Apis/DefaultApi.md#cancelAllOpenOrders) | **DELETE** /v1/orders | Cancel all open orders, if user passes orderbook or account_id on query params it will cancel all orders on specific orderbook or account, admin can cancel user's orders on specific orderbook |
 *DefaultApi* | [**cancelLedgerWithdrawRequest**](Apis/DefaultApi.md#cancelLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/cancel | Cancel a pending withdrawal request |
 *DefaultApi* | [**cancelOrderById**](Apis/DefaultApi.md#cancelOrderById) | **DELETE** /v1/orders/{order_id} | Cancel an order by ID |
+*DefaultApi* | [**cancelWithdrawal**](Apis/DefaultApi.md#cancelWithdrawal) | **DELETE** /v1/web3/withdrawals/{withdrawal_id} | Cancel the caller's own USDC withdrawal |
 *DefaultApi* | [**claimLeverageGetAccruedInterest**](Apis/DefaultApi.md#claimLeverageGetAccruedInterest) | **POST** /v1/leverage/accrued_interest/claim | Claim current accrued leverage interest for a specific user |
 *DefaultApi* | [**claimPromoLink**](Apis/DefaultApi.md#claimPromoLink) | **POST** /v1/promo/claim/{token} | Claim a public QR promotion link |
 *DefaultApi* | [**claimTradingChallengePrize**](Apis/DefaultApi.md#claimTradingChallengePrize) | **POST** /v1/trading_challenges/{trading_challenge_id}/claim | Claim challenge prize |
+*DefaultApi* | [**closeAllIsolatedPositions**](Apis/DefaultApi.md#closeAllIsolatedPositions) | **POST** /v1/positions/close/all | Close all open isolated positions in one request |
 *DefaultApi* | [**closeIsolatedAccountV2**](Apis/DefaultApi.md#closeIsolatedAccountV2) | **POST** /v2/accounts/close | Close an isolated account, repaying the borrowed |
 *DefaultApi* | [**closeIsolatedPosition**](Apis/DefaultApi.md#closeIsolatedPosition) | **POST** /v1/positions/close | Close isolated positions, repaying the borrowed |
 *DefaultApi* | [**createAPIKeyForUser**](Apis/DefaultApi.md#createAPIKeyForUser) | **POST** /v1/user/apikey | Create apikey for a user |
@@ -27,6 +29,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**createTradingChallenge**](Apis/DefaultApi.md#createTradingChallenge) | **POST** /v1/trading_challenges | Create a trading challenge |
 *DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**createWithdrawal**](Apis/DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
+*DefaultApi* | [**customizeAffiliateReferrerCode**](Apis/DefaultApi.md#customizeAffiliateReferrerCode) | **PUT** /v1/affiliate_referrers/{referrer_id}/code | Change an affiliate referral code |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
 *DefaultApi* | [**exportPromoLinksCSV**](Apis/DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 *DefaultApi* | [**getAPIKeysForUserID**](Apis/DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user's api keys: admin or integrator only |
@@ -39,12 +42,14 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getAssetYTMById**](Apis/DefaultApi.md#getAssetYTMById) | **GET** /v1/assets/{asset_id}/ytm | Get annualized yield to maturity for a bond asset |
 *DefaultApi* | [**getAssetYieldData**](Apis/DefaultApi.md#getAssetYieldData) | **GET** /v1/charts/{asset_id}/yield | Get yield chart data for an asset |
 *DefaultApi* | [**getAssetsStream**](Apis/DefaultApi.md#getAssetsStream) | **GET** /v1/assets/stream | Get all inserts or updates for assets |
+*DefaultApi* | [**getAutoRebalanceAccountStatusV2**](Apis/DefaultApi.md#getAutoRebalanceAccountStatusV2) | **GET** /v2/accounts/auto_rebalance/config/{account_id} | Get auto-rebalance configuration and live status for one isolated account |
 *DefaultApi* | [**getCandleData**](Apis/DefaultApi.md#getCandleData) | **GET** /v1/charts/{order_book_id}/candle | Get candlestick data for an orderbook |
 *DefaultApi* | [**getCashReserveByUserID**](Apis/DefaultApi.md#getCashReserveByUserID) | **GET** /v1/accounts/{user_id}/cash_reserve | Get the minimum USD cash reserve requirement for the given user |
 *DefaultApi* | [**getCashReserveSelf**](Apis/DefaultApi.md#getCashReserveSelf) | **GET** /v1/accounts/self/cash_reserve | Get the minimum USD cash reserve requirement for the logged in user |
 *DefaultApi* | [**getCopyTraders**](Apis/DefaultApi.md#getCopyTraders) | **GET** /v1/user/copy_traders | Get list of users with copy trading enabled |
 *DefaultApi* | [**getCouponPaymentsByAssetId**](Apis/DefaultApi.md#getCouponPaymentsByAssetId) | **GET** /v1/assets/{asset_id}/coupon_payments | Get coupon payments for a bond asset |
 *DefaultApi* | [**getDepositInstructions**](Apis/DefaultApi.md#getDepositInstructions) | **GET** /v1/web3/deposit-instructions | Get per-chain instructions for depositing USDC into the Dora vault |
+*DefaultApi* | [**getGlobalLeaderboard**](Apis/DefaultApi.md#getGlobalLeaderboard) | **GET** /v1/trading/global_leaderboard | Get global leaderboard |
 *DefaultApi* | [**getL1Depth**](Apis/DefaultApi.md#getL1Depth) | **GET** /v1/orderbooks/{order_book_id}/L1 | Get the top price levels for a specific orderbook (L1 market depth) |
 *DefaultApi* | [**getL2Depth**](Apis/DefaultApi.md#getL2Depth) | **GET** /v1/orderbooks/{order_book_id}/L2 | Get the aggregated price levels for a specific orderbook (L2 market depth) |
 *DefaultApi* | [**getL3Depth**](Apis/DefaultApi.md#getL3Depth) | **GET** /v1/orderbooks/{order_book_id}/L3 | Get all open orders for a specific orderbook (L3 market depth) |
@@ -68,11 +73,11 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getPLForSelfByAccount**](Apis/DefaultApi.md#getPLForSelfByAccount) | **GET** /v1/pl/self | Get account-by-account PL breakdown for the logged in user |
 *DefaultApi* | [**getPoolPrice**](Apis/DefaultApi.md#getPoolPrice) | **GET** /v1/price/pool/{pool_id} | Get the current price of a pool |
 *DefaultApi* | [**getPromoAttribution**](Apis/DefaultApi.md#getPromoAttribution) | **GET** /v1/trading_challenges/{trading_challenge_id}/attribution | Get promotional source attribution |
+*DefaultApi* | [**getQRRewardPreview**](Apis/DefaultApi.md#getQRRewardPreview) | **GET** /v1/trading_challenges/{trading_challenge_id}/reward | Preview QR reward eligibility |
 *DefaultApi* | [**getRealizedPnlSettlements**](Apis/DefaultApi.md#getRealizedPnlSettlements) | **GET** /v1/realized_pnl_settlements | Get realized P&L settlements with filters |
 *DefaultApi* | [**getTopTradersByPnL**](Apis/DefaultApi.md#getTopTradersByPnL) | **GET** /v1/user/ranking | Get top traders by PnL |
 *DefaultApi* | [**getTradeById**](Apis/DefaultApi.md#getTradeById) | **GET** /v1/trades/{trade_id} | Get a trade by ID |
 *DefaultApi* | [**getTrades**](Apis/DefaultApi.md#getTrades) | **GET** /v1/trades | Get a filtered, paginated list of trades |
-*DefaultApi* | [**getTradingChallengeAllResults**](Apis/DefaultApi.md#getTradingChallengeAllResults) | **GET** /v1/trading_challenges/all/results | Get combined results across all trading challenge |
 *DefaultApi* | [**getTradingChallengeByID**](Apis/DefaultApi.md#getTradingChallengeByID) | **GET** /v1/trading_challenges/{trading_challenge_id} | Get trading challenge by ID |
 *DefaultApi* | [**getTradingChallengeDailySnapshots**](Apis/DefaultApi.md#getTradingChallengeDailySnapshots) | **GET** /v1/trading_challenges/{trading_challenge_id}/daily_snapshots | Get trading challenge daily snapshots |
 *DefaultApi* | [**getTradingChallengeResults**](Apis/DefaultApi.md#getTradingChallengeResults) | **GET** /v1/trading_challenges/{trading_challenge_id}/results | Get trading challenge results |
@@ -113,6 +118,8 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**listAffiliateReferrals**](Apis/DefaultApi.md#listAffiliateReferrals) | **GET** /v1/affiliate_programs/{program_id}/referrals | List referred users and activity |
 *DefaultApi* | [**listAffiliateReferrers**](Apis/DefaultApi.md#listAffiliateReferrers) | **GET** /v1/affiliate_programs/{program_id}/referrers | List program referrers |
 *DefaultApi* | [**listAssets**](Apis/DefaultApi.md#listAssets) | **GET** /v1/assets | List assets |
+*DefaultApi* | [**listAutoRebalanceConfigsV2**](Apis/DefaultApi.md#listAutoRebalanceConfigsV2) | **GET** /v2/accounts/auto_rebalance/config | List auto-rebalance configuration for the authenticated user's isolated accounts |
+*DefaultApi* | [**listAutoRebalanceStatusesV2**](Apis/DefaultApi.md#listAutoRebalanceStatusesV2) | **GET** /v2/accounts/auto_rebalance/status | List auto-rebalance status for the authenticated user's isolated accounts, including disabled configs |
 *DefaultApi* | [**listDeposits**](Apis/DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
 *DefaultApi* | [**listOrderBooks**](Apis/DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 *DefaultApi* | [**listOrders**](Apis/DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
@@ -155,6 +162,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**updateUserConfig**](Apis/DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 *DefaultApi* | [**updateUserConfigSelf**](Apis/DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
 *DefaultApi* | [**updateUserKYC**](Apis/DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user's KYC completion timestamp |
+*DefaultApi* | [**upsertAutoRebalanceConfigsV2**](Apis/DefaultApi.md#upsertAutoRebalanceConfigsV2) | **PUT** /v2/accounts/auto_rebalance/config | Create or update auto-rebalance configuration for one or more isolated accounts |
 *DefaultApi* | [**validateSubmitOrder**](Apis/DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 *DefaultApi* | [**verifyUser**](Apis/DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
@@ -202,6 +210,9 @@ All URIs are relative to *https://staging.dora.co*
  - [AssetYield](./Models/AssetYield.md)
  - [AssetYieldResolution](./Models/AssetYieldResolution.md)
  - [AssignAffiliateReferralRequest](./Models/AssignAffiliateReferralRequest.md)
+ - [AutoRebalanceConfigStatus](./Models/AutoRebalanceConfigStatus.md)
+ - [AutoRebalanceConfigUpsert](./Models/AutoRebalanceConfigUpsert.md)
+ - [AutoRebalanceConfigsData](./Models/AutoRebalanceConfigsData.md)
  - [BalanceTransfer](./Models/BalanceTransfer.md)
  - [BalancesResponse](./Models/BalancesResponse.md)
  - [Bond](./Models/Bond.md)
@@ -219,6 +230,9 @@ All URIs are relative to *https://staging.dora.co*
  - [ClaimTradingChallengeResponse](./Models/ClaimTradingChallengeResponse.md)
  - [ClaimTradingChallengeResponseEnvelope](./Models/ClaimTradingChallengeResponseEnvelope.md)
  - [CloseAccountRequest](./Models/CloseAccountRequest.md)
+ - [CloseAllPositionsItem](./Models/CloseAllPositionsItem.md)
+ - [CloseAllPositionsResp](./Models/CloseAllPositionsResp.md)
+ - [CloseAllPositionsResponseEnvelope](./Models/CloseAllPositionsResponseEnvelope.md)
  - [ClosePositionRequest](./Models/ClosePositionRequest.md)
  - [ClosePositionResp](./Models/ClosePositionResp.md)
  - [ClosePositionResponseEnvelope](./Models/ClosePositionResponseEnvelope.md)
@@ -244,6 +258,7 @@ All URIs are relative to *https://staging.dora.co*
  - [CreditRating](./Models/CreditRating.md)
  - [CurrentLeverageAccruedInterest](./Models/CurrentLeverageAccruedInterest.md)
  - [CurrentLeverageAccruedInterestResponseEnvelope](./Models/CurrentLeverageAccruedInterestResponseEnvelope.md)
+ - [CustomizeAffiliateReferrerCodeRequest](./Models/CustomizeAffiliateReferrerCodeRequest.md)
  - [DefundUserRequest](./Models/DefundUserRequest.md)
  - [DepositArgs](./Models/DepositArgs.md)
  - [DepositCall](./Models/DepositCall.md)
@@ -258,10 +273,13 @@ All URIs are relative to *https://staging.dora.co*
  - [FundUserResponseEnvelope](./Models/FundUserResponseEnvelope.md)
  - [GetAssetByIDResponseEnvelope](./Models/GetAssetByIDResponseEnvelope.md)
  - [GetAssetYTMByIDResponseEnvelope](./Models/GetAssetYTMByIDResponseEnvelope.md)
+ - [GetAutoRebalanceAccountStatusResponseEnvelope](./Models/GetAutoRebalanceAccountStatusResponseEnvelope.md)
  - [GetCopyTradersResponse](./Models/GetCopyTradersResponse.md)
  - [GetPnLRankingResponse](./Models/GetPnLRankingResponse.md)
  - [GetRealizedPnlSettlementsResponseEnvelope](./Models/GetRealizedPnlSettlementsResponseEnvelope.md)
  - [GetTopOfBookResponseEnvelope](./Models/GetTopOfBookResponseEnvelope.md)
+ - [GlobalLeaderboardResponseEnvelope](./Models/GlobalLeaderboardResponseEnvelope.md)
+ - [GlobalLeaderboardResult](./Models/GlobalLeaderboardResult.md)
  - [HistoricalLeverageInterestRate](./Models/HistoricalLeverageInterestRate.md)
  - [HistoricalLeverageInterestRates](./Models/HistoricalLeverageInterestRates.md)
  - [HistoricalLeverageInterestRatesResponseEnvelope](./Models/HistoricalLeverageInterestRatesResponseEnvelope.md)
@@ -289,6 +307,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ListAccountsResponseV2Envelope](./Models/ListAccountsResponseV2Envelope.md)
  - [ListAssetPriceResponseEnvelope](./Models/ListAssetPriceResponseEnvelope.md)
  - [ListAssetYieldResponseEnvelope](./Models/ListAssetYieldResponseEnvelope.md)
+ - [ListAutoRebalanceConfigsResponseEnvelope](./Models/ListAutoRebalanceConfigsResponseEnvelope.md)
  - [ListCandlesResponseEnvelope](./Models/ListCandlesResponseEnvelope.md)
  - [ListCouponPaymentsResponseEnvelope](./Models/ListCouponPaymentsResponseEnvelope.md)
  - [ListDepositsResponseEnvelope](./Models/ListDepositsResponseEnvelope.md)
@@ -368,6 +387,8 @@ All URIs are relative to *https://staging.dora.co*
  - [PromoLinkListResponse_allOf_data](./Models/PromoLinkListResponse_allOf_data.md)
  - [PromoLinkStatus](./Models/PromoLinkStatus.md)
  - [PromoSourceType](./Models/PromoSourceType.md)
+ - [QRRewardPreview](./Models/QRRewardPreview.md)
+ - [QRRewardPreviewEnvelope](./Models/QRRewardPreviewEnvelope.md)
  - [RealizedPnlSettlement](./Models/RealizedPnlSettlement.md)
  - [RealizedPnlSettlements](./Models/RealizedPnlSettlements.md)
  - [RegisterAffiliateReferrerRequest](./Models/RegisterAffiliateReferrerRequest.md)
@@ -423,8 +444,6 @@ All URIs are relative to *https://staging.dora.co*
  - [TradeRequestError](./Models/TradeRequestError.md)
  - [TradeResponseEnvelope](./Models/TradeResponseEnvelope.md)
  - [TradingChallenge](./Models/TradingChallenge.md)
- - [TradingChallengeAllResult](./Models/TradingChallengeAllResult.md)
- - [TradingChallengeAllResultsResponseEnvelope](./Models/TradingChallengeAllResultsResponseEnvelope.md)
  - [TradingChallengeDailySnapshot](./Models/TradingChallengeDailySnapshot.md)
  - [TradingChallengeDailySnapshotsResponseEnvelope](./Models/TradingChallengeDailySnapshotsResponseEnvelope.md)
  - [TradingChallengeListResponseEnvelope](./Models/TradingChallengeListResponseEnvelope.md)
@@ -471,6 +490,8 @@ All URIs are relative to *https://staging.dora.co*
  - [UpdateUserKYCRequest](./Models/UpdateUserKYCRequest.md)
  - [UpdateUserKYCResponse](./Models/UpdateUserKYCResponse.md)
  - [UpdateUserKYCResponseEnvelope](./Models/UpdateUserKYCResponseEnvelope.md)
+ - [UpsertAutoRebalanceConfigsRequest](./Models/UpsertAutoRebalanceConfigsRequest.md)
+ - [UpsertAutoRebalanceConfigsResponseEnvelope](./Models/UpsertAutoRebalanceConfigsResponseEnvelope.md)
  - [User](./Models/User.md)
  - [UserBalanceResponseEnvelope](./Models/UserBalanceResponseEnvelope.md)
  - [UserConfig](./Models/UserConfig.md)
@@ -492,6 +513,7 @@ All URIs are relative to *https://staging.dora.co*
  - [UserUpdatedResponseEnvelope](./Models/UserUpdatedResponseEnvelope.md)
  - [UserValue](./Models/UserValue.md)
  - [UserValueResponseEnvelope](./Models/UserValueResponseEnvelope.md)
+ - [UsersTag](./Models/UsersTag.md)
  - [ValidateSubmitOrderRequest](./Models/ValidateSubmitOrderRequest.md)
  - [ValidateSubmitOrderResponse](./Models/ValidateSubmitOrderResponse.md)
  - [Web3EventStatus](./Models/Web3EventStatus.md)

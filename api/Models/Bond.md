@@ -16,6 +16,7 @@
 | **issued\_at** | **Date** |  | [default to null] |
 | **issuer** | **String** |  | [default to null] |
 | **maturity\_at** | **Date** |  | [default to null] |
+| **tenor** | **BigDecimal** | Years until maturity from the current date (negative for matured bonds) | [default to null] |
 | **principal\_value** | **String** |  | [default to null] |
 | **payments\_per\_year** | **Integer** |  | [default to null] |
 | **payments\_every** | **Long** | Coupon payment frequency in nanoseconds (minimum 1000 i.e. 1 microsecond) | [optional] [default to null] |

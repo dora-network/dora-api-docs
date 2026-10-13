@@ -10,7 +10,7 @@
 | **tenant\_id** | **String** |  | [default to null] |
 | **signup\_source** | **String** | Signup hostname when assigned at signup; empty for an assignment made later. | [default to null] |
 | **created\_at** | **Date** | Immutable assignment time; activity begins counting from this timestamp. | [default to null] |
-| **referral\_code** | **String** |  | [default to null] |
+| **referral\_code** | **String** | Exact code the user entered, retained when the referrer changes their primary code. | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

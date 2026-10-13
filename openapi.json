@@ -836,6 +836,106 @@
         }
       }
     },
+    "/v1/affiliate_referrers/{referrer_id}/code": {
+      "put": {
+        "summary": "Change an affiliate referral code",
+        "description": "The owner of this affiliate membership may change its primary code once. ADMIN callers may change any membership's code repeatedly across tenants. Admin changes preserve the owner's remaining one-time change. Changes are allowed while the program is inactive. Its initial code, whether generated or chosen by an admin, does not count as the change. Previous codes remain aliases and cannot be reused; codes resolve only while the program is active. Codes are unique across all programs and tenants, including for admins.",
+        "operationId": "customizeAffiliateReferrerCode",
+        "parameters": [
+          {
+            "name": "referrer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomizeAffiliateReferrerCodeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated affiliate membership",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid referral code or request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User or tenant context required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Affiliate membership not found or not owned by a non-admin caller",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Code already in use or unchanged, or membership already customized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/affiliate_programs/{program_id}/referrals": {
       "get": {
         "summary": "List referred users and activity",
@@ -4320,6 +4420,64 @@
           },
           "404": {
             "description": "Not found, e.g. order_book or position not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/positions/close/all": {
+      "post": {
+        "summary": "Close all open isolated positions in one request",
+        "operationId": "closeAllIsolatedPositions",
+        "responses": {
+          "201": {
+            "description": "All open isolated positions are queued for close",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseAllPositionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid isolated position shape",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, e.g. an isolated position has no matching order book",
             "content": {
               "application/json": {
                 "schema": {
@@ -8371,6 +8529,217 @@
         }
       }
     },
+    "/v2/accounts/auto_rebalance/config": {
+      "get": {
+        "summary": "List auto-rebalance configuration for the authenticated user's isolated accounts",
+        "operationId": "listAutoRebalanceConfigsV2",
+        "responses": {
+          "200": {
+            "description": "Persisted auto-rebalance configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAutoRebalanceConfigsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Create or update auto-rebalance configuration for one or more isolated accounts",
+        "operationId": "upsertAutoRebalanceConfigsV2",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAutoRebalanceConfigsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated auto-rebalance configurations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertAutoRebalanceConfigsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid thresholds or duplicate account IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "One or more accounts were not found or are not isolated accounts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/accounts/auto_rebalance/config/{account_id}": {
+      "get": {
+        "summary": "Get auto-rebalance configuration and live status for one isolated account",
+        "operationId": "getAutoRebalanceAccountStatusV2",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Auto-rebalance configuration with current collateral status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAutoRebalanceAccountStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. invalid account ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Auto-rebalance config was not found for this account or caller",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/accounts/auto_rebalance/status": {
+      "get": {
+        "summary": "List auto-rebalance status for the authenticated user's isolated accounts, including disabled configs",
+        "operationId": "listAutoRebalanceStatusesV2",
+        "responses": {
+          "200": {
+            "description": "Auto-rebalance configurations with current collateral status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAutoRebalanceConfigsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in or does not have access to this route",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/user/self/accounts": {
       "get": {
         "summary": "List all accounts for the authenticated user",
@@ -8423,7 +8792,7 @@
     "/v1/web3/deposit-instructions": {
       "get": {
         "summary": "Get per-chain instructions for depositing USDC into the Dora vault",
-        "description": "Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry. Restricted to DORA tenant users whose native asset is USDC.",
+        "description": "Returns everything the caller needs to deposit USDC into the Dora vault with a single signature and a single transaction: an EIP-712 (EIP-2612 permit) typed-data payload to sign with eth_signTypedData_v4, and the descriptor of the vault deposit() call. The client splits the permit signature into v/r/s and ABI-encodes the deposit function with the returned args plus (v, r, s); no separate approve transaction is needed. Only a single chain is currently supported: the provided nonce belongs to it, and the chains array holds at most one entry. Restricted to users whose native asset is USDC, under a tenant with web3 enabled.",
         "operationId": "getDepositInstructions",
         "parameters": [
           {
@@ -8496,7 +8865,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC. Admin and indexer API keys have no native asset and are also denied.",
+            "description": "Forbidden: access is restricted to users whose native asset is USDC, under a tenant with web3 enabled. Admin and indexer API keys have no native asset and are also denied.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9740,26 +10109,11 @@
         "security": []
       }
     },
-    "/v1/trading_challenges/all/results": {
+    "/v1/trading/global_leaderboard": {
       "get": {
-        "summary": "Get combined results across all trading challenge",
-        "description": "List trading challenge leaderboard/results filtered by board, trading_challenge_type, start date and end date across all challenges.",
-        "operationId": "getTradingChallengeAllResults",
+        "summary": "Get global leaderboard",
+        "operationId": "getGlobalLeaderboard",
         "parameters": [
-          {
-            "name": "board",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "TOP_PNL",
-                "TOP_VOLUME",
-                "IRON_TRADER"
-              ]
-            },
-            "description": "Leaderboard board selector."
-          },
           {
             "name": "start",
             "in": "query",
@@ -9781,22 +10135,35 @@
             "description": "Inclusive end date in YYYY-MM-DD format."
           },
           {
-            "name": "trading_challenge_type",
+            "name": "limit",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "$ref": "#/components/schemas/TradingChallengeType"
+              "type": "integer",
+              "default": 100,
+              "minimum": 1
             },
-            "description": "Challenge type to include in aggregation."
+            "description": "Maximum number of rows to return. Defaults to 100."
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "minimum": 0
+            },
+            "description": "Number of rows to skip before collecting the result set."
           }
         ],
         "responses": {
           "200": {
-            "description": "All trading challenge results",
+            "description": "Global leaderboard results",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TradingChallengeAllResultsResponseEnvelope"
+                  "$ref": "#/components/schemas/GlobalLeaderboardResponseEnvelope"
                 }
               }
             }
@@ -9842,7 +10209,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Prize claimed",
+            "description": "Prize claimed or QR reward fixed pending KYC",
             "content": {
               "application/json": {
                 "schema": {
@@ -9862,7 +10229,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "Conflict, including when another funded challenge may contribute to account equity or when the reward request account lock was released; retry the request after the latter",
             "content": {
               "application/json": {
                 "schema": {
@@ -9880,9 +10247,29 @@
                 }
               }
             }
+          },
+          "410": {
+            "description": "QR reward deadline passed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Wind-down timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
           }
         },
-        "description": "Claim the prize of a challenge the caller is eligible for. A TOURNAMENT claim credits the prize matching the crown and reactivates the account. A CASH claim winds the account down, sweeps every remaining challenge credit and awards the CASH_CROWN: the account is left deactivated with a zero balance, and the reward is redeemed out of band. Both mark the participation PRIZE_CLAIMED."
+        "description": "Claim an eligible trading challenge prize. TOURNAMENT requires completed KYC, credits the crown prize, reactivates the account, and marks the result PRIZE_CLAIMED. CASH requires completed KYC, winds down the account, sweeps remaining challenge credit, awards CASH_CROWN, and marks the result PRIZE_CLAIMED; the account stays deactivated with a zero balance. QR_PROMO accepts an eligible reward request before KYC, winds down the account, fixes the capped reward, queues a KYC email, and records REWARD_PENDING_KYC without paying the reward or reactivating the account."
       }
     },
     "/v1/trading_challenges/{trading_challenge_id}/participants/{user_id}/terminate": {
@@ -10362,7 +10749,7 @@
     "/v1/web3/withdrawals/fee-quote": {
       "get": {
         "summary": "Estimate the network fee to withdraw USDC via web3",
-        "description": "Examines on-chain conditions and simulates the named withdrawal to estimate the network fee the user must reserve before it can be submitted on-chain. The withdrawal must already exist, belong to the caller, and have been approved by an admin (status APPROVED_WITHOUT_FEE); its destination and quantity are read from the row, not taken from the request. The returned quote token is bound to that one withdrawal and is redeemed at PUT /v1/web3/withdrawals/{withdrawal_id}, which reserves the fee and moves the withdrawal to APPROVED. Restricted to DORA tenant users whose native asset is USDC.",
+        "description": "Estimates the network fee for an existing, admin-approved (APPROVED_WITHOUT_FEE) withdrawal owned by the caller. Redeem the returned quote token at PUT /v1/web3/withdrawals/{withdrawal_id} to reserve the fee. Restricted to USDC native-asset users.",
         "operationId": "getWithdrawalFeeQuote",
         "parameters": [
           {
@@ -10408,7 +10795,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC. Admin and indexer API keys have no native asset and are also denied.",
+            "description": "Forbidden: access is restricted to users whose native asset is USDC. Admin and indexer API keys have no native asset and are also denied.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10483,7 +10870,7 @@
     "/v1/web3/withdrawals": {
       "post": {
         "summary": "Create a USDC withdrawal request",
-        "description": "Reserves the requested quantity against the caller's available balance (moving it to pending_withdrawal) and creates a PENDING withdrawal. No fee quote is required and no fee is reserved: the withdrawal's fee is quoted and locked later, as part of approval. Idempotent on withdrawal_id: a repeat request carrying the same to_address and quantity reserves nothing further and returns the existing withdrawal with 200. Reusing a withdrawal_id with a different to_address or quantity is a conflict (409), not a replay, and reserves nothing. Restricted to DORA tenant users whose native asset is USDC.",
+        "description": "Requests a USDC withdrawal, holding the quantity from the caller's available balance until it completes or is cancelled. The fee is quoted and locked after admin approval. Idempotent on withdrawal_id; only one withdrawal may be in progress at a time. Restricted to users whose native asset is USDC.",
         "operationId": "createWithdrawal",
         "requestBody": {
           "required": true,
@@ -10537,7 +10924,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or the withdrawal would leave the caller below the minimum cash reserve.",
+            "description": "Forbidden: access is restricted to users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or the withdrawal would leave the caller below the minimum cash reserve.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10547,7 +10934,7 @@
             }
           },
           "409": {
-            "description": "Conflict, e.g. insufficient available balance, no USD ledger account to withdraw from, an unhealthy account, overdue coupon payments, a withdrawal_id already in use by another user, or a withdrawal_id reused with a to_address or quantity that does not match the existing withdrawal",
+            "description": "Conflict, e.g. insufficient available balance, no USD ledger account to withdraw from, an unhealthy account, overdue coupon payments, a withdrawal_id already in use by another user, a withdrawal_id reused with a to_address or quantity that does not match the existing withdrawal, or the caller already having another withdrawal still in progress (only one at a time is allowed; the error names the withdrawal that is in the way)",
             "content": {
               "application/json": {
                 "schema": {
@@ -10740,7 +11127,7 @@
       },
       "put": {
         "summary": "Lock the network fee for an approved USDC withdrawal",
-        "description": "Redeems a fee quote against a withdrawal an admin has approved. The quoted fee is reserved on top of the quantity reserved when the request was created, so the same risk checks the request cleared are run again for it: an active trading challenge, a deactivated account, account health, the minimum cash reserve, and overdue coupon payments. A fee that would take the caller below the minimum cash reserve is refused and nothing is reserved.",
+        "description": "Redeems a fee quote from GET /v1/web3/withdrawals/fee-quote against an admin-approved withdrawal, holding the quoted fee from the caller's available balance and making the withdrawal eligible for on-chain submission. Restricted to users whose native asset is USDC.",
         "operationId": "lockWithdrawalFee",
         "parameters": [
           {
@@ -10796,7 +11183,7 @@
             }
           },
           "403": {
-            "description": "Forbidden: access is restricted to DORA tenant users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or reserving the fee would leave the caller below the minimum cash reserve.",
+            "description": "Forbidden: access is restricted to users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied); the caller is taking part in an active trading challenge; the caller's account is deactivated or being deactivated; or reserving the fee would leave the caller below the minimum cash reserve.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10847,6 +11234,105 @@
           },
           "503": {
             "description": "Fee locking is not configured on this deployment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Cancel the caller's own USDC withdrawal",
+        "description": "Cancels the caller's own withdrawal and returns its held quantity to their available balance. Only PENDING or APPROVED_WITHOUT_FEE withdrawals can be cancelled. Restricted to users whose native asset is USDC.",
+        "operationId": "cancelWithdrawal",
+        "parameters": [
+          {
+            "name": "withdrawal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The withdrawal to cancel. It must be owned by the caller and be in status PENDING or APPROVED_WITHOUT_FEE."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Withdrawal cancelled; it is now REJECTED and its reservation is back in available",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawalResponseEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request: withdrawal_id is not a valid UUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden: access is restricted to users whose native asset is USDC (admin and indexer API keys have no native asset and are also denied)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Withdrawal not found, or it belongs to another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: the withdrawal is not PENDING or APPROVED_WITHOUT_FEE. It has either already been approved for on-chain submission (a fee is locked, or a transaction is in flight) or already finished, and in neither case can it be cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests: this route is rate limited per user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": {
@@ -10960,6 +11446,86 @@
           }
         }
       }
+    },
+    "/v1/trading_challenges/{trading_challenge_id}/reward": {
+      "get": {
+        "summary": "Preview QR reward eligibility",
+        "operationId": "getQRRewardPreview",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Live eligibility or fixed reward state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QRRewardPreviewEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Reward preview is available only for QR challenges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a participant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Challenge not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        },
+        "description": "Read-only projection for the authenticated QR participant. Request recomputes eligibility after wind-down; KYC is not a request blocker."
+      }
     }
   },
   "components": {
@@ -11030,7 +11596,8 @@
           },
           "referral_code": {
             "type": "string",
-            "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$"
+            "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$",
+            "description": "Exact code the user entered, retained when the referrer changes their primary code."
           }
         },
         "required": [
@@ -11130,11 +11697,19 @@
           "referral_code": {
             "type": "string",
             "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$",
-            "description": "Reusable referral code, stored uppercase. Letters, digits, hyphens and underscores are accepted; the first character must be a letter or digit. Matching is case-insensitive. Separate from QR claim tokens."
+            "description": "Current code to share; previously issued codes remain valid. Stored uppercase and unique across all programs and tenants."
           },
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "customized_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When the owner used their one code change; null until then."
           }
         },
         "required": [
@@ -11143,7 +11718,8 @@
           "tenant_id",
           "user_id",
           "referral_code",
-          "created_at"
+          "created_at",
+          "customized_at"
         ]
       },
       "CreateAffiliateProgramRequest": {
@@ -11246,7 +11822,7 @@
               "string",
               "null"
             ],
-            "description": "Optional custom code: 3 to 64 letters, digits, hyphens or underscores after trimming, starting with a letter or digit. Stored uppercase and unique across all programs and tenants. Omitted, null or empty generates a random code.",
+            "description": "Optional custom code: 3 to 64 letters, digits, hyphens or underscores after trimming, starting with a letter or digit. Stored uppercase and unique across all programs and tenants. Omitted, null or empty generates a random 12-character code.",
             "example": "TEAM-42"
           }
         },
@@ -11572,7 +12148,7 @@
           "referral_code": {
             "type": "string",
             "pattern": "^[A-Z0-9][A-Z0-9_-]{2,63}$",
-            "description": "Reusable referral code, stored uppercase. Letters, digits, hyphens and underscores are accepted; the first character must be a letter or digit. Matching is case-insensitive. Separate from QR claim tokens."
+            "description": "Current code to share; previously issued codes remain valid."
           },
           "created_at": {
             "type": "string",
@@ -11583,6 +12159,17 @@
           },
           "is_active": {
             "type": "boolean"
+          },
+          "customized_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "can_customize": {
+            "type": "boolean",
+            "description": "True when this membership has not used its one-time code change, including while the program is inactive."
           }
         },
         "required": [
@@ -11593,7 +12180,9 @@
           "referral_code",
           "created_at",
           "program_name",
-          "is_active"
+          "is_active",
+          "customized_at",
+          "can_customize"
         ]
       },
       "AffiliateReferralReportEnvelope": {
@@ -12257,6 +12846,10 @@
             "type": "string",
             "format": "date-time"
           },
+          "tenor": {
+            "type": "number",
+            "description": "Years until maturity from the current date (negative for matured bonds)"
+          },
           "principal_value": {
             "type": "string"
           },
@@ -12283,6 +12876,7 @@
           "issued_at",
           "issuer",
           "maturity_at",
+          "tenor",
           "principal_value",
           "payments_per_year"
         ]
@@ -12633,6 +13227,13 @@
           "COMPETITION_MANAGER"
         ]
       },
+      "UsersTag": {
+        "type": "string",
+        "enum": [
+          "MARKET_MAKER"
+        ],
+        "description": "Admin-assignable user tag. MARKET_MAKER users are exempt from the tenant trade limit and asset position restriction on POST /v1/orders."
+      },
       "ListUsersResponseEnvelope": {
         "allOf": [
           {
@@ -12684,7 +13285,7 @@
           "native_asset_id": {
             "type": "string",
             "format": "uuid",
-            "description": "Optional: the user's native asset ID. Must be a CURRENCY asset; defaults to USD. The USDC asset is never allowed for integrator-created users."
+            "description": "Optional: the user's native asset ID. Must be a CURRENCY asset; defaults to USD. The USDC asset is only allowed for users created under a tenant with is_web3_enabled set, and their accounts and positions still use the USD asset."
           },
           "photo_url": {
             "type": "string"
@@ -13049,6 +13650,10 @@
           "tenant_id": {
             "type": "string"
           },
+          "used_referral_code": {
+            "type": "string",
+            "description": "Exact affiliate code this user applied at signup or later. Empty when no code has been applied; distinct from codes the user owns."
+          },
           "allow_email_notifications": {
             "type": "boolean"
           },
@@ -13069,6 +13674,13 @@
             "format": "date-time",
             "nullable": true,
             "description": "When the user completed KYC. Omitted/null if KYC has not been completed. Set via POST /v1/integrators/user/{user_id}/kyc."
+          },
+          "tag": {
+            "type": "array",
+            "description": "Tags assigned to the user by an admin. Set via PUT /v1/users/{user_id}/tag.",
+            "items": {
+              "$ref": "#/components/schemas/UsersTag"
+            }
           }
         },
         "required": [
@@ -13081,6 +13693,7 @@
           "native_asset_id",
           "roles",
           "tenant_id",
+          "used_referral_code",
           "show_tutorial_cards",
           "notifications_enabled",
           "allow_email_notifications",
@@ -13736,7 +14349,7 @@
           },
           "fee_factor": {
             "type": "number",
-            "minimum": 0,
+            "minimum": 0.9,
             "maximum": 1
           },
           "initial_assets_ratio": {
@@ -14350,7 +14963,7 @@
           "daily_deposit_limit": {
             "type": "string",
             "format": "decimal",
-            "description": "Maximum allowed deposit for the tenant per day."
+            "description": "Maximum allowed USD deposit per user per day for this tenant."
           },
           "trade_limit": {
             "type": "string",
@@ -17595,6 +18208,9 @@
       "ClosePositionResponse": {
         "$ref": "#/components/schemas/ClosePositionResponseEnvelope"
       },
+      "CloseAllPositionsResponse": {
+        "$ref": "#/components/schemas/CloseAllPositionsResponseEnvelope"
+      },
       "ClosePositionRequest": {
         "type": "object",
         "properties": {
@@ -17631,6 +18247,44 @@
             "properties": {
               "data": {
                 "$ref": "#/components/schemas/ClosePositionResp"
+              }
+            }
+          }
+        ]
+      },
+      "CloseAllPositionsItem": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "account_id",
+          "order_id"
+        ]
+      },
+      "CloseAllPositionsResp": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CloseAllPositionsItem"
+        }
+      },
+      "CloseAllPositionsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/CloseAllPositionsResp"
               }
             }
           }
@@ -18224,6 +18878,173 @@
       },
       "TransferAccountBalancesResponse": {
         "$ref": "#/components/schemas/TransferAccountBalancesResponseEnvelope"
+      },
+      "AutoRebalanceConfigUpsert": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "min_utilization": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Lower utilization threshold, greater than 0 and less than max_utilization."
+          },
+          "max_utilization": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Upper utilization threshold, greater than min_utilization and less than or equal to 1."
+          }
+        },
+        "required": [
+          "account_id",
+          "enabled",
+          "min_utilization",
+          "max_utilization"
+        ]
+      },
+      "UpsertAutoRebalanceConfigsRequest": {
+        "type": "object",
+        "properties": {
+          "configs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/AutoRebalanceConfigUpsert"
+            }
+          }
+        },
+        "required": [
+          "configs"
+        ]
+      },
+      "AutoRebalanceConfigStatus": {
+        "type": "object",
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "min_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "max_utilization": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "available_usd": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "borrowed_value": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "borrow_limit": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "current_utilization": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "decimal"
+          },
+          "above_max": {
+            "type": "boolean",
+            "description": "True when current_utilization is greater than max_utilization."
+          },
+          "in_active_liquidation": {
+            "type": "boolean"
+          },
+          "last_rebalance_outcome": {
+            "type": "string",
+            "description": "Most recent persisted auto-rebalance attempt status for this account, when available."
+          }
+        },
+        "required": [
+          "account_id",
+          "enabled",
+          "min_utilization",
+          "max_utilization"
+        ]
+      },
+      "AutoRebalanceConfigsData": {
+        "type": "object",
+        "properties": {
+          "configs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AutoRebalanceConfigStatus"
+            }
+          }
+        },
+        "required": [
+          "configs"
+        ]
+      },
+      "UpsertAutoRebalanceConfigsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AutoRebalanceConfigsData"
+              }
+            }
+          }
+        ]
+      },
+      "UpsertAutoRebalanceConfigsResponse": {
+        "$ref": "#/components/schemas/UpsertAutoRebalanceConfigsResponseEnvelope"
+      },
+      "ListAutoRebalanceConfigsResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AutoRebalanceConfigsData"
+              }
+            }
+          }
+        ]
+      },
+      "ListAutoRebalanceConfigsResponse": {
+        "$ref": "#/components/schemas/ListAutoRebalanceConfigsResponseEnvelope"
+      },
+      "GetAutoRebalanceAccountStatusResponseEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/AutoRebalanceConfigStatus"
+              }
+            }
+          }
+        ]
+      },
+      "GetAutoRebalanceAccountStatusResponse": {
+        "$ref": "#/components/schemas/GetAutoRebalanceAccountStatusResponseEnvelope"
       },
       "CloseAccountRequest": {
         "type": "object",
@@ -19424,7 +20245,7 @@
           }
         }
       },
-      "TradingChallengeAllResult": {
+      "GlobalLeaderboardResult": {
         "type": "object",
         "properties": {
           "user_id": {
@@ -19454,7 +20275,8 @@
           },
           "pnl_pct": {
             "type": "string",
-            "format": "decimal"
+            "format": "decimal",
+            "description": "Cumulative pnl as a percentage of total TRADING_CHALLENGE_DEPOSIT and EXTERNAL_DEPOSIT quantities."
           }
         }
       },
@@ -19476,7 +20298,7 @@
           }
         ]
       },
-      "TradingChallengeAllResultsResponseEnvelope": {
+      "GlobalLeaderboardResponseEnvelope": {
         "allOf": [
           {
             "$ref": "#/components/schemas/ResponseEnvelope"
@@ -19487,7 +20309,7 @@
               "data": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/TradingChallengeAllResult"
+                  "$ref": "#/components/schemas/GlobalLeaderboardResult"
                 }
               }
             }
@@ -19507,6 +20329,19 @@
           },
           "status": {
             "type": "string"
+          },
+          "reward_amount": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Fixed QR reward, present for REWARD_PENDING_KYC."
+          },
+          "kyc_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "reward_deadline_at": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -19928,6 +20763,20 @@
           }
         ]
       },
+      "CustomizeAffiliateReferrerCodeRequest": {
+        "type": "object",
+        "properties": {
+          "referral_code": {
+            "type": "string",
+            "description": "New unique code. Trimmed and stored uppercase; 3 to 64 letters, digits, hyphens or underscores, starting with a letter or digit.",
+            "example": "BRENT"
+          }
+        },
+        "required": [
+          "referral_code"
+        ],
+        "additionalProperties": false
+      },
       "TenantGuaranteeFundRow": {
         "type": "object",
         "properties": {
@@ -20012,6 +20861,104 @@
             "properties": {
               "data": {
                 "$ref": "#/components/schemas/TenantGuaranteeFundHistory"
+              }
+            }
+          }
+        ]
+      },
+      "QRRewardPreview": {
+        "type": "object",
+        "properties": {
+          "trading_challenge_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "NOT_ELIGIBLE",
+              "ELIGIBLE",
+              "PENDING_KYC",
+              "PAID",
+              "LAPSED"
+            ]
+          },
+          "current_equity": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "promo_credit": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "eligible_profit": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "projected_reward": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "reward_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "min_reward_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "max_reward_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "reward_deadline_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "kyc_completed": {
+            "type": "boolean"
+          },
+          "kyc_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "BELOW_MINIMUM_PAYOUT",
+                "BUSTED",
+                "OTHER_CHALLENGE_FUNDED",
+                "REWARD_DEADLINE_PASSED",
+                "CHALLENGE_NOT_STARTED",
+                "ALREADY_REQUESTED",
+                "KYC_URL_UNAVAILABLE"
+              ]
+            }
+          }
+        },
+        "required": [
+          "trading_challenge_id",
+          "state",
+          "promo_credit",
+          "min_reward_amount",
+          "max_reward_amount",
+          "reward_deadline_at",
+          "kyc_completed",
+          "blockers"
+        ]
+      },
+      "QRRewardPreviewEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/QRRewardPreview"
               }
             }
           }

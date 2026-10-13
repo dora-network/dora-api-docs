@@ -40,6 +40,9 @@ Models/AssetYTM.md
 Models/AssetYield.md
 Models/AssetYieldResolution.md
 Models/AssignAffiliateReferralRequest.md
+Models/AutoRebalanceConfigStatus.md
+Models/AutoRebalanceConfigUpsert.md
+Models/AutoRebalanceConfigsData.md
 Models/BalanceTransfer.md
 Models/BalancesResponse.md
 Models/Bond.md
@@ -57,6 +60,9 @@ Models/ClaimLeverageAccruedInterestResponseEnvelope.md
 Models/ClaimTradingChallengeResponse.md
 Models/ClaimTradingChallengeResponseEnvelope.md
 Models/CloseAccountRequest.md
+Models/CloseAllPositionsItem.md
+Models/CloseAllPositionsResp.md
+Models/CloseAllPositionsResponseEnvelope.md
 Models/ClosePositionRequest.md
 Models/ClosePositionResp.md
 Models/ClosePositionResponseEnvelope.md
@@ -82,6 +88,7 @@ Models/CreateWithdrawalRequest.md
 Models/CreditRating.md
 Models/CurrentLeverageAccruedInterest.md
 Models/CurrentLeverageAccruedInterestResponseEnvelope.md
+Models/CustomizeAffiliateReferrerCodeRequest.md
 Models/DefundUserRequest.md
 Models/DepositArgs.md
 Models/DepositCall.md
@@ -96,10 +103,13 @@ Models/FundUserRequest.md
 Models/FundUserResponseEnvelope.md
 Models/GetAssetByIDResponseEnvelope.md
 Models/GetAssetYTMByIDResponseEnvelope.md
+Models/GetAutoRebalanceAccountStatusResponseEnvelope.md
 Models/GetCopyTradersResponse.md
 Models/GetPnLRankingResponse.md
 Models/GetRealizedPnlSettlementsResponseEnvelope.md
 Models/GetTopOfBookResponseEnvelope.md
+Models/GlobalLeaderboardResponseEnvelope.md
+Models/GlobalLeaderboardResult.md
 Models/HistoricalLeverageInterestRate.md
 Models/HistoricalLeverageInterestRates.md
 Models/HistoricalLeverageInterestRatesResponseEnvelope.md
@@ -127,6 +137,7 @@ Models/LiquidityResponseEnvelope.md
 Models/ListAccountsResponseV2Envelope.md
 Models/ListAssetPriceResponseEnvelope.md
 Models/ListAssetYieldResponseEnvelope.md
+Models/ListAutoRebalanceConfigsResponseEnvelope.md
 Models/ListCandlesResponseEnvelope.md
 Models/ListCouponPaymentsResponseEnvelope.md
 Models/ListDepositsResponseEnvelope.md
@@ -206,6 +217,8 @@ Models/PromoLinkListResponse.md
 Models/PromoLinkListResponse_allOf_data.md
 Models/PromoLinkStatus.md
 Models/PromoSourceType.md
+Models/QRRewardPreview.md
+Models/QRRewardPreviewEnvelope.md
 Models/RealizedPnlSettlement.md
 Models/RealizedPnlSettlements.md
 Models/RegisterAffiliateReferrerRequest.md
@@ -261,8 +274,6 @@ Models/Trade.md
 Models/TradeRequestError.md
 Models/TradeResponseEnvelope.md
 Models/TradingChallenge.md
-Models/TradingChallengeAllResult.md
-Models/TradingChallengeAllResultsResponseEnvelope.md
 Models/TradingChallengeDailySnapshot.md
 Models/TradingChallengeDailySnapshotsResponseEnvelope.md
 Models/TradingChallengeListResponseEnvelope.md
@@ -309,6 +320,8 @@ Models/UpdateUserConfigRequest.md
 Models/UpdateUserKYCRequest.md
 Models/UpdateUserKYCResponse.md
 Models/UpdateUserKYCResponseEnvelope.md
+Models/UpsertAutoRebalanceConfigsRequest.md
+Models/UpsertAutoRebalanceConfigsResponseEnvelope.md
 Models/User.md
 Models/UserBalanceResponseEnvelope.md
 Models/UserConfig.md
@@ -330,6 +343,7 @@ Models/UserRole.md
 Models/UserUpdatedResponseEnvelope.md
 Models/UserValue.md
 Models/UserValueResponseEnvelope.md
+Models/UsersTag.md
 Models/ValidateSubmitOrderRequest.md
 Models/ValidateSubmitOrderResponse.md
 Models/Web3EventStatus.md
