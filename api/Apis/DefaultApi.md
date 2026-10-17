@@ -23,6 +23,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**createAffiliateProgram**](DefaultApi.md#createAffiliateProgram) | **POST** /v1/affiliate_programs | Create an affiliate program |
 | [**createConditionalOrder**](DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 | [**createOrder**](DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
+| [**createOrdersBulk**](DefaultApi.md#createOrdersBulk) | **POST** /v1/orders/bulk | Create many orders at once |
 | [**createTradingChallenge**](DefaultApi.md#createTradingChallenge) | **POST** /v1/trading_challenges | Create a trading challenge |
 | [**createUser**](DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 | [**createWithdrawal**](DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
@@ -31,6 +32,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**exportPromoLinksCSV**](DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
 | [**getAffiliateProgram**](DefaultApi.md#getAffiliateProgram) | **GET** /v1/affiliate_programs/{program_id} | Get an affiliate program |
+| [**getAffiliateReferrerCode**](DefaultApi.md#getAffiliateReferrerCode) | **GET** /v1/affiliate_referrers/{referrer_id}/code | Get a referrer&#39;s current code |
 | [**getAllAssetPrices**](DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
 | [**getAllPositions**](DefaultApi.md#getAllPositions) | **GET** /v1/ledger/positions | Get all users&#39; positions |
 | [**getAllWithdrawalRequests**](DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
@@ -134,6 +136,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**registerAffiliateReferrer**](DefaultApi.md#registerAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers | Register an existing user as a referrer |
 | [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 | [**rejectTradingChallengeRegistrationRequest**](DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
+| [**removeAffiliateReferrer**](DefaultApi.md#removeAffiliateReferrer) | **DELETE** /v1/affiliate_programs/{program_id}/referrers/{referrer_id} | Remove a referrer from a program |
 | [**removeTradingChallengeUsers**](DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 | [**renderPromoLinkQR**](DefaultApi.md#renderPromoLinkQR) | **GET** /v1/promo_links/{link_id}/qr | Render a promotional link QR code |
 | [**repayUSD**](DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
@@ -253,7 +256,7 @@ Approve a trading challenge registration request
 
 Assign your affiliate referrer
 
-    Authenticated existing users may assign a referral code once, within their own tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.
+    Authenticated existing users may assign a referral code once. The code must belong to their own tenant or to a global tenant, whose referrers serve every tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.
 
 ### Parameters
 
@@ -660,6 +663,33 @@ Create a new order
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="createOrdersBulk"></a>
+# **createOrdersBulk**
+> CreateOrdersBulkResponse createOrdersBulk(CreateOrdersBulkRequest)
+
+Create many orders at once
+
+    Submits up to &#x60;matching.bulk_order_max_orders&#x60; orders (default 20) on a single order book for the logged in user. Every order must have the same &#x60;order_book_id&#x60;. By default each order is validated, locked and inserted independently, so a rejected order does not affect the others; &#x60;results&#x60; reports the outcome of every order in request order. Atomic submission (&#x60;atomic: true&#x60;) is not currently supported and is rejected with 400. Global-position orders and isolated orders are each processed sequentially in request order. &#x60;client_order_id&#x60; must be unique within a request.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateOrdersBulkRequest** | [**CreateOrdersBulkRequest**](../Models/CreateOrdersBulkRequest.md)|  | |
+
+### Return type
+
+[**CreateOrdersBulkResponse**](../Models/CreateOrdersBulkResponse.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="createTradingChallenge"></a>
 # **createTradingChallenge**
 > TradingChallengeResponseEnvelope createTradingChallenge(CreateTradingChallengeRequest)
@@ -861,6 +891,33 @@ Get an affiliate program
 ### Return type
 
 [**AffiliateProgramEnvelope**](../Models/AffiliateProgramEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getAffiliateReferrerCode"></a>
+# **getAffiliateReferrerCode**
+> AffiliateReferrerEnvelope getAffiliateReferrerCode(referrer\_id)
+
+Get a referrer&#39;s current code
+
+    ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within tenant and assignment scope.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **referrer\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**AffiliateReferrerEnvelope**](../Models/AffiliateReferrerEnvelope.md)
 
 ### Authorization
 
@@ -1962,7 +2019,7 @@ No authorization required
 
 <a name="getTrades"></a>
 # **getTrades**
-> ListTradeResponseEnvelope getTrades(order\_book\_ids, user\_ids, start, end, page, limit)
+> ListTradeResponseEnvelope getTrades(order\_book\_ids, user\_ids, exclude\_user\_ids, start, end, page, limit)
 
 Get a filtered, paginated list of trades
 
@@ -1974,6 +2031,7 @@ Get a filtered, paginated list of trades
 |------------- | ------------- | ------------- | -------------|
 | **order\_book\_ids** | [**List**](../Models/String.md)|  | [optional] [default to null] |
 | **user\_ids** | [**List**](../Models/UUID.md)|  | [optional] [default to null] |
+| **exclude\_user\_ids** | [**List**](../Models/UUID.md)| Leave out the trades of these users. Requires order_book_ids, and may not be combined with user_ids; a request that breaks either rule is rejected rather than served without the exclusion. | [optional] [default to null] |
 | **start** | **Date**|  | [optional] [default to null] |
 | **end** | **Date**|  | [optional] [default to null] |
 | **page** | **Integer**|  | [optional] [default to 1] |
@@ -3607,6 +3665,34 @@ Reject a trading challenge registration request
 ### HTTP request headers
 
 - **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="removeAffiliateReferrer"></a>
+# **removeAffiliateReferrer**
+> AffiliateReferrerEnvelope removeAffiliateReferrer(program\_id, referrer\_id)
+
+Remove a referrer from a program
+
+    ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within tenant and assignment scope. Disables the referrer&#39;s code for new attributions while preserving historical attribution and reporting.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **referrer\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**AffiliateReferrerEnvelope**](../Models/AffiliateReferrerEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
 - **Accept**: application/json
 
 <a name="removeTradingChallengeUsers"></a>

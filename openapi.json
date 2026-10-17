@@ -561,6 +561,95 @@
         ]
       }
     },
+    "/v1/affiliate_programs/{program_id}/referrers/{referrer_id}": {
+      "delete": {
+        "summary": "Remove a referrer from a program",
+        "description": "ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within tenant and assignment scope. Disables the referrer's code for new attributions while preserving historical attribution and reporting.",
+        "operationId": "removeAffiliateReferrer",
+        "responses": {
+          "200": {
+            "description": "Removed affiliate referrer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden by role, tenant, or program assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Program or active referrer not found within scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referrer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
     "/v1/affiliate_codes/{code}": {
       "get": {
         "summary": "Look up a reusable referral code",
@@ -657,7 +746,7 @@
     "/v1/affiliate_referrals/self": {
       "post": {
         "summary": "Assign your affiliate referrer",
-        "description": "Authenticated existing users may assign a referral code once, within their own tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.",
+        "description": "Authenticated existing users may assign a referral code once. The code must belong to their own tenant or to a global tenant, whose referrers serve every tenant. No user_id or tenant_id override is accepted. New assignments reject self-referral and require an active program. Repeating the same code returns the original assignment without changing its timestamp; changing the code returns 409. Only activity from assignment onward counts. This does not change signup_source.",
         "operationId": "assignAffiliateReferral",
         "responses": {
           "201": {
@@ -837,6 +926,84 @@
       }
     },
     "/v1/affiliate_referrers/{referrer_id}/code": {
+      "get": {
+        "summary": "Get a referrer's current code",
+        "description": "ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within tenant and assignment scope.",
+        "operationId": "getAffiliateReferrerCode",
+        "parameters": [
+          {
+            "name": "referrer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Affiliate referrer code details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden by role, tenant, or program assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Referrer not found within scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "summary": "Change an affiliate referral code",
         "description": "The owner of this affiliate membership may change its primary code once. ADMIN callers may change any membership's code repeatedly across tenants. Admin changes preserve the owner's remaining one-time change. Changes are allowed while the program is inactive. Its initial code, whether generated or chosen by an admin, does not count as the change. Previous codes remain aliases and cannot be reused; codes resolve only while the program is active. Codes are unique across all programs and tenants, including for admins.",
@@ -3572,6 +3739,95 @@
           },
           "401": {
             "description": "Unauthorized, user not logged in or does not have access to this orderbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/orders/bulk": {
+      "post": {
+        "summary": "Create many orders at once",
+        "description": "Submits up to `matching.bulk_order_max_orders` orders (default 20) on a single order book for the logged in user. Every order must have the same `order_book_id`. By default each order is validated, locked and inserted independently, so a rejected order does not affect the others; `results` reports the outcome of every order in request order. Atomic submission (`atomic: true`) is not currently supported and is rejected with 400. Global-position orders and isolated orders are each processed sequentially in request order. `client_order_id` must be unique within a request.",
+        "operationId": "createOrdersBulk",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrdersBulkRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Every order was processed; see each result's status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrdersBulkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, e.g. no orders, more orders than the configured maximum, orders on different order books, or `atomic: true` (not currently supported)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized, user not logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden, e.g. the user's account is deactivated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many bulk requests from this user",
             "content": {
               "application/json": {
                 "schema": {
@@ -6592,6 +6848,18 @@
           {
             "name": "user_ids",
             "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "exclude_user_ids",
+            "in": "query",
+            "description": "Leave out the trades of these users. Requires order_book_ids, and may not be combined with user_ids; a request that breaks either rule is rejected rather than served without the exclusion.",
             "schema": {
               "type": "array",
               "items": {
@@ -11583,7 +11851,12 @@
             "format": "uuid"
           },
           "tenant_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Tenant that owns the referrer and the program. A referrer in a global tenant may refer users of any tenant."
+          },
+          "referred_tenant_id": {
+            "type": "string",
+            "description": "Tenant that owns the referred user. Differs from tenant_id only when a global tenant's referrer referred the user."
           },
           "signup_source": {
             "type": "string",
@@ -11606,6 +11879,7 @@
           "referrer_id",
           "referrer_user_id",
           "tenant_id",
+          "referred_tenant_id",
           "signup_source",
           "created_at",
           "referral_code"
@@ -12302,7 +12576,8 @@
           "FINALIZED",
           "ORPHANED",
           "USER_NOT_EXIST",
-          "DUST"
+          "DUST",
+          "UNMATCHED"
         ]
       },
       "DepositInstructionForChain": {
@@ -13224,7 +13499,8 @@
           "TRADER",
           "INTEGRATOR",
           "INDEXER",
-          "COMPETITION_MANAGER"
+          "COMPETITION_MANAGER",
+          "AFFILIATE_MANAGER"
         ]
       },
       "UsersTag": {
@@ -13260,7 +13536,7 @@
         "properties": {
           "referral_code": {
             "type": "string",
-            "description": "Optional affiliate code, normalized to uppercase. Accepted only when creating a new account in the program owning tenant. One immutable attribution per user account; a later signup/linking call cannot add or replace it. Invalid or inactive codes fail signup atomically. Independent of QR acquisition attribution. Existing unassigned users can instead use POST /v1/affiliate_referrals/self; earlier activity is excluded."
+            "description": "Optional affiliate code, normalized to uppercase. Accepted only when creating a new account, in the program owning tenant or in any tenant when the program owner is a global tenant. One immutable attribution per user account; a later signup/linking call cannot add or replace it. Invalid or inactive codes fail signup atomically. Independent of QR acquisition attribution. Existing unassigned users can instead use POST /v1/affiliate_referrals/self; earlier activity is excluded."
           },
           "signup_source": {
             "type": "string",
@@ -13623,6 +13899,14 @@
           "managed_competition_ids": {
             "type": "array",
             "description": "Competition IDs this user is explicitly allowed to manage when they have COMPETITION_MANAGER role. Empty means no competition-management access.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "managed_affiliate_program_ids": {
+            "type": "array",
+            "description": "Affiliate program IDs this user is explicitly allowed to manage when they have AFFILIATE_MANAGER role. Empty means no affiliate-management access.",
             "items": {
               "type": "string",
               "format": "uuid"
@@ -14221,6 +14505,16 @@
             "format": "decimal",
             "description": "Cumulative executed trading volume across all UTC trading days."
           },
+          "avg_daily_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "total_trading_volume divided by active_trading_days. 0 if the user has no active trading days."
+          },
+          "avg_daily_volume_on_n_days": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Executed trading volume within [start, end) divided by the number of requested days elapsed so far (end clamped to now, partial days rounded up). 0 if start is in the future."
+          },
           "active_trading_days": {
             "type": "integer",
             "description": "Number of distinct UTC days on which the user has at least one executed fill."
@@ -14245,6 +14539,8 @@
           "win_rate",
           "daily_trading_volume",
           "total_trading_volume",
+          "avg_daily_volume",
+          "avg_daily_volume_on_n_days",
           "active_trading_days",
           "activated",
           "kyc_approved"
@@ -14262,11 +14558,23 @@
             "type": "string",
             "format": "decimal",
             "description": "Sum of total_trading_volume across all users matching ranking filters before pagination."
+          },
+          "all_users_avg_daily_trading_volume": {
+            "type": "string",
+            "format": "decimal",
+            "description": "all_users_total_trading_volume divided by the number of distinct UTC days on which any matching user had an executed fill. 0 if there are none."
+          },
+          "all_users_avg_daily_trading_volume_on_n_days": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Executed trading volume within [start, end) across all users matching ranking filters, divided by the number of requested days elapsed so far (end clamped to now, partial days rounded up). 0 if start is in the future."
           }
         },
         "required": [
           "all_users_daily_trading_volume",
-          "all_users_total_trading_volume"
+          "all_users_total_trading_volume",
+          "all_users_avg_daily_trading_volume",
+          "all_users_avg_daily_trading_volume_on_n_days"
         ]
       },
       "PnLRankingResponses": {
@@ -15175,6 +15483,85 @@
       },
       "CreateOrderResponse": {
         "$ref": "#/components/schemas/CreateOrderResponseEnvelope"
+      },
+      "CreateOrdersBulkRequest": {
+        "type": "object",
+        "required": [
+          "orders"
+        ],
+        "properties": {
+          "orders": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Orders to submit, all with the same `order_book_id`. The maximum is configurable (matching.bulk_order_max_orders, default 20).",
+            "items": {
+              "$ref": "#/components/schemas/CreateOrderRequest"
+            }
+          },
+          "atomic": {
+            "type": "boolean",
+            "default": false,
+            "description": "Not currently supported: must be omitted or false, and `true` is rejected with 400. Orders are processed independently and partial creation is allowed."
+          }
+        }
+      },
+      "BulkOrderResult": {
+        "type": "object",
+        "required": [
+          "index",
+          "status"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Position of the order in the request"
+          },
+          "client_order_id": {
+            "type": "string"
+          },
+          "order_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Present when the order was created"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status the order would have received from POST /v1/orders: 201 when created"
+          },
+          "error": {
+            "type": "string",
+            "description": "Present when the order was rejected"
+          }
+        }
+      },
+      "CreateOrdersBulkResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ResponseEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "object",
+                "properties": {
+                  "created": {
+                    "type": "integer"
+                  },
+                  "rejected": {
+                    "type": "integer"
+                  },
+                  "results": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/BulkOrderResult"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       },
       "PositionResponse": {
         "type": "object",
@@ -20795,6 +21182,10 @@
             "type": "string",
             "format": "decimal"
           },
+          "transaction_amount": {
+            "type": "string",
+            "format": "decimal"
+          },
           "tx_kind": {
             "type": "string",
             "enum": [
@@ -20813,6 +21204,7 @@
           "tenant_id",
           "seq",
           "available",
+          "transaction_amount",
           "tx_kind",
           "updated_at"
         ]

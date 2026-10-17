@@ -26,6 +26,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**createAffiliateProgram**](Apis/DefaultApi.md#createAffiliateProgram) | **POST** /v1/affiliate_programs | Create an affiliate program |
 *DefaultApi* | [**createConditionalOrder**](Apis/DefaultApi.md#createConditionalOrder) | **POST** /v1/orders/conditional | Create a new conditional orders |
 *DefaultApi* | [**createOrder**](Apis/DefaultApi.md#createOrder) | **POST** /v1/orders | Create a new order |
+*DefaultApi* | [**createOrdersBulk**](Apis/DefaultApi.md#createOrdersBulk) | **POST** /v1/orders/bulk | Create many orders at once |
 *DefaultApi* | [**createTradingChallenge**](Apis/DefaultApi.md#createTradingChallenge) | **POST** /v1/trading_challenges | Create a trading challenge |
 *DefaultApi* | [**createUser**](Apis/DefaultApi.md#createUser) | **POST** /v1/integrators/user | Create a new user |
 *DefaultApi* | [**createWithdrawal**](Apis/DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
@@ -34,6 +35,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**exportPromoLinksCSV**](Apis/DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 *DefaultApi* | [**getAPIKeysForUserID**](Apis/DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user's api keys: admin or integrator only |
 *DefaultApi* | [**getAffiliateProgram**](Apis/DefaultApi.md#getAffiliateProgram) | **GET** /v1/affiliate_programs/{program_id} | Get an affiliate program |
+*DefaultApi* | [**getAffiliateReferrerCode**](Apis/DefaultApi.md#getAffiliateReferrerCode) | **GET** /v1/affiliate_referrers/{referrer_id}/code | Get a referrer's current code |
 *DefaultApi* | [**getAllAssetPrices**](Apis/DefaultApi.md#getAllAssetPrices) | **GET** /v1/price | Get the current price of all assets |
 *DefaultApi* | [**getAllPositions**](Apis/DefaultApi.md#getAllPositions) | **GET** /v1/ledger/positions | Get all users' positions |
 *DefaultApi* | [**getAllWithdrawalRequests**](Apis/DefaultApi.md#getAllWithdrawalRequests) | **GET** /v1/ledger/withdraw/requests | Get all withdrawal requests |
@@ -137,6 +139,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**registerAffiliateReferrer**](Apis/DefaultApi.md#registerAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers | Register an existing user as a referrer |
 *DefaultApi* | [**rejectLedgerWithdrawRequest**](Apis/DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 *DefaultApi* | [**rejectTradingChallengeRegistrationRequest**](Apis/DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
+*DefaultApi* | [**removeAffiliateReferrer**](Apis/DefaultApi.md#removeAffiliateReferrer) | **DELETE** /v1/affiliate_programs/{program_id}/referrers/{referrer_id} | Remove a referrer from a program |
 *DefaultApi* | [**removeTradingChallengeUsers**](Apis/DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 *DefaultApi* | [**renderPromoLinkQR**](Apis/DefaultApi.md#renderPromoLinkQR) | **GET** /v1/promo_links/{link_id}/qr | Render a promotional link QR code |
 *DefaultApi* | [**repayUSD**](Apis/DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
@@ -218,6 +221,7 @@ All URIs are relative to *https://staging.dora.co*
  - [Bond](./Models/Bond.md)
  - [BondKind](./Models/BondKind.md)
  - [BondRunStatus](./Models/BondRunStatus.md)
+ - [BulkOrderResult](./Models/BulkOrderResult.md)
  - [CancelOrderResponseEnvelope](./Models/CancelOrderResponseEnvelope.md)
  - [Candle](./Models/Candle.md)
  - [CandleResolution](./Models/CandleResolution.md)
@@ -252,6 +256,9 @@ All URIs are relative to *https://staging.dora.co*
  - [CreateOrUpdateUserResponse](./Models/CreateOrUpdateUserResponse.md)
  - [CreateOrderRequest](./Models/CreateOrderRequest.md)
  - [CreateOrderResponseEnvelope](./Models/CreateOrderResponseEnvelope.md)
+ - [CreateOrdersBulkRequest](./Models/CreateOrdersBulkRequest.md)
+ - [CreateOrdersBulkResponse](./Models/CreateOrdersBulkResponse.md)
+ - [CreateOrdersBulkResponse_allOf_data](./Models/CreateOrdersBulkResponse_allOf_data.md)
  - [CreateTradingChallengeQRRequest](./Models/CreateTradingChallengeQRRequest.md)
  - [CreateTradingChallengeRequest](./Models/CreateTradingChallengeRequest.md)
  - [CreateWithdrawalRequest](./Models/CreateWithdrawalRequest.md)

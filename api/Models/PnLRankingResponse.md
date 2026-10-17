@@ -13,6 +13,8 @@
 | **win\_rate** | **BigDecimal** |  | [default to null] |
 | **daily\_trading\_volume** | **BigDecimal** | Executed trading volume for the current UTC day. | [default to null] |
 | **total\_trading\_volume** | **BigDecimal** | Cumulative executed trading volume across all UTC trading days. | [default to null] |
+| **avg\_daily\_volume** | **BigDecimal** | total_trading_volume divided by active_trading_days. 0 if the user has no active trading days. | [default to null] |
+| **avg\_daily\_volume\_on\_n\_days** | **BigDecimal** | Executed trading volume within [start, end) divided by the number of requested days elapsed so far (end clamped to now, partial days rounded up). 0 if start is in the future. | [default to null] |
 | **active\_trading\_days** | **Integer** | Number of distinct UTC days on which the user has at least one executed fill. | [default to null] |
 | **activated** | **Boolean** | True once the user has traded on at least 5 distinct UTC days. | [default to null] |
 | **kyc\_approved** | **Boolean** | Whether the user is currently considered KYC/verification approved. | [default to null] |

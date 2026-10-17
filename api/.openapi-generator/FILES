@@ -48,6 +48,7 @@ Models/BalancesResponse.md
 Models/Bond.md
 Models/BondKind.md
 Models/BondRunStatus.md
+Models/BulkOrderResult.md
 Models/CancelOrderResponseEnvelope.md
 Models/Candle.md
 Models/CandleResolution.md
@@ -82,6 +83,9 @@ Models/CreateIntegratorUserRequest.md
 Models/CreateOrUpdateUserResponse.md
 Models/CreateOrderRequest.md
 Models/CreateOrderResponseEnvelope.md
+Models/CreateOrdersBulkRequest.md
+Models/CreateOrdersBulkResponse.md
+Models/CreateOrdersBulkResponse_allOf_data.md
 Models/CreateTradingChallengeQRRequest.md
 Models/CreateTradingChallengeRequest.md
 Models/CreateWithdrawalRequest.md

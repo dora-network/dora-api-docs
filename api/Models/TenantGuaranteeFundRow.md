@@ -7,6 +7,7 @@
 | **tenant\_id** | **String** |  | [default to null] |
 | **seq** | **Long** |  | [default to null] |
 | **available** | **BigDecimal** |  | [default to null] |
+| **transaction\_amount** | **BigDecimal** |  | [default to null] |
 | **tx\_kind** | **String** |  | [default to null] |
 | **updated\_at** | **Date** |  | [default to null] |
 
