@@ -32,6 +32,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**createWithdrawal**](Apis/DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
 *DefaultApi* | [**customizeAffiliateReferrerCode**](Apis/DefaultApi.md#customizeAffiliateReferrerCode) | **PUT** /v1/affiliate_referrers/{referrer_id}/code | Change an affiliate referral code |
 *DefaultApi* | [**deleteUser**](Apis/DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
+*DefaultApi* | [**enableAffiliateReferrer**](Apis/DefaultApi.md#enableAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers/{referrer_id}/enable | Re-enable an existing referrer |
 *DefaultApi* | [**exportPromoLinksCSV**](Apis/DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 *DefaultApi* | [**getAPIKeysForUserID**](Apis/DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user's api keys: admin or integrator only |
 *DefaultApi* | [**getAffiliateProgram**](Apis/DefaultApi.md#getAffiliateProgram) | **GET** /v1/affiliate_programs/{program_id} | Get an affiliate program |
@@ -100,6 +101,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**getUsersAPIKeys**](Apis/DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user's api keys |
 *DefaultApi* | [**getWithdrawal**](Apis/DefaultApi.md#getWithdrawal) | **GET** /v1/web3/withdrawals/{withdrawal_id} | Get a USDC withdrawal by ID |
 *DefaultApi* | [**getWithdrawalFeeQuote**](Apis/DefaultApi.md#getWithdrawalFeeQuote) | **GET** /v1/web3/withdrawals/fee-quote | Estimate the network fee to withdraw USDC via web3 |
+*DefaultApi* | [**grantPromoCampaignManager**](Apis/DefaultApi.md#grantPromoCampaignManager) | **PUT** /v1/promo_campaigns/{trading_challenge_id}/managers/{manager_id} | Grant QR campaign access for an Affiliate Manager |
 *DefaultApi* | [**issuePromoLinkBatch**](Apis/DefaultApi.md#issuePromoLinkBatch) | **POST** /v1/trading_challenges/{trading_challenge_id}/link_batches | Issue a promotional link batch |
 *DefaultApi* | [**ledgerDeposit**](Apis/DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user's account from the outside world |
 *DefaultApi* | [**ledgerWithdraw**](Apis/DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
@@ -123,6 +125,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**listAutoRebalanceConfigsV2**](Apis/DefaultApi.md#listAutoRebalanceConfigsV2) | **GET** /v2/accounts/auto_rebalance/config | List auto-rebalance configuration for the authenticated user's isolated accounts |
 *DefaultApi* | [**listAutoRebalanceStatusesV2**](Apis/DefaultApi.md#listAutoRebalanceStatusesV2) | **GET** /v2/accounts/auto_rebalance/status | List auto-rebalance status for the authenticated user's isolated accounts, including disabled configs |
 *DefaultApi* | [**listDeposits**](Apis/DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
+*DefaultApi* | [**listManagedPromoCampaigns**](Apis/DefaultApi.md#listManagedPromoCampaigns) | **GET** /v1/promo_campaigns | List accessible Campaign Links campaigns |
 *DefaultApi* | [**listOrderBooks**](Apis/DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 *DefaultApi* | [**listOrders**](Apis/DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 *DefaultApi* | [**listOwnAffiliateMemberships**](Apis/DefaultApi.md#listOwnAffiliateMemberships) | **GET** /v1/affiliate_referrers/self | List your affiliate memberships |
@@ -140,6 +143,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**rejectLedgerWithdrawRequest**](Apis/DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 *DefaultApi* | [**rejectTradingChallengeRegistrationRequest**](Apis/DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
 *DefaultApi* | [**removeAffiliateReferrer**](Apis/DefaultApi.md#removeAffiliateReferrer) | **DELETE** /v1/affiliate_programs/{program_id}/referrers/{referrer_id} | Remove a referrer from a program |
+*DefaultApi* | [**removePromoCampaignManager**](Apis/DefaultApi.md#removePromoCampaignManager) | **DELETE** /v1/promo_campaigns/{trading_challenge_id}/managers/{manager_id} | Remove QR campaign access for an Affiliate Manager |
 *DefaultApi* | [**removeTradingChallengeUsers**](Apis/DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 *DefaultApi* | [**renderPromoLinkQR**](Apis/DefaultApi.md#renderPromoLinkQR) | **GET** /v1/promo_links/{link_id}/qr | Render a promotional link QR code |
 *DefaultApi* | [**repayUSD**](Apis/DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
@@ -231,6 +235,7 @@ All URIs are relative to *https://staging.dora.co*
  - [ClaimLeverageAccruedInterest](./Models/ClaimLeverageAccruedInterest.md)
  - [ClaimLeverageAccruedInterestRequest](./Models/ClaimLeverageAccruedInterestRequest.md)
  - [ClaimLeverageAccruedInterestResponseEnvelope](./Models/ClaimLeverageAccruedInterestResponseEnvelope.md)
+ - [ClaimPromoLinkRequest](./Models/ClaimPromoLinkRequest.md)
  - [ClaimTradingChallengeResponse](./Models/ClaimTradingChallengeResponse.md)
  - [ClaimTradingChallengeResponseEnvelope](./Models/ClaimTradingChallengeResponseEnvelope.md)
  - [CloseAccountRequest](./Models/CloseAccountRequest.md)
@@ -258,7 +263,7 @@ All URIs are relative to *https://staging.dora.co*
  - [CreateOrderResponseEnvelope](./Models/CreateOrderResponseEnvelope.md)
  - [CreateOrdersBulkRequest](./Models/CreateOrdersBulkRequest.md)
  - [CreateOrdersBulkResponse](./Models/CreateOrdersBulkResponse.md)
- - [CreateOrdersBulkResponse_allOf_data](./Models/CreateOrdersBulkResponse_allOf_data.md)
+ - [CreateOrdersBulkResponseData](./Models/CreateOrdersBulkResponseData.md)
  - [CreateTradingChallengeQRRequest](./Models/CreateTradingChallengeQRRequest.md)
  - [CreateTradingChallengeRequest](./Models/CreateTradingChallengeRequest.md)
  - [CreateWithdrawalRequest](./Models/CreateWithdrawalRequest.md)
@@ -295,8 +300,9 @@ All URIs are relative to *https://staging.dora.co*
  - [IsolatedCollateral](./Models/IsolatedCollateral.md)
  - [IsolatedPosition](./Models/IsolatedPosition.md)
  - [IssuePromoLinkBatchRequest](./Models/IssuePromoLinkBatchRequest.md)
+ - [IssuePromoLinkBatchRequestSingleUse](./Models/IssuePromoLinkBatchRequestSingleUse.md)
  - [IssuePromoLinkBatchResponse](./Models/IssuePromoLinkBatchResponse.md)
- - [IssuePromoLinkBatchResponse_allOf_data](./Models/IssuePromoLinkBatchResponse_allOf_data.md)
+ - [IssuePromoLinkBatchResponseData](./Models/IssuePromoLinkBatchResponseData.md)
  - [IssuedPromoLink](./Models/IssuedPromoLink.md)
  - [LedgerAccountsResponseV2Envelope](./Models/LedgerAccountsResponseV2Envelope.md)
  - [LedgerModuleByAssetResponseEnvelope](./Models/LedgerModuleByAssetResponseEnvelope.md)
@@ -381,17 +387,20 @@ All URIs are relative to *https://staging.dora.co*
  - [PositionType](./Models/PositionType.md)
  - [PriceLevel](./Models/PriceLevel.md)
  - [PromoAttributionResponse](./Models/PromoAttributionResponse.md)
- - [PromoAttributionResponse_allOf_data](./Models/PromoAttributionResponse_allOf_data.md)
+ - [PromoAttributionResponseData](./Models/PromoAttributionResponseData.md)
  - [PromoAttributionSource](./Models/PromoAttributionSource.md)
+ - [PromoCampaignSelectorResponse](./Models/PromoCampaignSelectorResponse.md)
+ - [PromoCampaignSelectorResponseData](./Models/PromoCampaignSelectorResponseData.md)
+ - [PromoCampaignSelectorResponseDataCampaigns](./Models/PromoCampaignSelectorResponseDataCampaigns.md)
  - [PromoClaimResponseEnvelope](./Models/PromoClaimResponseEnvelope.md)
- - [PromoClaimResponseEnvelope_allOf_data](./Models/PromoClaimResponseEnvelope_allOf_data.md)
+ - [PromoClaimResponseEnvelopeData](./Models/PromoClaimResponseEnvelopeData.md)
  - [PromoClaimState](./Models/PromoClaimState.md)
  - [PromoLinkAdmin](./Models/PromoLinkAdmin.md)
  - [PromoLinkBatchListResponse](./Models/PromoLinkBatchListResponse.md)
- - [PromoLinkBatchListResponse_allOf_data](./Models/PromoLinkBatchListResponse_allOf_data.md)
+ - [PromoLinkBatchListResponseData](./Models/PromoLinkBatchListResponseData.md)
  - [PromoLinkBatchSummary](./Models/PromoLinkBatchSummary.md)
  - [PromoLinkListResponse](./Models/PromoLinkListResponse.md)
- - [PromoLinkListResponse_allOf_data](./Models/PromoLinkListResponse_allOf_data.md)
+ - [PromoLinkListResponseData](./Models/PromoLinkListResponseData.md)
  - [PromoLinkStatus](./Models/PromoLinkStatus.md)
  - [PromoSourceType](./Models/PromoSourceType.md)
  - [QRRewardPreview](./Models/QRRewardPreview.md)
@@ -410,7 +419,7 @@ All URIs are relative to *https://staging.dora.co*
  - [RevokeAPIKeyResponseEnvelope](./Models/RevokeAPIKeyResponseEnvelope.md)
  - [RevokePromoLinkRequest](./Models/RevokePromoLinkRequest.md)
  - [RevokePromoLinkResponse](./Models/RevokePromoLinkResponse.md)
- - [RevokePromoLinkResponse_allOf_data](./Models/RevokePromoLinkResponse_allOf_data.md)
+ - [RevokePromoLinkResponseData](./Models/RevokePromoLinkResponseData.md)
  - [SettleLeverageAccruedInterest](./Models/SettleLeverageAccruedInterest.md)
  - [SettleLeverageAccruedInterestRequest](./Models/SettleLeverageAccruedInterestRequest.md)
  - [SettleLeverageAccruedInterestResponseEnvelope](./Models/SettleLeverageAccruedInterestResponseEnvelope.md)
@@ -483,9 +492,9 @@ All URIs are relative to *https://staging.dora.co*
  - [UnitePositionResponseEnvelope](./Models/UnitePositionResponseEnvelope.md)
  - [UnitedPosition](./Models/UnitedPosition.md)
  - [UpdateAffiliateProgramRequest](./Models/UpdateAffiliateProgramRequest.md)
- - [UpdateAffiliateProgramRequest_description](./Models/UpdateAffiliateProgramRequest_description.md)
- - [UpdateAffiliateProgramRequest_is_active](./Models/UpdateAffiliateProgramRequest_is_active.md)
- - [UpdateAffiliateProgramRequest_name](./Models/UpdateAffiliateProgramRequest_name.md)
+ - [UpdateAffiliateProgramRequestDescription](./Models/UpdateAffiliateProgramRequestDescription.md)
+ - [UpdateAffiliateProgramRequestIsActive](./Models/UpdateAffiliateProgramRequestIsActive.md)
+ - [UpdateAffiliateProgramRequestName](./Models/UpdateAffiliateProgramRequestName.md)
  - [UpdateFieldBoolean](./Models/UpdateFieldBoolean.md)
  - [UpdateFieldDateTime](./Models/UpdateFieldDateTime.md)
  - [UpdateFieldDecimal](./Models/UpdateFieldDecimal.md)
@@ -534,7 +543,6 @@ All URIs are relative to *https://staging.dora.co*
  - [WithdrawalResponse](./Models/WithdrawalResponse.md)
  - [WithdrawalResponseEnvelope](./Models/WithdrawalResponseEnvelope.md)
  - [WithdrawalStatus](./Models/WithdrawalStatus.md)
- - [claimPromoLink_request](./Models/claimPromoLink_request.md)
 
 
 <a name="documentation-for-authorization"></a>

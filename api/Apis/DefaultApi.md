@@ -29,6 +29,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**createWithdrawal**](DefaultApi.md#createWithdrawal) | **POST** /v1/web3/withdrawals | Create a USDC withdrawal request |
 | [**customizeAffiliateReferrerCode**](DefaultApi.md#customizeAffiliateReferrerCode) | **PUT** /v1/affiliate_referrers/{referrer_id}/code | Change an affiliate referral code |
 | [**deleteUser**](DefaultApi.md#deleteUser) | **DELETE** /v1/user/{user_id} | Delete user by ID |
+| [**enableAffiliateReferrer**](DefaultApi.md#enableAffiliateReferrer) | **POST** /v1/affiliate_programs/{program_id}/referrers/{referrer_id}/enable | Re-enable an existing referrer |
 | [**exportPromoLinksCSV**](DefaultApi.md#exportPromoLinksCSV) | **GET** /v1/link_batches/{batch_id}/links.csv | Export promotional links as CSV |
 | [**getAPIKeysForUserID**](DefaultApi.md#getAPIKeysForUserID) | **GET** /v1/user/{user_id}/apikey | Get user&#39;s api keys: admin or integrator only |
 | [**getAffiliateProgram**](DefaultApi.md#getAffiliateProgram) | **GET** /v1/affiliate_programs/{program_id} | Get an affiliate program |
@@ -97,6 +98,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**getUsersAPIKeys**](DefaultApi.md#getUsersAPIKeys) | **GET** /v1/user/apikey | Get user&#39;s api keys |
 | [**getWithdrawal**](DefaultApi.md#getWithdrawal) | **GET** /v1/web3/withdrawals/{withdrawal_id} | Get a USDC withdrawal by ID |
 | [**getWithdrawalFeeQuote**](DefaultApi.md#getWithdrawalFeeQuote) | **GET** /v1/web3/withdrawals/fee-quote | Estimate the network fee to withdraw USDC via web3 |
+| [**grantPromoCampaignManager**](DefaultApi.md#grantPromoCampaignManager) | **PUT** /v1/promo_campaigns/{trading_challenge_id}/managers/{manager_id} | Grant QR campaign access for an Affiliate Manager |
 | [**issuePromoLinkBatch**](DefaultApi.md#issuePromoLinkBatch) | **POST** /v1/trading_challenges/{trading_challenge_id}/link_batches | Issue a promotional link batch |
 | [**ledgerDeposit**](DefaultApi.md#ledgerDeposit) | **POST** /v1/ledger/deposit/{user_id} | Deposit assets into this user&#39;s account from the outside world |
 | [**ledgerWithdraw**](DefaultApi.md#ledgerWithdraw) | **POST** /v1/ledger/withdraw/{user_id} | Withdraw assets from this user to the outside world |
@@ -120,6 +122,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**listAutoRebalanceConfigsV2**](DefaultApi.md#listAutoRebalanceConfigsV2) | **GET** /v2/accounts/auto_rebalance/config | List auto-rebalance configuration for the authenticated user&#39;s isolated accounts |
 | [**listAutoRebalanceStatusesV2**](DefaultApi.md#listAutoRebalanceStatusesV2) | **GET** /v2/accounts/auto_rebalance/status | List auto-rebalance status for the authenticated user&#39;s isolated accounts, including disabled configs |
 | [**listDeposits**](DefaultApi.md#listDeposits) | **GET** /v1/web3/deposits | List USDC deposits |
+| [**listManagedPromoCampaigns**](DefaultApi.md#listManagedPromoCampaigns) | **GET** /v1/promo_campaigns | List accessible Campaign Links campaigns |
 | [**listOrderBooks**](DefaultApi.md#listOrderBooks) | **GET** /v1/orderbooks | List order books |
 | [**listOrders**](DefaultApi.md#listOrders) | **GET** /v1/orders | List all orders |
 | [**listOwnAffiliateMemberships**](DefaultApi.md#listOwnAffiliateMemberships) | **GET** /v1/affiliate_referrers/self | List your affiliate memberships |
@@ -137,6 +140,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**rejectLedgerWithdrawRequest**](DefaultApi.md#rejectLedgerWithdrawRequest) | **POST** /v1/ledger/withdraw/requests/{withdrawal_id}/reject | Reject a pending withdrawal request |
 | [**rejectTradingChallengeRegistrationRequest**](DefaultApi.md#rejectTradingChallengeRegistrationRequest) | **POST** /v1/trading_challenges/registration_requests/{request_id}/reject | Reject a trading challenge registration request |
 | [**removeAffiliateReferrer**](DefaultApi.md#removeAffiliateReferrer) | **DELETE** /v1/affiliate_programs/{program_id}/referrers/{referrer_id} | Remove a referrer from a program |
+| [**removePromoCampaignManager**](DefaultApi.md#removePromoCampaignManager) | **DELETE** /v1/promo_campaigns/{trading_challenge_id}/managers/{manager_id} | Remove QR campaign access for an Affiliate Manager |
 | [**removeTradingChallengeUsers**](DefaultApi.md#removeTradingChallengeUsers) | **PUT** /v1/trading_challenges/remove_users | Remove users from a trading challenge |
 | [**renderPromoLinkQR**](DefaultApi.md#renderPromoLinkQR) | **GET** /v1/promo_links/{link_id}/qr | Render a promotional link QR code |
 | [**repayUSD**](DefaultApi.md#repayUSD) | **POST** /v1/positions/repay_usd | Repay borrowed USD, then accrue and pay leverage interest |
@@ -412,16 +416,18 @@ Claim current accrued leverage interest for a specific user
 
 <a name="claimPromoLink"></a>
 # **claimPromoLink**
-> PromoClaimResponseEnvelope claimPromoLink(token, claimPromoLink\_request)
+> PromoClaimResponseEnvelope claimPromoLink(token, ClaimPromoLinkRequest)
 
 Claim a public QR promotion link
+
+    New users only. Send email only; campaign/link/source and affiliate selection are server-bound. Creates account, enrollment, referral attribution and encrypted delivery transactionally. One eligible account/email per campaign across all link types; existing accounts remain excluded. This does not guarantee a unique human across mailboxes. Successful reusable claims leave the link active. Permanent affiliate attribution is separate from originating link identity. Reusable failures have a per-link/email limit with a 15-minute inactivity reset, plus the route IP limit.
 
 ### Parameters
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **token** | **String**| Opaque bearer claim token | [default to null] |
-| **claimPromoLink\_request** | [**claimPromoLink_request**](../Models/claimPromoLink_request.md)|  | |
+| **ClaimPromoLinkRequest** | [**ClaimPromoLinkRequest**](../Models/ClaimPromoLinkRequest.md)|  | |
 
 ### Return type
 
@@ -822,13 +828,41 @@ Delete user by ID
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="enableAffiliateReferrer"></a>
+# **enableAffiliateReferrer**
+> AffiliateReferrerEnvelope enableAffiliateReferrer(program\_id, referrer\_id)
+
+Re-enable an existing referrer
+
+    Uses the same ADMIN, tenant INTEGRATOR, and assigned-program AFFILIATE_MANAGER permissions as disabling. Clears disabled_at and disabled_by on the existing membership, preserving its ID, user, program, codes, customization, and attribution history. Already enabled returns 200 unchanged. Unknown or wrong-program members return 404. Does not unpause the program or change independent signup, account, tenant, or campaign rules.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **program\_id** | **UUID**|  | [default to null] |
+| **referrer\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+[**AffiliateReferrerEnvelope**](../Models/AffiliateReferrerEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="exportPromoLinksCSV"></a>
 # **exportPromoLinksCSV**
 > String exportPromoLinksCSV(batch\_id)
 
 Export promotional links as CSV
 
-    Stream private claim URLs with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.
+    Export saved links. Reusable CSV includes link_id, link_type, campaign_id, affiliate_program_id, affiliate_member_id, referral_code, url, status, expires_at and created_at, with no claimant columns. Check X-Promo-Export-Status trailer for complete. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.
 
 ### Parameters
 
@@ -2584,13 +2618,41 @@ Estimate the network fee to withdraw USDC via web3
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="grantPromoCampaignManager"></a>
+# **grantPromoCampaignManager**
+> grantPromoCampaignManager(trading\_challenge\_id, manager\_id)
+
+Grant QR campaign access for an Affiliate Manager
+
+    ADMIN only. Idempotent PUT with no body. QR campaign grants are independent of home tenant and affiliate programs. Removal takes effect on the next protected request after commit; already authorized reads/downloads may finish. Batch issuance and removal serialize on the campaign lock.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+| **manager\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+null (empty response body)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
 <a name="issuePromoLinkBatch"></a>
 # **issuePromoLinkBatch**
 > IssuePromoLinkBatchResponse issuePromoLinkBatch(trading\_challenge\_id, Idempotency-Key, IssuePromoLinkBatchRequest)
 
 Issue a promotional link batch
 
-    Atomically reserve QR campaign capacity and create opaque, encrypted promotional links. ADMIN and same-tenant INTEGRATOR only. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.
+    Mint single-use links or one reusable link bound to an existing affiliate program/member/code. Requires Idempotency-Key. Only committed new-user signups consume the shared campaign max_users limit; unused single-use links have no reserved place. Uses DORA-6544 campaign-grant authorization. Affiliate selection also requires independent access to the selected program. Migration 208 must precede reusable-link migration 209. Enable reusable creation in FE after all API replicas and reward-settlement daemon processes support this contract; older replicas fail closed instead of consuming reusable links. No program-only codes or landing-page selector. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.
 
 ### Parameters
 
@@ -3074,11 +3136,11 @@ List referred users and activity
 
 <a name="listAffiliateReferrers"></a>
 # **listAffiliateReferrers**
-> AffiliateReferrerListEnvelope listAffiliateReferrers(program\_id, limit, page)
+> AffiliateReferrerListEnvelope listAffiliateReferrers(program\_id, limit, page, include\_disabled)
 
 List program referrers
 
-    ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Includes registrations in inactive programs.
+    ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within the same tenant and assigned-program scope as disabling. Active memberships only by default; include_disabled&#x3D;true also returns disabled memberships. Includes memberships in paused programs.
 
 ### Parameters
 
@@ -3087,6 +3149,7 @@ List program referrers
 | **program\_id** | **UUID**|  | [default to null] |
 | **limit** | **Integer**|  | [optional] [default to 100] |
 | **page** | **Integer**| One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending. | [optional] [default to 1] |
+| **include\_disabled** | **Boolean**| Include disabled memberships for management. Disabled codes remain ineligible for new referrals. | [optional] [default to false] |
 
 ### Return type
 
@@ -3198,6 +3261,33 @@ List USDC deposits
 ### Return type
 
 [**ListDepositsResponseEnvelope**](../Models/ListDepositsResponseEnvelope.md)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="listManagedPromoCampaigns"></a>
+# **listManagedPromoCampaigns**
+> PromoCampaignSelectorResponse listManagedPromoCampaigns(tenant\_id)
+
+List accessible Campaign Links campaigns
+
+    Authenticated QR campaign selector. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access. Managers with no grants receive an empty campaigns array. Returns all assigned tenants unless tenant_id narrows the set. Public challenge listing is unchanged.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **tenant\_id** | **String**| Optional filter within the authorized campaign set; authenticate as the home-tenant account. | [optional] [default to null] |
+
+### Return type
+
+[**PromoCampaignSelectorResponse**](../Models/PromoCampaignSelectorResponse.md)
 
 ### Authorization
 
@@ -3327,7 +3417,7 @@ This endpoint does not need any parameter.
 
 List promotional link batches
 
-    Return source metadata and ISSUED, CLAIMED, and REVOKED counts for each batch. ADMIN and same-tenant INTEGRATOR only.
+    Retrieve saved Campaign Links with campaign, link_type, affiliate selection, creation date and signups. Reusable entries omit allocation/issued/claimed/revoked counts. The same member can have many links/campaigns; separate link IDs preserve origin identity for future landing pages. Landing-page selection is out of scope. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.
 
 ### Parameters
 
@@ -3354,7 +3444,7 @@ List promotional link batches
 
 List promotional links
 
-    Keyset-paginated batch links. URLs are omitted by default and decrypted only when reveal&#x3D;true. ADMIN and same-tenant INTEGRATOR only.
+    Use reveal&#x3D;true to copy a saved private URL. Reusable entries show ACTIVE or REVOKED and have no single claimant. Treat URLs as private and do not cache/log them. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.
 
 ### Parameters
 
@@ -3363,7 +3453,7 @@ List promotional links
 | **batch\_id** | **UUID**|  | [default to null] |
 | **limit** | **Integer**|  | [optional] [default to 100] |
 | **cursor** | **String**|  | [optional] [default to null] |
-| **status** | [**PromoLinkStatus**](../Models/.md)|  | [optional] [default to null] [enum: ISSUED, CLAIMED, REVOKED] |
+| **status** | **String**| ACTIVE selects active reusable links. Single-use links retain ISSUED/CLAIMED/REVOKED. | [optional] [default to null] [enum: ACTIVE, ISSUED, CLAIMED, REVOKED] |
 | **reveal** | **Boolean**|  | [optional] [default to false] |
 
 ### Return type
@@ -3695,6 +3785,34 @@ Remove a referrer from a program
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
+<a name="removePromoCampaignManager"></a>
+# **removePromoCampaignManager**
+> removePromoCampaignManager(trading\_challenge\_id, manager\_id)
+
+Remove QR campaign access for an Affiliate Manager
+
+    ADMIN only. Idempotent DELETE with no body. QR campaign grants are independent of home tenant and affiliate programs. Removal takes effect on the next protected request after commit; already authorized reads/downloads may finish. Batch issuance and removal serialize on the campaign lock.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **trading\_challenge\_id** | **UUID**|  | [default to null] |
+| **manager\_id** | **UUID**|  | [default to null] |
+
+### Return type
+
+null (empty response body)
+
+### Authorization
+
+[apiKeyAuthHeader](../README.md#apiKeyAuthHeader), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
 <a name="removeTradingChallengeUsers"></a>
 # **removeTradingChallengeUsers**
 > TradingChallengeResponseEnvelope removeTradingChallengeUsers(RemoveTradingChallengeUsersRequest)
@@ -3728,7 +3846,7 @@ Remove users from a trading challenge
 
 Render a promotional link QR code
 
-    Render the exact private claim URL as PNG with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.
+    Download private QR PNG with Content-Disposition filename promo-link-{link_id}.png; the same link_id is in saved links and CSV. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.
 
 ### Parameters
 
@@ -3859,7 +3977,7 @@ Revoke apikey for a user: admin or integrator only
 
 Revoke a promotional link
 
-    Revoke an unclaimed link and return one unit of QR campaign capacity. Repeating an already-revoked request is idempotent; claimed links return 409.
+    Revoke an active promo link. Revoking a reusable link prevents new signups and preserves existing participants. Does not release a successful signup place.
 
 ### Parameters
 

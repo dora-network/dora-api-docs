@@ -1,9 +1,10 @@
-# PromoAttributionResponse_allOf_data
+# UpdateAffiliateProgramRequestName
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **sources** | [**List**](PromoAttributionSource.md) |  | [default to null] |
+| **update** | **Boolean** | Whether to update the field. | [default to null] |
+| **value** | **String** | The new value to set for the field. | [optional] [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

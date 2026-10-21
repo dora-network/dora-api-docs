@@ -3,7 +3,7 @@
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **data** | [**IssuePromoLinkBatchResponse_allOf_data**](IssuePromoLinkBatchResponse_allOf_data.md) |  | [optional] [default to null] |
+| **data** | [**IssuePromoLinkBatchResponseData**](IssuePromoLinkBatchResponseData.md) |  | [optional] [default to null] |
 | **error** | **String** | The error message. Present for error (non-2xx) responses. | [optional] [default to null] |
 | **metadata** | [**Metadata**](Metadata.md) | Metadata about the response, including status code and trace information. | [default to null] |
 

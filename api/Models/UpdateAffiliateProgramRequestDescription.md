@@ -1,4 +1,4 @@
-# UpdateAffiliateProgramRequest_name
+# UpdateAffiliateProgramRequestDescription
 ## Properties
 
 | Name | Type | Description | Notes |

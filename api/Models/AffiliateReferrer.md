@@ -10,6 +10,8 @@
 | **referral\_code** | **String** | Current code to share; previously issued codes remain valid. Stored uppercase and unique across all programs and tenants. | [default to null] |
 | **created\_at** | **Date** |  | [default to null] |
 | **customized\_at** | **Date** | When the owner used their one code change; null until then. | [default to null] |
+| **disabled\_at** | **Date** | When this membership was disabled; null while enabled. | [default to null] |
+| **disabled\_by** | **UUID** | Actor who disabled this membership; null while enabled. | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

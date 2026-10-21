@@ -1,11 +1,9 @@
-# RevokePromoLinkResponse_allOf_data
+# PromoLinkBatchListResponseData
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **id** | **UUID** |  | [default to null] |
-| **status** | **String** |  | [default to null] |
-| **repeated** | **Boolean** |  | [default to null] |
+| **batches** | [**List**](PromoLinkBatchSummary.md) |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

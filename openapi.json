@@ -462,7 +462,7 @@
       },
       "get": {
         "summary": "List program referrers",
-        "description": "ADMIN or INTEGRATOR required. Integrators are restricted to their own tenant; ADMIN overrides other roles. Includes registrations in inactive programs.",
+        "description": "ADMIN, INTEGRATOR, or AFFILIATE_MANAGER required within the same tenant and assigned-program scope as disabling. Active memberships only by default; include_disabled=true also returns disabled memberships. Includes memberships in paused programs.",
         "operationId": "listAffiliateReferrers",
         "responses": {
           "200": {
@@ -557,6 +557,16 @@
               "default": 1
             },
             "description": "One-based page; the resulting offset must not exceed 2147483647. Results sort by created_at then id descending."
+          },
+          {
+            "name": "include_disabled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Include disabled memberships for management. Disabled codes remain ineligible for new referrals."
           }
         ]
       }
@@ -1467,7 +1477,7 @@
             }
           },
           "409": {
-            "description": "Link, campaign, or email can no longer be claimed",
+            "description": "Campaign full, email already registered/claimed, link already claimed, or saved affiliate selection inactive (AFFILIATE_UNAVAILABLE). No additional campaign place is consumed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1516,7 +1526,8 @@
               }
             }
           }
-        }
+        },
+        "description": "New users only. Send email only; campaign/link/source and affiliate selection are server-bound. Creates account, enrollment, referral attribution and encrypted delivery transactionally. One eligible account/email per campaign across all link types; existing accounts remain excluded. This does not guarantee a unique human across mailboxes. Successful reusable claims leave the link active. Permanent affiliate attribution is separate from originating link identity. Reusable failures have a per-link/email limit with a 15-minute inactivity reset, plus the route IP limit."
       }
     },
     "/v1/assets": {
@@ -9519,7 +9530,7 @@
     "/v1/trading_challenges/{trading_challenge_id}/link_batches": {
       "post": {
         "summary": "Issue a promotional link batch",
-        "description": "Atomically reserve QR campaign capacity and create opaque, encrypted promotional links. ADMIN and same-tenant INTEGRATOR only. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.",
+        "description": "Mint single-use links or one reusable link bound to an existing affiliate program/member/code. Requires Idempotency-Key. Only committed new-user signups consume the shared campaign max_users limit; unused single-use links have no reserved place. Uses DORA-6544 campaign-grant authorization. Affiliate selection also requires independent access to the selected program. Migration 208 must precede reusable-link migration 209. Enable reusable creation in FE after all API replicas and reward-settlement daemon processes support this contract; older replicas fail closed instead of consuming reusable links. No program-only codes or landing-page selector. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access. Exact idempotent replays return 200; first creation returns 201; key reuse with another payload returns 409.",
         "operationId": "issuePromoLinkBatch",
         "parameters": [
           {
@@ -9548,6 +9559,20 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/IssuePromoLinkBatchRequest"
+              },
+              "examples": {
+                "reusable": {
+                  "summary": "Reusable marketing link; no quantity",
+                  "value": {
+                    "link_type": "REUSABLE",
+                    "source_type": "DORA",
+                    "source_id": "NIGERIA",
+                    "source_name": "Nigeria campaign",
+                    "affiliate_program_id": "00000000-0000-0000-0000-000000000001",
+                    "affiliate_member_id": "00000000-0000-0000-0000-000000000002",
+                    "referral_code": "MEMBER_CODE"
+                  }
+                }
               }
             }
           }
@@ -9577,7 +9602,7 @@
             "description": "Malformed request or missing/duplicate idempotency key"
           },
           "403": {
-            "description": "Caller cannot administer this tenant"
+            "description": "No Campaign Links permission for the owning campaign; no asset data is returned"
           },
           "404": {
             "description": "QR campaign not found"
@@ -9587,12 +9612,15 @@
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       },
       "get": {
         "summary": "List promotional link batches",
-        "description": "Return source metadata and ISSUED, CLAIMED, and REVOKED counts for each batch. ADMIN and same-tenant INTEGRATOR only.",
+        "description": "Retrieve saved Campaign Links with campaign, link_type, affiliate selection, creation date and signups. Reusable entries omit allocation/issued/claimed/revoked counts. The same member can have many links/campaigns; separate link IDs preserve origin identity for future landing pages. Landing-page selection is out of scope. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.",
         "operationId": "listPromoLinkBatches",
         "parameters": [
           {
@@ -9620,13 +9648,16 @@
             "description": "Malformed request"
           },
           "403": {
-            "description": "Caller cannot administer this tenant"
+            "description": "No Campaign Links permission for the owning campaign; no asset data is returned"
           },
           "404": {
             "description": "QR campaign not found"
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       }
@@ -9634,7 +9665,7 @@
     "/v1/link_batches/{batch_id}/links": {
       "get": {
         "summary": "List promotional links",
-        "description": "Keyset-paginated batch links. URLs are omitted by default and decrypted only when reveal=true. ADMIN and same-tenant INTEGRATOR only.",
+        "description": "Use reveal=true to copy a saved private URL. Reusable entries show ACTIVE or REVOKED and have no single claimant. Treat URLs as private and do not cache/log them. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.",
         "operationId": "listPromoLinks",
         "parameters": [
           {
@@ -9667,8 +9698,15 @@
             "name": "status",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/PromoLinkStatus"
-            }
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "ISSUED",
+                "CLAIMED",
+                "REVOKED"
+              ]
+            },
+            "description": "ACTIVE selects active reusable links. Single-use links retain ISSUED/CLAIMED/REVOKED."
           },
           {
             "name": "reveal",
@@ -9694,13 +9732,16 @@
             "description": "Malformed filter or cursor"
           },
           "403": {
-            "description": "Caller cannot administer this tenant"
+            "description": "No Campaign Links permission for the owning campaign; no asset data is returned"
           },
           "404": {
             "description": "Batch not found"
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       }
@@ -9708,7 +9749,7 @@
     "/v1/link_batches/{batch_id}/links.csv": {
       "get": {
         "summary": "Export promotional links as CSV",
-        "description": "Stream private claim URLs with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.",
+        "description": "Export saved links. Reusable CSV includes link_id, link_type, campaign_id, affiliate_program_id, affiliate_member_id, referral_code, url, status, expires_at and created_at, with no claimant columns. Check X-Promo-Export-Status trailer for complete. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.",
         "operationId": "exportPromoLinksCSV",
         "parameters": [
           {
@@ -9761,13 +9802,16 @@
             "description": "Malformed request"
           },
           "403": {
-            "description": "Caller cannot administer this tenant"
+            "description": "No Campaign Links permission for the owning campaign; no asset data is returned"
           },
           "404": {
             "description": "Batch not found"
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       }
@@ -9775,7 +9819,7 @@
     "/v1/promo_links/{link_id}/qr": {
       "get": {
         "summary": "Render a promotional link QR code",
-        "description": "Render the exact private claim URL as PNG with Cache-Control private, no-store. ADMIN and same-tenant INTEGRATOR only.",
+        "description": "Download private QR PNG with Content-Disposition filename promo-link-{link_id}.png; the same link_id is in saved links and CSV. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access.",
         "operationId": "renderPromoLinkQR",
         "parameters": [
           {
@@ -9847,13 +9891,16 @@
             "description": "Malformed QR parameter"
           },
           "403": {
-            "description": "Caller cannot administer this tenant"
+            "description": "No Campaign Links permission for the owning campaign; no asset data is returned"
           },
           "404": {
             "description": "Link not found"
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       }
@@ -9861,7 +9908,7 @@
     "/v1/promo_links/{link_id}/revoke": {
       "post": {
         "summary": "Revoke a promotional link",
-        "description": "Revoke an unclaimed link and return one unit of QR campaign capacity. Repeating an already-revoked request is idempotent; claimed links return 409.",
+        "description": "Revoke an active promo link. Revoking a reusable link prevents new signups and preserves existing participants. Does not release a successful signup place.",
         "operationId": "revokePromoLink",
         "parameters": [
           {
@@ -11794,6 +11841,236 @@
         },
         "description": "Read-only projection for the authenticated QR participant. Request recomputes eligibility after wind-down; KYC is not a request blocker."
       }
+    },
+    "/v1/promo_campaigns": {
+      "get": {
+        "summary": "List accessible Campaign Links campaigns",
+        "operationId": "listManagedPromoCampaigns",
+        "description": "Authenticated QR campaign selector. ADMIN, same-tenant INTEGRATOR, or AFFILIATE_MANAGER explicitly assigned to the owning QR campaign (including across tenants). Grants are checked on every request; tenant filters do not confer access. Managers with no grants receive an empty campaigns array. Returns all assigned tenants unless tenant_id narrows the set. Public challenge listing is unchanged.",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional filter within the authorized campaign set; authenticate as the home-tenant account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized QR campaigns",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCampaignSelectorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or repeated query parameters"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Campaign Links management role required"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/promo_campaigns/{trading_challenge_id}/managers/{manager_id}": {
+      "put": {
+        "summary": "Grant QR campaign access for an Affiliate Manager",
+        "operationId": "grantPromoCampaignManager",
+        "description": "ADMIN only. Idempotent PUT with no body. QR campaign grants are independent of home tenant and affiliate programs. Removal takes effect on the next protected request after commit; already authorized reads/downloads may finish. Batch issuance and removal serialize on the campaign lock.",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "manager_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grant present"
+          },
+          "400": {
+            "description": "Malformed UUID or recipient is not an active Affiliate Manager"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "ADMIN role required"
+          },
+          "404": {
+            "description": "Unknown manager or unknown/non-QR campaign"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove QR campaign access for an Affiliate Manager",
+        "operationId": "removePromoCampaignManager",
+        "description": "ADMIN only. Idempotent DELETE with no body. QR campaign grants are independent of home tenant and affiliate programs. Removal takes effect on the next protected request after commit; already authorized reads/downloads may finish. Batch issuance and removal serialize on the campaign lock.",
+        "parameters": [
+          {
+            "name": "trading_challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "manager_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grant absent"
+          },
+          "400": {
+            "description": "Malformed UUID"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "ADMIN role required"
+          },
+          "404": {
+            "description": "Unknown manager or unknown/non-QR campaign"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v1/affiliate_programs/{program_id}/referrers/{referrer_id}/enable": {
+      "post": {
+        "summary": "Re-enable an existing referrer",
+        "description": "Uses the same ADMIN, tenant INTEGRATOR, and assigned-program AFFILIATE_MANAGER permissions as disabling. Clears disabled_at and disabled_by on the existing membership, preserving its ID, user, program, codes, customization, and attribution history. Already enabled returns 200 unchanged. Unknown or wrong-program members return 404. Does not unpause the program or change independent signup, account, tenant, or campaign rules.",
+        "operationId": "enableAffiliateReferrer",
+        "responses": {
+          "200": {
+            "description": "Existing enabled affiliate referrer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateReferrerEnvelope"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden by role, tenant, or program assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Program or referrer not found within scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AffiliateError"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referrer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -11984,6 +12261,22 @@
             ],
             "format": "date-time",
             "description": "When the owner used their one code change; null until then."
+          },
+          "disabled_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "When this membership was disabled; null while enabled."
+          },
+          "disabled_by": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "Actor who disabled this membership; null while enabled."
           }
         },
         "required": [
@@ -11993,7 +12286,9 @@
           "user_id",
           "referral_code",
           "created_at",
-          "customized_at"
+          "customized_at",
+          "disabled_at",
+          "disabled_by"
         ]
       },
       "CreateAffiliateProgramRequest": {
@@ -12557,6 +12852,38 @@
                     "format": "date-time"
                   },
                   "source_name": {
+                    "type": "string"
+                  },
+                  "link_type": {
+                    "type": "string",
+                    "enum": [
+                      "SINGLE_USE",
+                      "REUSABLE"
+                    ],
+                    "description": "Defaults to SINGLE_USE for existing clients. REUSABLE creates one tracked link without a quantity."
+                  },
+                  "affiliate_program_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "affiliate_member_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Existing affiliate referrer/member ID, not user ID."
+                  },
+                  "referral_code": {
+                    "type": "string",
+                    "description": "An existing code belonging to the selected member. Required with both IDs for reusable links; bound on the server and revalidated at claim time."
+                  },
+                  "campaign_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "link_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "source_id": {
                     "type": "string"
                   }
                 },
@@ -19777,8 +20104,7 @@
         "additionalProperties": false,
         "required": [
           "source_type",
-          "source_id",
-          "allocation"
+          "source_id"
         ],
         "properties": {
           "source_type": {
@@ -19796,7 +20122,7 @@
             "type": "integer",
             "format": "int32",
             "minimum": 1,
-            "description": "Cannot exceed the configured max_links_per_batch or remaining campaign capacity."
+            "description": "Required for SINGLE_USE; omit for REUSABLE. Bounded by max_links_per_batch. Minting reserves no campaign place."
           },
           "note": {
             "type": "string",
@@ -19806,8 +20132,61 @@
             "type": "string",
             "format": "date-time",
             "description": "Defaults to challenge end and must fall between challenge start and end in the future."
+          },
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "SINGLE_USE",
+              "REUSABLE"
+            ],
+            "description": "Defaults to SINGLE_USE for existing clients. REUSABLE creates one tracked link without a quantity."
+          },
+          "affiliate_program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "affiliate_member_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Existing affiliate referrer/member ID, not user ID."
+          },
+          "referral_code": {
+            "type": "string",
+            "description": "An existing code belonging to the selected member. Required with both IDs for reusable links; bound on the server and revalidated at claim time."
           }
-        }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "link_type": {
+                "enum": [
+                  "SINGLE_USE"
+                ]
+              }
+            },
+            "required": [
+              "allocation"
+            ]
+          },
+          {
+            "properties": {
+              "link_type": {
+                "const": "REUSABLE"
+              }
+            },
+            "required": [
+              "link_type",
+              "affiliate_program_id",
+              "affiliate_member_id",
+              "referral_code"
+            ],
+            "not": {
+              "required": [
+                "allocation"
+              ]
+            }
+          }
+        ]
       },
       "IssuedPromoLink": {
         "type": "object",
@@ -19853,7 +20232,6 @@
                 "required": [
                   "batch_id",
                   "source_id",
-                  "allocation",
                   "links"
                 ],
                 "properties": {
@@ -19873,6 +20251,27 @@
                     "items": {
                       "$ref": "#/components/schemas/IssuedPromoLink"
                     }
+                  },
+                  "link_type": {
+                    "type": "string",
+                    "enum": [
+                      "SINGLE_USE",
+                      "REUSABLE"
+                    ],
+                    "description": "Defaults to SINGLE_USE for existing clients. REUSABLE creates one tracked link without a quantity."
+                  },
+                  "affiliate_program_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "affiliate_member_id": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Existing affiliate referrer/member ID, not user ID."
+                  },
+                  "referral_code": {
+                    "type": "string",
+                    "description": "An existing code belonging to the selected member. Required with both IDs for reusable links; bound on the server and revalidated at claim time."
                   }
                 }
               }
@@ -19887,10 +20286,6 @@
           "source_type",
           "source_id",
           "source_name",
-          "allocation",
-          "issued",
-          "claimed",
-          "revoked",
           "created_at"
         ],
         "properties": {
@@ -19926,6 +20321,36 @@
           "created_at": {
             "type": "string",
             "format": "date-time"
+          },
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "SINGLE_USE",
+              "REUSABLE"
+            ],
+            "description": "Defaults to SINGLE_USE for existing clients. REUSABLE creates one tracked link without a quantity."
+          },
+          "affiliate_program_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "affiliate_member_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Existing affiliate referrer/member ID, not user ID."
+          },
+          "referral_code": {
+            "type": "string",
+            "description": "An existing code belonging to the selected member. Required with both IDs for reusable links; bound on the server and revalidated at claim time."
+          },
+          "campaign_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "signups": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Successful signups; reusable links omit allocation/issued/claimed/revoked counts."
           }
         }
       },
@@ -19977,7 +20402,14 @@
             "description": "Only present when reveal=true. Private; do not log or cache."
           },
           "status": {
-            "$ref": "#/components/schemas/PromoLinkStatus"
+            "type": "string",
+            "enum": [
+              "ISSUED",
+              "CLAIMED",
+              "REVOKED",
+              "ACTIVE"
+            ],
+            "description": "Reusable links use ACTIVE or REVOKED and have no single claimant."
           },
           "expires_at": {
             "type": "string",
@@ -19994,6 +20426,14 @@
           "user_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "link_type": {
+            "type": "string",
+            "enum": [
+              "SINGLE_USE",
+              "REUSABLE"
+            ],
+            "description": "Defaults to SINGLE_USE for existing clients. REUSABLE creates one tracked link without a quantity."
           }
         }
       },
@@ -21355,6 +21795,68 @@
             }
           }
         ]
+      },
+      "PromoCampaignSelectorResponse": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": [
+              "campaigns"
+            ],
+            "properties": {
+              "campaigns": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "tenant_id",
+                    "status",
+                    "start",
+                    "end",
+                    "max_users"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tenant_id": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "ACTIVE",
+                        "COMPLETED"
+                      ]
+                    },
+                    "start": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "max_users": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
