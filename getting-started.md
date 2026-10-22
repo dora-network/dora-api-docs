@@ -637,6 +637,15 @@ the current version, the following rules apply:
 - Isolated accounts cannot be deleted; they are permanent ledger entries. When you no longer need one, transfer its
   remaining balances to another account instead.
 
+> **Note:** an isolated account can be left with **outstanding USD debt** even after its bond position is gone —
+> the USD leg of the account holds `available > 0` and `borrowed > 0` while the bond leg is fully zero. This state
+> is mostly reached through API trading, for example when a take-profit order is triggered but not fully filled.
+> While any borrowed USD remains, the position is **not** considered closed: the account keeps its original
+> leverage limit, so new orders at a higher leverage are refused ("...exceeds position leverage limit... close all
+> positions first") even though no position appears open. Clear it by repaying the debt with
+> `POST /v1/positions/repay_usd` (the Dora UI shows a **Repay** button for exactly this state). See
+> [Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
 For a deeper guide to reading your accounts and balances via the V2 endpoints, including a worked example and real-time
 ledger streaming, see [Understanding Positions](./understanding-positions.md). To automate moving funds between your
 global account and your isolated accounts, see [Collateral Auto-Rebalance](./collateral-auto-rebalance/README.md).
@@ -708,6 +717,10 @@ how much you need to borrow from the leverage module.
 To change the leverage limit, you must close the existing position and create a new position in the isolated account.
 By closing the position, the leverage for the isolated account is reset, allowing you to create a new position with
 a different leverage level.
+
+A position only counts as closed once every debt on the isolated account has been repaid. An account left with
+borrowed USD after its bond position is gone keeps its original leverage limit — see the note on
+[outstanding USD debt](#accounts) under Accounts above.
 
 > Note: The leverage constraint set when a levered position is created is independent of the maximum leverage available for the asset.
 > In DORA, this constraint is termed as the `leverage limit`. The leverage limit cannot be more than the maximum leverage available for the asset,
