@@ -33,6 +33,7 @@
     - [Accounts](#accounts)
       - [Creating isolated accounts](#creating-isolated-accounts)
         - [Example: first and second trade on the same bond](#example-first-and-second-trade-on-the-same-bond)
+      - [The Global Account cash reserve](#the-global-account-cash-reserve)
       - [Maximum leverage](#maximum-leverage)
         - [Example: Setting leverage on an order](#example-setting-leverage-on-an-order)
     - [Leverage operations](#leverage-operations)
@@ -516,6 +517,8 @@ In addition to the usual badly formed request errors, some of the common reasons
   limit that does not exceed the maximum allowed limit for the asset. See [below](#maximum-leverage)
 - The requested leverage exceeds the maximum allowed leverage for the asset. See [below](#maximum-leverage)
 - The user does not have enough balance to place the order.
+- The Global Account's available USD is below the minimum cash reserve, or the order would push it below the
+  requirement its own fees and borrowing create. See [The Global Account cash reserve](#the-global-account-cash-reserve)
 
 #### Cancelling orders
 
@@ -704,6 +707,53 @@ leverage you are using.
    insufficient funds.
 4. You transfer an additional $100 from your global account to the isolated account using the
    `POST /v2/accounts/transfer_balances` endpoint, then re-submit the order. It is now accepted.
+
+#### The Global Account cash reserve
+
+Every user must keep a minimum amount of USD **available in their Global Account** at all times. The reserve
+covers obligations the user has already incurred and might not be able to cover from an isolated account: coupon
+payments owed, leverage interest owed, a fraction of outstanding borrowing, and the trading fees on the user's
+current volume. It is **sized from activity across all of the user's accounts** but **held on the Global
+Account** — trading in an isolated account raises the requirement on the Global Account even though it never
+touches its balance.
+
+The requirement is the sum of:
+
+- **Completed PAC** — partially accrued coupon payments owed from finished coupon periods
+- **Outstanding LAI** — leverage accrued interest still owed (see [Understanding Positions — detecting the
+  state](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account))
+- **Estimated fees** — a small fraction (configured per environment) of the user's traded USD volume since
+  00:00:00 UTC, plus the notional of all open orders
+- **Borrowed portion** — a small fraction (configured per environment) of the user's total outstanding borrowed
+  value in USD, across all accounts
+
+The sum is floored at a configured absolute minimum (currently $1.00) and never goes below zero. A user with no
+coupon payments, interest, borrowing, or trading only needs to keep the floor in their Global Account.
+
+> **Note:** while the Global Account's available USD is below the requirement, the user may not submit orders
+> from **any** account, open new leveraged positions, transfer assets out of the Global Account, or withdraw —
+> even if the order itself would be funded entirely from an isolated account's own balance. Actions that pay USD
+> back into the Global Account (deposits, transfers into Global, and sells funded from the Global Account) are
+> exempt, so they are always available as the way to restore the reserve.
+
+Every order is also checked against the requirement it would itself create (its own fees and borrowing), so an
+order can never spend the USD that its fees or loan will need. Note that open market buy orders on the Global
+Account reserve no funds at submission, so their USD still counts as available but is treated as already
+committed when the reserve is evaluated.
+
+To check the reserve at any time, use:
+
+`GET /v1/accounts/self/cash_reserve`
+
+```bash
+curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+     "$DORA_BASE_URL/v1/accounts/self/cash_reserve"
+```
+
+The response returns `available_usd`, `committed_usd` (USD already spoken for by open market buys),
+`required_usd`, `satisfied`, a `breakdown` of the four components plus the floor, and the single-axis caps
+`max_volume_usd` / `max_borrow_usd` — how much more traded volume or borrowing the user can add before the
+reserve stops being covered.
 
 #### Maximum leverage
 
