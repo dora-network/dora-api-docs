@@ -38,6 +38,7 @@
       - [Maximum leverage](#maximum-leverage)
         - [Example: Setting leverage on an order](#example-setting-leverage-on-an-order)
     - [Leverage operations](#leverage-operations)
+      - [Virtual borrowing](#virtual-borrowing)
     - [Reporting](#reporting)
       - [Trades](#trades)
       - [Transactions](#transactions)
@@ -875,6 +876,39 @@ and your available balance will be updated accordingly. The request body should 
 To withdraw assets from the leverage pool, you can use the endpoint:
 
 `POST /v1/leverage/withdraw`
+
+#### Virtual borrowing
+
+Opening a short position means borrowing bonds from the leverage pool so they can be sold. Normally those bonds
+come from other users who have supplied them to the pool. When a bond is newly listed or few users have supplied
+it, real supply can be too small to meet borrowing demand — a short in that case would simply be refused for
+lack of borrowable bonds.
+
+For assets flagged with **virtual borrowing** (`can_virtual_borrow: true` in the asset data from
+`GET /v1/assets/{asset_id}`), DORA can instead make up the shortfall itself and lend the full amount. This is a
+deliberate early-stage mechanism so that shorting is not blocked while a bond's lending supply is still growing;
+it is not available for every asset.
+
+For you as a borrower, a virtually borrowed position works the same as any other:
+
+- your obligations are unchanged — repay the same number of bonds, plus leverage interest and any coupon
+  amounts owed, exactly as with bonds borrowed from real lenders;
+- your position, orders, triggers, and account balances behave identically;
+
+with two restrictions on the borrowed bonds themselves: they cannot be withdrawn from the platform, and they
+cannot be used as collateral for further borrowing.
+
+Over time, as real lending supply grows, DORA replaces virtually borrowed bonds with real supplied ones. This is
+seamless — the number of bonds you owe stays the same, and only the interest rate may change, since it follows
+the real supply and demand for the bond.
+
+To see how many of a bond's supplied assets are actually available to borrow (real supply), use:
+
+`GET /v1/ledger/module/{asset_id}`
+
+This is also how to tell what an "insufficient available balance" refusal on a short means: if the module shows
+little or no available supply for the bond, the borrow itself was the problem; otherwise it was your own
+collateral or balances.
 
 > TODO: Explain the borrowing and repaying operations, as well as the collateral and position isolation features.
 
