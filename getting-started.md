@@ -577,6 +577,19 @@ as described earlier. Your order can be a market order or a limit order, dependi
 the position immediately at the best available price, you would place a market sell order for 100 units. Alternatively,
 if you want to close the position at a specific price, you would place a limit sell order for 100 units at your desired price.
 
+> **Note: how orders reduce or close a leveraged position.** An opposite-side order in an isolated account first
+> closes the existing position: a buy against a short first returns the borrowed bonds, and a sell against a long
+> first spends the available bonds. Only any remainder opens a position on the other side, and only that remainder
+> is subject to the leverage checks (the requested leverage must still be within the account's leverage limit —
+> see [Maximum leverage](#maximum-leverage)). The simplest and safest way to reduce or close a position is to send
+> the order with `inverse_leverage: 1` (no leverage).
+>
+> When a reducing order fills, the proceeds go towards repaying the borrowed amount first; only anything left over
+> after the borrow is fully repaid is added to the account's available balance. If the position closes with borrows
+> still remaining, that outstanding debt must be repaid before the position is considered closed and the account's
+> leverage limit is reset — see
+> [Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
 To create a quick market order to close an existing postion, you can use the endpoint `POST /v2/accounts/close`. This
 endpoint allows you to specify the id of the isolated account and order book you want to close the position on. DORA will automatically
 generate a market order with the correct quantity and side to close the position. The request body looks like this:

@@ -113,7 +113,10 @@ Replace any reference to the V1 endpoints `/v1/user/self/position_accounts`, `/v
 An isolated account can be left with borrowed USD after its bond position is gone: the USD leg of the account
 holds `available > 0` and `borrowed > 0` while the bond leg is fully zero. This state is reached mostly through
 API trading — for example, when a conditional take-profit order is triggered but only partially filled. The Dora
-UI marks the state with a **Repay** button and shows the borrowed amount in red.
+UI marks the state with a **Repay** button and shows the borrowed amount in red. Reducing and closing orders
+always repay the borrowed amount first (see
+[Getting started — closing positions](./getting-started.md#closing-positions)); this state is what remains when
+the proceeds were not enough to clear the borrow.
 
 While any borrowed USD remains, the account's position is **not** considered closed, so:
 
