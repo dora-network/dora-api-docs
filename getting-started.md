@@ -23,6 +23,7 @@
     - [Orders](#orders)
       - [Submitting orders](#submitting-orders)
         - [Conditional Orders](#conditional-orders)
+          - [Adding take profit / stop loss to an open position](#adding-take-profit--stop-loss-to-an-open-position)
         - [Error responses for invalid orders](#error-responses-for-invalid-orders)
       - [Cancelling orders](#cancelling-orders)
       - [Updating orders](#updating-orders)
@@ -491,6 +492,50 @@ market moves against them, while leaving it up to them when they want to take pr
 > for any user to want to do this as it creates a position that would limit profits, but allow unlimited losses. DORA does
 > not prevent users from doing this, so care should be taken to ensure the correct properties are set when placing
 > conditional orders.
+
+###### Adding take profit / stop loss to an open position
+
+Conditional orders can also be attached to a position that is **already open**, using the endpoint:
+
+`POST /v1/orders/conditional`
+
+```json
+{
+  "price": "0.90", // required: the current market price of the bond; DORA validates the trigger levels against it
+  "order_book_id": "some-orderbook-uuid", // required: the order book the position was opened on
+  "position_id": "some-position-uuid", // required: the account holding the position (global or isolated)
+  "asset_id": "some-bond-asset-uuid", // required: the bond asset of the position
+  "stop_loss_price": "0.88", // optional: the stop loss trigger level
+  "take_profit_price": "0.92" // optional: the take profit trigger level
+}
+```
+
+At least one of `stop_loss_price` or `take_profit_price` must be set. The `price` field is the **current market
+price** of the bond — DORA uses it as the reference point the trigger levels are validated against, so it should
+be the latest price from the price stream or
+[price snapshot](#market-data). The levels must sit on the correct side of it for the position's direction:
+
+| Position | `stop_loss_price` | `take_profit_price` |
+|---|---|---|
+| Long | below `price` | above `price` |
+| Short | above `price` | below `price` |
+
+For example, a take profit of $0.92 on a short position must be **less than** `price` — sending both as the same
+level is refused with "take profit price must be less than price for short orders".
+
+Creating a new conditional order **replaces** any existing pending one of the same type on that position: a new
+`stop_loss_price` cancels the previous stop loss, and a new `take_profit_price` cancels the previous take profit.
+To cancel without replacing, use `DELETE /v1/orders/{order_id}` as usual. The response returns the ids of the
+created orders:
+
+```json
+{
+  "stop_loss_order_id": "some-order-uuid",
+  "take_profit_order_id": "some-order-uuid"
+}
+```
+
+An id is null (UUID zero) when that trigger level was not set in the request.
 
 ##### Error responses for invalid orders
 
