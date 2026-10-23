@@ -23,6 +23,7 @@
     - [Orders](#orders)
       - [Submitting orders](#submitting-orders)
         - [Conditional Orders](#conditional-orders)
+          - [Adding take profit / stop loss to an open position](#adding-take-profit--stop-loss-to-an-open-position)
         - [Error responses for invalid orders](#error-responses-for-invalid-orders)
       - [Cancelling orders](#cancelling-orders)
       - [Updating orders](#updating-orders)
@@ -32,11 +33,14 @@
     - [Ledgers](#ledgers)
     - [Accounts](#accounts)
       - [Creating isolated accounts](#creating-isolated-accounts)
-        - [Example: creating an isolated position on-the-fly](#example-creating-an-isolated-position-on-the-fly)
-        - [Example: using an existing isolated position](#example-using-an-existing-isolated-position)
+        - [Example: first and second trade on the same bond](#example-first-and-second-trade-on-the-same-bond)
+      - [The Global Account cash reserve](#the-global-account-cash-reserve)
       - [Maximum leverage](#maximum-leverage)
         - [Example: Setting leverage on an order](#example-setting-leverage-on-an-order)
     - [Leverage operations](#leverage-operations)
+      - [Virtual borrowing](#virtual-borrowing)
+      - [Borrowing and repaying](#borrowing-and-repaying)
+      - [Leverage accrued interest (LAI)](#leverage-accrued-interest-lai)
     - [Reporting](#reporting)
       - [Trades](#trades)
       - [Transactions](#transactions)
@@ -492,6 +496,50 @@ market moves against them, while leaving it up to them when they want to take pr
 > not prevent users from doing this, so care should be taken to ensure the correct properties are set when placing
 > conditional orders.
 
+###### Adding take profit / stop loss to an open position
+
+Conditional orders can also be attached to a position that is **already open**, using the endpoint:
+
+`POST /v1/orders/conditional`
+
+```json
+{
+  "price": "0.90", // required: the current market price of the bond; DORA validates the trigger levels against it
+  "order_book_id": "some-orderbook-uuid", // required: the order book the position was opened on
+  "position_id": "some-position-uuid", // required: the account holding the position (global or isolated)
+  "asset_id": "some-bond-asset-uuid", // required: the bond asset of the position
+  "stop_loss_price": "0.88", // optional: the stop loss trigger level
+  "take_profit_price": "0.92" // optional: the take profit trigger level
+}
+```
+
+At least one of `stop_loss_price` or `take_profit_price` must be set. The `price` field is the **current market
+price** of the bond — DORA uses it as the reference point the trigger levels are validated against, so it should
+be the latest price from the price stream or
+[price snapshot](#market-data). The levels must sit on the correct side of it for the position's direction:
+
+| Position | `stop_loss_price` | `take_profit_price` |
+|---|---|---|
+| Long | below `price` | above `price` |
+| Short | above `price` | below `price` |
+
+For example, a take profit of $0.92 on a short position must be **less than** `price` — sending both as the same
+level is refused with "take profit price must be less than price for short orders".
+
+Creating a new conditional order **replaces** any existing pending one of the same type on that position: a new
+`stop_loss_price` cancels the previous stop loss, and a new `take_profit_price` cancels the previous take profit.
+To cancel without replacing, use `DELETE /v1/orders/{order_id}` as usual. The response returns the ids of the
+created orders:
+
+```json
+{
+  "stop_loss_order_id": "some-order-uuid",
+  "take_profit_order_id": "some-order-uuid"
+}
+```
+
+An id is null (UUID zero) when that trigger level was not set in the request.
+
 ##### Error responses for invalid orders
 
 In addition to the usual badly formed request errors, some of the common reasons why an order can be rejected:
@@ -517,6 +565,8 @@ In addition to the usual badly formed request errors, some of the common reasons
   limit that does not exceed the maximum allowed limit for the asset. See [below](#maximum-leverage)
 - The requested leverage exceeds the maximum allowed leverage for the asset. See [below](#maximum-leverage)
 - The user does not have enough balance to place the order.
+- The Global Account's available USD is below the minimum cash reserve, or the order would push it below the
+  requirement its own fees and borrowing create. See [The Global Account cash reserve](#the-global-account-cash-reserve)
 
 #### Cancelling orders
 
@@ -578,13 +628,26 @@ as described earlier. Your order can be a market order or a limit order, dependi
 the position immediately at the best available price, you would place a market sell order for 100 units. Alternatively,
 if you want to close the position at a specific price, you would place a limit sell order for 100 units at your desired price.
 
-To create a quick market order to close an existing postion, you can use the endpoint `POST /v1/positions/close`. This
-endpoint allows you to specify the id of the position and order book you want to close the position on. DORA will automatically
+> **Note: how orders reduce or close a leveraged position.** An opposite-side order in an isolated account first
+> closes the existing position: a buy against a short first returns the borrowed bonds, and a sell against a long
+> first spends the available bonds. Only any remainder opens a position on the other side, and only that remainder
+> is subject to the leverage checks (the requested leverage must still be within the account's leverage limit —
+> see [Maximum leverage](#maximum-leverage)). The simplest and safest way to reduce or close a position is to send
+> the order with `inverse_leverage: 1` (no leverage).
+>
+> When a reducing order fills, the proceeds go towards repaying the borrowed amount first; only anything left over
+> after the borrow is fully repaid is added to the account's available balance. If the position closes with borrows
+> still remaining, that outstanding debt must be repaid before the position is considered closed and the account's
+> leverage limit is reset — see
+> [Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
+To create a quick market order to close an existing postion, you can use the endpoint `POST /v2/accounts/close`. This
+endpoint allows you to specify the id of the isolated account and order book you want to close the position on. DORA will automatically
 generate a market order with the correct quantity and side to close the position. The request body looks like this:
 
 ```json
 {
-  "position_id": "some-position-uuid", // the id of the position you want to close
+  "account_id": "some-account-uuid", // the id of the isolated account you want to close
   "order_book_id": "some-orderbook-uuid" // the id of the order book you want to close the position on
 }
 ```
@@ -596,73 +659,21 @@ functionality in future iterations of DORA.
 
 ### Ledgers
 
-The DORA platform maintains a ledger for each user, which tracks their positions, balances, and other relevant information.
+The DORA platform maintains a ledger for each user, which tracks their accounts, positions, balances, and other relevant information.
 To retrieve your ledger, you can use the endpoint:
 
-`GET /v1/ledger/positions/self`
+`GET /v2/ledger/accounts/self`
 
-Use your DORA user ID to retrieve your ledger. The user ID is a UUID v7 unique identifier that is automatically generated by
-the system when your user account is created.
+This returns your full account/position portfolio: your global account plus any isolated accounts, each keyed first by
+account ID and then by asset ID, with per-asset `available`, `locked`, `supplied`, and `borrowed` balances.
 
-The position response looks like this:
+For the full response shape, a worked example, real-time ledger streaming via
+`GET /v1/user/{user_id}/ledger/stream`, and how to calculate your open positions from the snapshot, see
+[Understanding Positions](./understanding-positions.md).
 
-```json
-{
-  "portfolio": {
-    "user_id": "some-user-uuid",
-    "positon": {
-      "some-asset-uuid": {
-        "some-position-uuid": {
-          "id": "some-position-uuid",
-          "asset_id": "some-asset-uuid",
-          "seq": 1,
-          "is_global": true,
-          "available": "5000.0",
-          "locked": "0.0",
-          "supplied": "2000.0",
-          "collateral": "0.0",
-          "supplied_collateral": "0.0",
-          "borrowed": "0.0",
-          "impending_borrows": "0.0"
-        },
-        "some-other-position-uuid": {
-          "id": "some-other-position-uuid",
-          "asset_id": "some-other-asset-uuid",
-          "seq": 2,
-          "is_global": false,
-          "available": "1000.0",
-          "locked": "0.0",
-          "supplied": "0.0",
-          "collateral": "0.0",
-          "supplied_collateral": "0.0",
-          "borrowed": "0.0",
-          "impending_borrows": "0.0"
-        }
-      },
-      "some-other-asset-uuid": {
-        ...
-        // more positions for other assets
-      },
-      ... // more asset positions
-    },
-    "net_stablecoin_equivalence": {
-      "gained": "1000.0", // the total amount of stablecoin equivalent gained
-      "lost": "0" // the total amount of stablecoin equivalent lost
-    }
-  }
-}
-```
+To view just a list of your accounts (id, name, and whether each is the global account), you can use the endpoint:
 
-The `portfolio` object contains a map of asset IDs to their respective positions.
-Each portfolio contains a single `global` position, which is a special position that represents the user's main account balance.
-A position that is not flagged as `global` is an `isolated` position, which is similar to a sub-account or a specific trading
-balance that has been created for a leveraged position.
-
-To view just a list of all your global positions, you can use the endpoint:
-
-`GET /v1/ledger/balances/self`
-
-instead. You can also filter the positions by asset ID using the `asset_id` query parameter.
+`GET /v2/user/self/accounts`
 
 ### Accounts
 
@@ -677,11 +688,31 @@ the current version, the following rules apply:
 - An isolated positions account can only hold positions in the assets associated with the order book being traded with leverage.
   For example, if a user creates an isolated account by trading BOND1/USD, the isolated account can only hold positions in BOND1 and USD.
 - A user can have multiple isolated accounts, each tied to the assets of the order book they created a leveraged order on.
-- Users cannot transfer bond asset balances between their global account and isolated accounts.
-- Users can transfer USD balances only between their isolated accounts.
+- USD balances can be transferred between any of the user's accounts: global to isolated, isolated to global, and
+  between isolated accounts.
+- Bond (non-USD) assets can only be transferred between the global account and an isolated account, and the isolated
+  account must already hold a position in that asset. Transferring bond assets directly between two isolated accounts
+  is not supported.
 - Closing a position in an isolated account will automatically repay any borrows.
 - Balances transferred to an isolated account will stay in the isolated account until the user chooses to move the money
   to another account.
+- The maximum leverage allowed on an isolated account is set by the leverage used on the first order that opens a
+  position in it, and is reset when the position is closed. See [Maximum leverage](#maximum-leverage) below.
+- Isolated accounts cannot be deleted; they are permanent ledger entries. When you no longer need one, transfer its
+  remaining balances to another account instead.
+
+> **Note:** an isolated account can be left with **outstanding USD debt** even after its bond position is gone —
+> the USD leg of the account holds `available > 0` and `borrowed > 0` while the bond leg is fully zero. This state
+> is mostly reached through API trading, for example when a take-profit order is triggered but not fully filled.
+> While any borrowed USD remains, the position is **not** considered closed: the account keeps its original
+> leverage limit, so new orders at a higher leverage are refused ("...exceeds position leverage limit... close all
+> positions first") even though no position appears open. Clear it by repaying the debt with
+> `POST /v1/positions/repay_usd` (the Dora UI shows a **Repay** button for exactly this state). See
+> [Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
+For a deeper guide to reading your accounts and balances via the V2 endpoints, including a worked example and real-time
+ledger streaming, see [Understanding Positions](./understanding-positions.md). To automate moving funds between your
+global account and your isolated accounts, see [Collateral Auto-Rebalance](./collateral-auto-rebalance/README.md).
 
 #### Creating isolated accounts
 
@@ -694,7 +725,7 @@ If an isolated position already exists for the asset being traded, and the `from
 the order will be placed using the existing isolated position, as long as there are sufficient funds available in the
 isolated position. If there are insufficient funds in the isolated position, the order will be rejected. To rectify this,
 you need to transfer more funds to the isolated position from your global position or another isolated position using the
-`POST /v1/positions/transfer_balances` endpoint.
+`POST /v2/accounts/transfer_balances` endpoint.
 
 When you close a position in an isolated account, any borrowed funds will be automatically repaid, and any remaining
 balance will stay in the isolated account until you choose to transfer it to another account. As the USD balance remains
@@ -702,23 +733,75 @@ in the isolated account, you can use it to place new orders using leverage witho
 global position again, however, your order size will be limited based on the available balance, and the amount of
 leverage you are using.
 
-##### Example: creating an isolated position on-the-fly
+##### Example: first and second trade on the same bond
 
-1. You have a global position with 5000 USD available for trading.
-2. You want to place a leveraged buy order for $100 units of a BOND1/USD using 2x leverage.
+**First trade — the isolated account is created and funded from your global account:**
+
+1. You have a global account with 5000 USD available for trading, and no isolated account for BOND1/USD.
+2. You want to place a leveraged buy order for $100 units of BOND1/USD using 2x leverage.
 3. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`.
-4. Since there is no existing isolated position for BOND1/USD, a new isolated position is created automatically.
-5. The required funds for the order is calculated and transferred from your global position to the new isolated position.
-6. The order is placed using the new isolated position.
+4. Since there is no existing isolated account for BOND1/USD, a new isolated account is created automatically. The
+   required funds (the margin for the order) are transferred from your global account into the new isolated account,
+   and the order is funded entirely from the isolated account.
+5. The order is placed using the new isolated account.
 
-##### Example: using an existing isolated position
+**Second trade on the same bond — funded from the existing isolated account only:**
 
-1. You have the above existing isolated position for \$100 of BOND1, you want to increase your position by placing another leveraged buy order for \$100 of BOND1/USD using 2x leverage.
-2. You place a new order using the `POST /v1/orders` endpoint, setting `from_global_position` to `false`.
-3. Since there is an existing isolated position account for BOND1/USD, the order is placed using the existing isolated position account.
-4. As the isolated position account was created with only sufficient funds for the first order, the order is rejected due to insufficient funds.
-5. You transfer an additional $100 from your global position account to the isolated position account using the `POST /v1/positions/transfer_balances` endpoint.
-6. You re-submit the order, and it is successfully placed using the existing isolated position account.
+1. Later, you want to increase the position with another $100 leveraged buy at 2x. You submit another order with
+   `from_global_position` set to `false`.
+2. Since the isolated account for BOND1/USD already exists, the order draws its margin from that account only —
+   nothing is pulled from your global account this time.
+3. As the isolated account only holds sufficient funds for the first order, the order is rejected due to
+   insufficient funds.
+4. You transfer an additional $100 from your global account to the isolated account using the
+   `POST /v2/accounts/transfer_balances` endpoint, then re-submit the order. It is now accepted.
+
+#### The Global Account cash reserve
+
+Every user must keep a minimum amount of USD **available in their Global Account** at all times. The reserve
+covers obligations the user has already incurred and might not be able to cover from an isolated account: coupon
+payments owed, leverage interest owed, a fraction of outstanding borrowing, and the trading fees on the user's
+current volume. It is **sized from activity across all of the user's accounts** but **held on the Global
+Account** — trading in an isolated account raises the requirement on the Global Account even though it never
+touches its balance.
+
+The requirement is the sum of:
+
+- **Completed PAC** — partially accrued coupon payments owed from finished coupon periods
+- **Outstanding LAI** — leverage accrued interest still owed (see [Understanding Positions — detecting the
+  state](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account))
+- **Estimated fees** — a small fraction (configured per environment) of the user's traded USD volume since
+  00:00:00 UTC, plus the notional of all open orders
+- **Borrowed portion** — a small fraction (configured per environment) of the user's total outstanding borrowed
+  value in USD, across all accounts
+
+The sum is floored at a configured absolute minimum (currently $1.00) and never goes below zero. A user with no
+coupon payments, interest, borrowing, or trading only needs to keep the floor in their Global Account.
+
+> **Note:** while the Global Account's available USD is below the requirement, the user may not submit orders
+> from **any** account, open new leveraged positions, transfer assets out of the Global Account, or withdraw —
+> even if the order itself would be funded entirely from an isolated account's own balance. Actions that pay USD
+> back into the Global Account (deposits, transfers into Global, and sells funded from the Global Account) are
+> exempt, so they are always available as the way to restore the reserve.
+
+Every order is also checked against the requirement it would itself create (its own fees and borrowing), so an
+order can never spend the USD that its fees or loan will need. Note that open market buy orders on the Global
+Account reserve no funds at submission, so their USD still counts as available but is treated as already
+committed when the reserve is evaluated.
+
+To check the reserve at any time, use:
+
+`GET /v1/accounts/self/cash_reserve`
+
+```bash
+curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+     "$DORA_BASE_URL/v1/accounts/self/cash_reserve"
+```
+
+The response returns `available_usd`, `committed_usd` (USD already spoken for by open market buys),
+`required_usd`, `satisfied`, a `breakdown` of the four components plus the floor, and the single-axis caps
+`max_volume_usd` / `max_borrow_usd` — how much more traded volume or borrowing the user can add before the
+reserve stops being covered.
 
 #### Maximum leverage
 
@@ -745,6 +828,10 @@ how much you need to borrow from the leverage module.
 To change the leverage limit, you must close the existing position and create a new position in the isolated account.
 By closing the position, the leverage for the isolated account is reset, allowing you to create a new position with
 a different leverage level.
+
+A position only counts as closed once every debt on the isolated account has been repaid. An account left with
+borrowed USD after its bond position is gone keeps its original leverage limit — see the note on
+[outstanding USD debt](#accounts) under Accounts above.
 
 > Note: The leverage constraint set when a levered position is created is independent of the maximum leverage available for the asset.
 > In DORA, this constraint is termed as the `leverage limit`. The leverage limit cannot be more than the maximum leverage available for the asset,
@@ -792,7 +879,71 @@ To withdraw assets from the leverage pool, you can use the endpoint:
 
 `POST /v1/leverage/withdraw`
 
-> TODO: Explain the borrowing and repaying operations, as well as the collateral and position isolation features.
+#### Virtual borrowing
+
+Opening a short position means borrowing bonds from the leverage pool so they can be sold. Normally those bonds
+come from other users who have supplied them to the pool. When a bond is newly listed or few users have supplied
+it, real supply can be too small to meet borrowing demand — a short in that case would simply be refused for
+lack of borrowable bonds.
+
+For assets flagged with **virtual borrowing** (`can_virtual_borrow: true` in the asset data from
+`GET /v1/assets/{asset_id}`), DORA can instead make up the shortfall itself and lend the full amount. This is a
+deliberate early-stage mechanism so that shorting is not blocked while a bond's lending supply is still growing;
+it is not available for every asset.
+
+For you as a borrower, a virtually borrowed position works the same as any other:
+
+- your obligations are unchanged — repay the same number of bonds, plus leverage interest and any coupon
+  amounts owed, exactly as with bonds borrowed from real lenders;
+- your position, orders, triggers, and account balances behave identically;
+
+with two restrictions on the borrowed bonds themselves: they cannot be withdrawn from the platform, and they
+cannot be used as collateral for further borrowing.
+
+Over time, as real lending supply grows, DORA replaces virtually borrowed bonds with real supplied ones. This is
+seamless — the number of bonds you owe stays the same, and only the interest rate may change, since it follows
+the real supply and demand for the bond.
+
+To see how many of a bond's supplied assets are actually available to borrow (real supply), use:
+
+`GET /v1/ledger/module/{asset_id}`
+
+This is also how to tell what an "insufficient available balance" refusal on a short means: if the module shows
+little or no available supply for the bond, the borrow itself was the problem; otherwise it was your own
+collateral or balances.
+
+#### Borrowing and repaying
+
+Borrowing is not a separate API call. When you place a leveraged order, DORA borrows what the order needs — bonds
+for a short, USD for a leveraged buy — from the leverage pool automatically, and the borrowed amount appears in
+the `borrowed` balance of the isolated account. The collateral for the borrow is the isolated account the order
+trades from; the global account cannot be borrowed against (see [Accounts](#accounts)).
+
+Repayment is also automatic: orders that reduce or close a position repay the borrowed amount first (see
+[Closing positions](#closing-positions)), and `POST /v2/accounts/close` repays any remaining borrows when it
+closes a position. If an account is left with borrowed USD and no bond balances, clear it with
+`POST /v1/positions/repay_usd` — see
+[Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
+#### Leverage accrued interest (LAI)
+
+Borrowed balances accrue interest continuously, reported in USD as **leverage accrued interest (LAI)**. Interest
+you have earned (for example on assets you have supplied to the pool) accrues the same way, as a positive amount.
+LAI is **not** part of the `borrowed` balance — it is tracked separately, so check it on its own to know what you
+owe or have earned in full.
+
+- `GET /v1/leverage/accrued_interest/self` — your current accrued interest per position
+- `GET /v1/user/{user_id}/leverage/accrued_interest/stream` — real-time updates of the same values
+- `POST /v1/leverage/accrued_interest/pay` — pay the interest owed on one position (body: `position_id`,
+  `asset_id`); the interest is paid from your global account
+- `POST /v1/leverage/accrued_interest/claim` — claim interest you have earned into your USD balance (body:
+  `position_id`, `asset_id`)
+- `POST /v1/leverage/accrued_interest/settle` — settle accrued interest in bulk, optionally scoped to one
+  `position_id` and/or `asset_id`; settles everything you owe and have earned across your positions
+
+> **Note:** a transfer out of an isolated account can be refused with "position health is negative {value} after
+> transfer" when the account has unpaid accrued interest. Pay the interest on the account with
+> `POST /v1/leverage/accrued_interest/pay`, then retry the transfer.
 
 ### Reporting
 

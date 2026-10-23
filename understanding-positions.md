@@ -108,6 +108,48 @@ For working with accounts once you have the snapshot:
 
 Replace any reference to the V1 endpoints `/v1/user/self/position_accounts`, `/v1/positions/transfer_balances`, or `/v1/positions/close` with the V2 equivalents above.
 
+## Outstanding USD debt on an isolated account
+
+An isolated account can be left with borrowed USD after its bond position is gone: the USD leg of the account
+holds `available > 0` and `borrowed > 0` while the bond leg is fully zero. This state is reached mostly through
+API trading — for example, when a conditional take-profit order is triggered but only partially filled. The Dora
+UI marks the state with a **Repay** button and shows the borrowed amount in red. Reducing and closing orders
+always repay the borrowed amount first (see
+[Getting started — closing positions](./getting-started.md#closing-positions)); this state is what remains when
+the proceeds were not enough to clear the borrow.
+
+While any borrowed USD remains, the account's position is **not** considered closed, so:
+
+- the account keeps the leverage limit set when the position was created — new orders at a higher leverage are
+  refused with "requested leverage Nx exceeds position leverage limit ... To increase the limit, close all
+  positions first", even though no position appears open;
+- the account cannot be used normally until the debt is cleared.
+
+### Detecting the state
+
+In the `GET /v2/ledger/accounts/self` snapshot, find the isolated account: the bond-asset entry has
+`available = 0`, `locked = 0`, and `borrowed = 0`, while the quote-asset (USD) entry has `available > 0` and
+`borrowed > 0`. Note that `borrowed` is principal only — accrued leverage interest is reported separately by
+`GET /v1/leverage/accrued_interest/self`.
+
+### Repaying
+
+`POST /v1/positions/repay_usd` clears the debt:
+
+```json
+{
+  "position_id": "<isolated-account-uuid>"
+}
+```
+
+The `position_id` field is the v1 wire name for the isolated account's ID. The endpoint repays
+`min(available, borrowed)` USD and then settles accrued leverage interest on both the USD and bond legs; the
+interest is paid from the global account on a best-effort basis, so an underfunded global account does not fail
+the repayment. The response returns `position_id`, `asset_id`, `repaid`, and `transaction_id`.
+
+The request is rejected (409) when the account is not an isolated account, when the bond leg still has any
+available, locked, or borrowed balance, or when either USD `available` or USD `borrowed` is zero.
+
 ## Calculating open positions
 
 An **open position** on a bond asset is a non-zero `available` balance (a long position, in either the global account or an isolated account) or a non-zero `borrowed` balance (a short position, in an isolated account only — the global account cannot be borrowed against). Iterate through the accounts returned by the snapshot, look at each per-asset entry, and aggregate the bond-asset `available` (across global + all isolated accounts) and bond-asset `borrowed` (across isolated accounts only) by asset. Quote-asset entries (e.g. USD, USDC) are funding balances, not positions.
