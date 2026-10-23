@@ -39,6 +39,8 @@
         - [Example: Setting leverage on an order](#example-setting-leverage-on-an-order)
     - [Leverage operations](#leverage-operations)
       - [Virtual borrowing](#virtual-borrowing)
+      - [Borrowing and repaying](#borrowing-and-repaying)
+      - [Leverage accrued interest (LAI)](#leverage-accrued-interest-lai)
     - [Reporting](#reporting)
       - [Trades](#trades)
       - [Transactions](#transactions)
@@ -910,7 +912,38 @@ This is also how to tell what an "insufficient available balance" refusal on a s
 little or no available supply for the bond, the borrow itself was the problem; otherwise it was your own
 collateral or balances.
 
-> TODO: Explain the borrowing and repaying operations, as well as the collateral and position isolation features.
+#### Borrowing and repaying
+
+Borrowing is not a separate API call. When you place a leveraged order, DORA borrows what the order needs — bonds
+for a short, USD for a leveraged buy — from the leverage pool automatically, and the borrowed amount appears in
+the `borrowed` balance of the isolated account. The collateral for the borrow is the isolated account the order
+trades from; the global account cannot be borrowed against (see [Accounts](#accounts)).
+
+Repayment is also automatic: orders that reduce or close a position repay the borrowed amount first (see
+[Closing positions](#closing-positions)), and `POST /v2/accounts/close` repays any remaining borrows when it
+closes a position. If an account is left with borrowed USD and no bond balances, clear it with
+`POST /v1/positions/repay_usd` — see
+[Understanding Positions — outstanding USD debt](./understanding-positions.md#outstanding-usd-debt-on-an-isolated-account).
+
+#### Leverage accrued interest (LAI)
+
+Borrowed balances accrue interest continuously, reported in USD as **leverage accrued interest (LAI)**. Interest
+you have earned (for example on assets you have supplied to the pool) accrues the same way, as a positive amount.
+LAI is **not** part of the `borrowed` balance — it is tracked separately, so check it on its own to know what you
+owe or have earned in full.
+
+- `GET /v1/leverage/accrued_interest/self` — your current accrued interest per position
+- `GET /v1/user/{user_id}/leverage/accrued_interest/stream` — real-time updates of the same values
+- `POST /v1/leverage/accrued_interest/pay` — pay the interest owed on one position (body: `position_id`,
+  `asset_id`); the interest is paid from your global account
+- `POST /v1/leverage/accrued_interest/claim` — claim interest you have earned into your USD balance (body:
+  `position_id`, `asset_id`)
+- `POST /v1/leverage/accrued_interest/settle` — settle accrued interest in bulk, optionally scoped to one
+  `position_id` and/or `asset_id`; settles everything you owe and have earned across your positions
+
+> **Note:** a transfer out of an isolated account can be refused with "position health is negative {value} after
+> transfer" when the account has unpaid accrued interest. Pay the interest on the account with
+> `POST /v1/leverage/accrued_interest/pay`, then retry the transfer.
 
 ### Reporting
 
