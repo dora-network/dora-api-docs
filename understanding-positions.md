@@ -41,7 +41,7 @@ Response shape (envelope elided, `data.portfolio` shown):
   },
   "net_stablecoin_equivalence": {
     "gained": { "USD": "0.0" },
-    "lost":   { "USD": "0.0" }
+    "lost": { "USD": "0.0" }
   }
 }
 ```
@@ -99,12 +99,12 @@ Each message is a JSON array of entries shaped like:
 
 For working with accounts once you have the snapshot:
 
-| Action | Endpoint |
-|---|---|
-| List accounts (id, name, global flag) | `GET /v2/user/self/accounts` |
-| Get full account/position portfolio | `GET /v2/ledger/accounts/self` |
-| Transfer balance between accounts | `POST /v2/accounts/transfer_balances` |
-| Close a position (generates a market order) | `POST /v2/accounts/close` |
+| Action                                      | Endpoint                              |
+| ------------------------------------------- | ------------------------------------- |
+| List accounts (id, name, global flag)       | `GET /v2/user/self/accounts`          |
+| Get full account/position portfolio         | `GET /v2/ledger/accounts/self`        |
+| Transfer balance between accounts           | `POST /v2/accounts/transfer_balances` |
+| Close a position (generates a market order) | `POST /v2/accounts/close`             |
 
 Replace any reference to the V1 endpoints `/v1/user/self/position_accounts`, `/v1/positions/transfer_balances`, or `/v1/positions/close` with the V2 equivalents above.
 
@@ -134,7 +134,10 @@ In the `GET /v2/ledger/accounts/self` snapshot, find the isolated account: the b
 
 ### Repaying
 
-`POST /v1/positions/repay_usd` clears the debt:
+`POST /v1/positions/repay_usd` repays up to the isolated account's available USD. To clear the principal in full,
+first ensure that its available USD covers the borrowed principal; if it does not, transfer the shortfall in
+using `POST /v2/accounts/transfer_balances`. After repayment, refresh the account snapshot to confirm that
+USD `borrowed` is zero. The request body is:
 
 ```json
 {
@@ -181,16 +184,40 @@ Consider a user with the following account state. The example numbers are synthe
     "portfolio": {
       "accounts": {
         "<global-acct>": {
-          "<USD-asset>":   { "is_global": true,  "available": "5000", "borrowed": "0" },
-          "<GOOGL-asset>": { "is_global": true,  "available": "100",  "borrowed": "0" }
+          "<USD-asset>": {
+            "is_global": true,
+            "available": "5000",
+            "borrowed": "0"
+          },
+          "<GOOGL-asset>": {
+            "is_global": true,
+            "available": "100",
+            "borrowed": "0"
+          }
         },
         "<isol-GOOGL-acct>": {
-          "<USD-asset>":    { "is_global": false, "available": "250",  "borrowed": "750" },
-          "<GOOGL-asset>":  { "is_global": false, "available": "1000", "borrowed": "0" }
+          "<USD-asset>": {
+            "is_global": false,
+            "available": "250",
+            "borrowed": "750"
+          },
+          "<GOOGL-asset>": {
+            "is_global": false,
+            "available": "1000",
+            "borrowed": "0"
+          }
         },
         "<isol-TSLA-acct>": {
-          "<USD-asset>":   { "is_global": false, "available": "500",  "borrowed": "0" },
-          "<TSLA-asset>":  { "is_global": false, "available": "0",    "borrowed": "2000" }
+          "<USD-asset>": {
+            "is_global": false,
+            "available": "500",
+            "borrowed": "0"
+          },
+          "<TSLA-asset>": {
+            "is_global": false,
+            "available": "0",
+            "borrowed": "2000"
+          }
         }
       }
     }
@@ -202,22 +229,22 @@ The leveraged-short account holds the user's own USD as collateral: the user sup
 
 Walking each non-zero entry:
 
-| Account          | Asset     | is_global | available | borrowed | What it means                                                    |
-|------------------|-----------|-----------|-----------|----------|------------------------------------------------------------------|
-| global           | USD       | true      | 5000      | 0        | Cash balance — not a position.                                   |
-| global           | GOOGL     | true      | 100       | 0        | Long 100 GOOGL held in the main balance.                         |
-| isolated GOOGL   | USD       | false     | 250       | 750      | User's $250 USD + $750 system-lent (4× leverage on the collateral), used to fund the leveraged long. |
-| isolated GOOGL   | GOOGL     | false     | 1000      | 0        | Long 1000 GOOGL held in the isolated account.                    |
-| isolated TSLA    | USD       | false     | 500       | 0        | User-supplied USD collateral in the isolated account.            |
-| isolated TSLA    | TSLA      | false     | 0         | 2000     | Short 2000 TSLA (borrowed via 4× leverage on the $500 collateral). |
+| Account        | Asset | is_global | available | borrowed | What it means                                                                                        |
+| -------------- | ----- | --------- | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| global         | USD   | true      | 5000      | 0        | Cash balance — not a position.                                                                       |
+| global         | GOOGL | true      | 100       | 0        | Long 100 GOOGL held in the main balance.                                                             |
+| isolated GOOGL | USD   | false     | 250       | 750      | User's $250 USD + $750 system-lent (4× leverage on the collateral), used to fund the leveraged long. |
+| isolated GOOGL | GOOGL | false     | 1000      | 0        | Long 1000 GOOGL held in the isolated account.                                                        |
+| isolated TSLA  | USD   | false     | 500       | 0        | User-supplied USD collateral in the isolated account.                                                |
+| isolated TSLA  | TSLA  | false     | 0         | 2000     | Short 2000 TSLA (borrowed via 4× leverage on the $500 collateral).                                   |
 
 Aggregating per bond asset:
 
-| Asset  | Long (sum available)               | Short (sum borrowed, isolated only) | Net position |
-|--------|------------------------------------|-------------------------------------|--------------|
-| GOOGL  | 100 (global) + 1000 (isolated) = 1100 | 0                                   | **long 1100**  |
-| TSLA   | 0                                  | 2000 (isolated)                     | **short 2000**   |
-These are tracked as separate per-account entries in the API response; the combined net is derived by summing across accounts.
+| Asset                                                                                                                          | Long (sum available)                  | Short (sum borrowed, isolated only) | Net position   |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ----------------------------------- | -------------- |
+| GOOGL                                                                                                                          | 100 (global) + 1000 (isolated) = 1100 | 0                                   | **long 1100**  |
+| TSLA                                                                                                                           | 0                                     | 2000 (isolated)                     | **short 2000** |
+| These are tracked as separate per-account entries in the API response; the combined net is derived by summing across accounts. |
 
 When placing an order, DORA validates the balance of only **one** account at a time — the global account or a specific isolated account. Balances are not pooled across accounts. For example, with 100 GOOGL in the global account and 1000 GOOGL in an isolated account, a single sell of 1100 GOOGL will be rejected. Instead, create separate orders via `POST /v1/orders`, setting the `from_global_position` field to `true` for the global account or `false` for an isolated account.
 

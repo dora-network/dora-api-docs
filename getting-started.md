@@ -519,17 +519,17 @@ be the latest price from the price stream or
 [price snapshot](#market-data). The levels must sit on the correct side of it for the position's direction:
 
 | Position | `stop_loss_price` | `take_profit_price` |
-|---|---|---|
-| Long | below `price` | above `price` |
-| Short | above `price` | below `price` |
+| -------- | ----------------- | ------------------- |
+| Long     | below `price`     | above `price`       |
+| Short    | above `price`     | below `price`       |
 
 For example, a take profit of $0.92 on a short position must be **less than** `price` — sending both as the same
 level is refused with "take profit price must be less than price for short orders".
 
 Creating a new conditional order **replaces** any existing pending one of the same type on that position: a new
 `stop_loss_price` cancels the previous stop loss, and a new `take_profit_price` cancels the previous take profit.
-To cancel without replacing, use `DELETE /v1/orders/{order_id}` as usual. The response returns the ids of the
-created orders:
+To cancel without replacing, use `DELETE /v1/orders/{order_id}` as usual. The response's `data` field contains the
+created order IDs (the response envelope is omitted below):
 
 ```json
 {
@@ -538,7 +538,8 @@ created orders:
 }
 ```
 
-An id is null (UUID zero) when that trigger level was not set in the request.
+When a trigger level was not set in the request, its corresponding order ID is the zero UUID string
+`"00000000-0000-0000-0000-000000000000"`, not JSON `null`.
 
 ##### Error responses for invalid orders
 
@@ -908,9 +909,10 @@ To see how many of a bond's supplied assets are actually available to borrow (re
 
 `GET /v1/ledger/module/{asset_id}`
 
-This is also how to tell what an "insufficient available balance" refusal on a short means: if the module shows
-little or no available supply for the bond, the borrow itself was the problem; otherwise it was your own
-collateral or balances.
+Use the module snapshot together with the asset's `can_virtual_borrow` flag when investigating an
+"insufficient available balance" refusal. Low real supply alone does not imply that borrowing failed: assets
+with virtual borrowing enabled can cover that shortfall. Compare the requested borrow amount with available
+supply, and check your isolated account's collateral and available balances before attributing the refusal to the pool.
 
 #### Borrowing and repaying
 
