@@ -62,11 +62,12 @@
 
 ### Purpose
 
-The **DORA platform** (U.S. Patent 12,596,578) provides a digital institutional marketplace for fractionalized bonds. Every order book on DORA is backed by a separate underlying liquidity pool that determines the price of the bonds, and all orders cross against this liquidity pool. The order book provides additional liquidity through resting orders supplied by other users of the platform, including market makers, which are matched at the requested price level when the pool price reaches that limit price. 
+The **DORA platform** (U.S. Patent 12,596,578) provides a digital institutional marketplace for fractionalized bonds. Every order book on DORA is backed by a separate underlying liquidity pool that determines the price of the bonds, and all orders cross against this liquidity pool. The order book provides additional liquidity through resting orders supplied by other users of the platform, including market makers, which are matched at the requested price level when the pool price reaches that limit price.
 
 This guide details how **Bridge Providers**—software vendors supplying middleware and translation layers between retail trading platforms (such as MetaTrader 4, MetaTrader 5, and cTrader) and institutional liquidity venues—integrate with the DORA Network.
 
 By integrating DORA into your bridge engine, you enable brokerages utilizing your bridge software to:
+
 1. **Offer innovative CFD products** on fractionalized fixed-income securities and bonds to their retail and institutional client base.
 2. **Aggregate real-time market data** from DORA with other market venues.
 3. **Apply custom broker spreads and markups** to order books before distributing quotes to client trading terminals.
@@ -120,18 +121,18 @@ Integrating as a bridge provider differs fundamentally from a direct retail trad
 
 ### Architecture Comparison
 
-| Feature / Domain | Direct / Retail Integrator | Bridge Provider / STP Broker Integration |
-| :--- | :--- | :--- |
-| **User Identity** | Individual user accounts per end-user | Single institutional / omnibus LP account per broker |
-| **Authentication** | Per-user API keys or Bearer JWT tokens via UI | Institutional API Key with high rate limits and IP whitelisting |
-| **Market Data Transport** | Per-stream WebSockets or REST polling | Single **Multiplexed WebSocket (`wsplex`)** carrying multi-symbol quotes, L2 depth, and account events |
-| **Symbol Presentation** | Native DORA UUIDs and asset metadata | Mapped to broker symbol naming (e.g., `US10Y.bond`, `US30Y.cfd`) with broker lot and contract size rules |
-| **Order Routing** | Direct trader-initiated orders | **Straight-Through Processing (STP)** hedging broker risk triggered by client terminal deals |
-| **Permitted Order Kinds** | Market and Limit orders | **Market orders only** (`kind: "market"`). Limit orders are rejected on omnibus accounts |
-| **Global Account Trading** | Standard spot trading | Not recommended for STP hedging (`from_global_position: false` should always be set) |
-| **Order Correlation** | Native DORA `order_id` | Mapped via `client_order_id` using MT5/cTrader ticket/deal IDs |
-| **Position Model** | Manual portfolio management | Netting or per-trade hedging against isolated accounts |
-| **Margin & Cash Reserve** | User balances checked per trade | Broker LP capital buffer + strict **Global Account Cash Reserve** management |
+| Feature / Domain           | Direct / Retail Integrator                    | Bridge Provider / STP Broker Integration                                                                 |
+| :------------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **User Identity**          | Individual user accounts per end-user         | Single institutional / omnibus LP account per broker                                                     |
+| **Authentication**         | Per-user API keys or Bearer JWT tokens via UI | Institutional API Key with high rate limits and IP whitelisting                                          |
+| **Market Data Transport**  | Per-stream WebSockets or REST polling         | Single **Multiplexed WebSocket (`wsplex`)** carrying multi-symbol quotes, L2 depth, and account events   |
+| **Symbol Presentation**    | Native DORA UUIDs and asset metadata          | Mapped to broker symbol naming (e.g., `US10Y.bond`, `US30Y.cfd`) with broker lot and contract size rules |
+| **Order Routing**          | Direct trader-initiated orders                | **Straight-Through Processing (STP)** hedging broker risk triggered by client terminal deals             |
+| **Permitted Order Kinds**  | Market and Limit orders                       | **Market orders only** (`kind: "market"`). Limit orders are rejected on omnibus accounts                 |
+| **Global Account Trading** | Standard spot trading                         | Not recommended for STP hedging (`from_global_position: false` should always be set)                     |
+| **Order Correlation**      | Native DORA `order_id`                        | Mapped via `client_order_id` using MT5/cTrader ticket/deal IDs                                           |
+| **Position Model**         | Manual portfolio management                   | Netting or per-trade hedging against isolated accounts                                                   |
+| **Margin & Cash Reserve**  | User balances checked per trade               | Broker LP capital buffer + strict **Global Account Cash Reserve** management                             |
 
 ### Omnibus Account vs. End-User Account Topology
 
@@ -161,10 +162,10 @@ DORA's matching engine is built on an underlying liquidity pool architecture:
 
 DORA provides isolated staging and production environments:
 
-| Environment | REST API Base URL | Multiplexed WebSocket URL (`wsplex`) |
-| :--- | :--- | :--- |
-| **Staging** | `https://staging.dora.co` | `wss://staging.dora.co/plex` |
-| **Production** | `https://api.dora.co` | `wss://api.dora.co/plex` |
+| Environment    | REST API Base URL         | Multiplexed WebSocket URL (`wsplex`) |
+| :------------- | :------------------------ | :----------------------------------- |
+| **Staging**    | `https://staging.dora.co` | `wss://staging.dora.co/plex`         |
+| **Production** | `https://api.dora.co`     | `wss://api.dora.co/plex`             |
 
 ### API Key Management
 
@@ -187,6 +188,7 @@ curl -L -X POST \
 ```
 
 Sample response:
+
 ```json
 {
   "data": {
@@ -217,6 +219,7 @@ When upgrading the WebSocket connection to `wss://<base_url>/plex`, you must sup
 ### Key Rotation Strategy
 
 Bridge engines must maintain continuous 24/7 uptime. To rotate keys without dropping connectivity:
+
 1. Generate a second active API key with a descriptive label (e.g., `Bridge-Key-Active-B`).
 2. Establish a secondary WebSocket session or update the REST authentication token pool in the bridge software.
 3. Verify that orders and streams function with the new key.
@@ -231,6 +234,7 @@ Bridge engines must maintain continuous 24/7 uptime. To rotate keys without drop
 Unlike conventional FX pairs (`EURUSD`) or standard crypto assets, DORA trades **fractionalized bonds** priced against USD (or currency equivalents).
 
 Each market on DORA consists of:
+
 - **Base Asset:** The fractionalized bond (identified by a UUIDv7 string).
 - **Quote Asset:** The settlement currency (USD).
 - **Order Book ID:** The UUIDv7 market identifier.
@@ -246,6 +250,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 Sample order book response snippet:
+
 ```json
 {
   "data": [
@@ -253,25 +258,26 @@ Sample order book response snippet:
       "order_book_id": "019c3420-5cd7-7a88-8fe6-a5a622e01ad9",
       "base_asset_id": "019c341e-35a1-7711-a83e-9080b02cb003",
       "quote_asset_id": "019c341b-1234-7000-8000-000000000001",
-      "name": "US10Y / USD",
+      "display_name": "US10Y / USD",
       "status": "OPEN",
-      "price_precision": 4,
-      "quantity_precision": 2
+      "tick_size": 0.001
     }
   ]
 }
 ```
 
 To fetch detailed bond parameters:
+
 ```bash
 curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
   "https://api.dora.co/v1/assets/019c341e-35a1-7711-a83e-9080b02cb003"
 ```
 
 Key asset fields relevant to bridge configuration:
-- `asset_id`: DORA UUIDv7 identifier.
+
+- `id`: DORA UUIDv7 asset identifier.
 - `symbol` / `name`: Human-readable ticker (e.g., `US-TREASURY-10Y-2034`).
-- `isin` / `cusip`: Institutional securities identifiers.
+- `bond.isin`: Institutional securities identifier for a bond asset.
 - `decimals`: Unit decimal precision.
 - `max_leverage`: Maximum allowable leverage on DORA (e.g., `5.0` for 5x).
 - `can_virtual_borrow`: Boolean indicating whether short positions can utilize virtual borrowing.
@@ -280,20 +286,21 @@ Key asset fields relevant to bridge configuration:
 
 Bridge providers must map DORA assets to broker terminal symbol definitions:
 
-| MT5 / cTrader Symbol Parameter | DORA Property | Typical Bridge Configuration |
-| :--- | :--- | :--- |
-| **Symbol Name** | Custom broker naming | `US10Y`, `UST10Y.dora`, `BOND_US10Y` |
-| **Digits (Decimal Places)** | `price_precision` | Usually 2 or 4 decimals (e.g., `98.2540`) |
-| **Contract Size** | Nominal unit scale | 100 or 1,000 face value units |
-| **Minimum Lot** | `10^(-quantity_precision)` | e.g., 0.01 or 1.0 units |
-| **Lot Step** | Fractional step size | e.g., 0.01 units |
-| **Execution Mode** | Order book model | Market Execution (STP) |
-| **Margin Mode** | Isolated leverage model | CFD Leverage / Percentage calculation |
+| MT5 / cTrader Symbol Parameter | DORA Property              | Typical Bridge Configuration              |
+| :----------------------------- | :------------------------- | :---------------------------------------- |
+| **Symbol Name**                | Custom broker naming       | `US10Y`, `UST10Y.dora`, `BOND_US10Y`      |
+| **Digits (Decimal Places)**    | `price_precision`          | Usually 2 or 4 decimals (e.g., `98.2540`) |
+| **Contract Size**              | Nominal unit scale         | 100 or 1,000 face value units             |
+| **Minimum Lot**                | `10^(-quantity_precision)` | e.g., 0.01 or 1.0 units                   |
+| **Lot Step**                   | Fractional step size       | e.g., 0.01 units                          |
+| **Execution Mode**             | Order book model           | Market Execution (STP)                    |
+| **Margin Mode**                | Isolated leverage model    | CFD Leverage / Percentage calculation     |
 
 ### Handling Bond Coupons
 
 Bond assets on DORA pay coupons periodically:
-- Query coupons: `GET /v1/assets/{asset_id}/coupons`.
+
+- Query coupon payments: `GET /v1/assets/{asset_id}/coupons`.
 - Long positions in fractionalized bonds receive coupon credits; short positions (borrowed bonds) owe coupon debits (**PAC: Partially Accrued Coupons**).
 - For CFD brokers, the bridge or broker back-office typically reflects this on client accounts as daily swap or dividend adjustments.
 
@@ -314,7 +321,7 @@ sequenceDiagram
 
     Bridge->>WSPlex: HTTP Upgrade (Headers: Authorization, User-Agent)
     WSPlex-->>Bridge: 101 Switching Protocols
-    
+
     Note over Bridge,WSPlex: Subscribe to Prices across all assets
     Bridge->>WSPlex: {"id":"uuid-1", "path":"/prices", "data":{"subscribe_all": true}}
     WSPlex-->>Bridge: {"id":"uuid-1", "kind":"response", "path":"/prices", "data":{"subscribed_all": true}}
@@ -334,6 +341,7 @@ sequenceDiagram
 The `/prices` path delivers low-latency price updates derived directly from DORA's liquidity pools.
 
 **Request:**
+
 ```json
 {
   "id": "019ed20f-cfcb-7167-a318-4b42d0582517",
@@ -345,16 +353,21 @@ The `/prices` path delivers low-latency price updates derived directly from DORA
 ```
 
 **Stream Notification:**
+
 ```json
 {
   "kind": "notification",
   "path": "/prices",
   "id": "019ed211-1234-7000-8000-000000000001",
   "data": {
-    "asset_id": "019c341e-35a1-7711-a83e-9080b02cb003",
-    "order_book_id": "019c3420-5cd7-7a88-8fe6-a5a622e01ad9",
-    "price": "98.4520",
-    "timestamp": "2026-10-28T10:30:15.124Z"
+    "prices": {
+      "019c341e-35a1-7711-a83e-9080b02cb003": {
+        "asset_id": "019c341e-35a1-7711-a83e-9080b02cb003",
+        "price": "98.4520",
+        "ytm": "0",
+        "timestamp": "2026-10-28T10:30:15.124Z"
+      }
+    }
   }
 }
 ```
@@ -364,6 +377,7 @@ The `/prices` path delivers low-latency price updates derived directly from DORA
 Because all orders cross directly against the liquidity pool underlying each order book, tracking the pool size is critical for estimating price impact and slippage on large market orders. DORA publishes real-time pool balances over the `/pools/balance` channel.
 
 **Request:**
+
 ```json
 {
   "id": "019ee189-87d7-7c69-802a-8070f3779b97",
@@ -375,6 +389,7 @@ Because all orders cross directly against the liquidity pool underlying each ord
 ```
 
 **Stream Notification:**
+
 ```json
 {
   "kind": "notification",
@@ -400,6 +415,7 @@ Bridge risk engines can utilize the `base_quantity` (available bond inventory) a
 To aggregate market depth and view resting bids and asks:
 
 **Request for L2 Depth:**
+
 ```json
 {
   "id": "019ed20f-cfcb-7167-a318-4b42d0582518",
@@ -411,6 +427,7 @@ To aggregate market depth and view resting bids and asks:
 ```
 
 **Request for Order Book Summary Stats:**
+
 ```json
 {
   "id": "019ed20f-cfcb-7167-a318-4b42d0582519",
@@ -435,9 +452,10 @@ The bridge pricing engine aggregates DORA liquidity with other feeds and constru
 ### Snapshot & Fallback REST Endpoints
 
 If the WebSocket stream reconnects or requires baseline synchronization:
+
 - Single asset price snapshot: `GET /v1/price/asset/{asset_id}`
 - All asset prices snapshot: `GET /v1/price`
-- Level 2 Depth snapshot: `GET /v1/orderbook/{order_book_id}/L2`
+- Level 2 Depth snapshot: `GET /v1/orderbooks/{order_book_id}/L2`
 - Order book summary: `GET /v1/orderbooks/{order_book_id}/summary`
 
 ---
@@ -623,13 +641,13 @@ The following scenario illustrates the lifecycle of automatic cash and collatera
 In DORA, leverage is specified via `inverse_leverage`:
 $$\text{inverse\_leverage} = \frac{1}{\text{Target Leverage}}$$
 
-| Target Leverage | `inverse_leverage` Value | Required Margin |
-| :--- | :--- | :--- |
-| **1x (No Leverage)** | `"1.0"` | 100% |
-| **2x** | `"0.5"` | 50% |
-| **3x** | `"0.3333"` | 33.33% |
-| **4x** | `"0.25"` | 25% |
-| **5x** | `"0.2"` | 20% |
+| Target Leverage      | `inverse_leverage` Value | Required Margin |
+| :------------------- | :----------------------- | :-------------- |
+| **1x (No Leverage)** | `"1.0"`                  | 100%            |
+| **2x**               | `"0.5"`                  | 50%             |
+| **3x**               | `"0.3333"`               | 33.33%          |
+| **4x**               | `"0.25"`                 | 25%             |
+| **5x**               | `"0.2"`                  | 20%             |
 
 > [!IMPORTANT]
 > The leverage on an isolated position account is locked by the first order that opens the position. While open, you may submit subsequent orders at equal or lower leverage, but **not higher**. To reset an isolated account's leverage, the position and all accrued debts must be fully closed.
@@ -639,6 +657,7 @@ $$\text{inverse\_leverage} = \frac{1}{\text{Target Leverage}}$$
 DORA enforces an institutional risk safeguard: every user/broker must maintain a minimum amount of unencumbered USD available in their **Global Account** at all times.
 
 The cash reserve covers:
+
 1. **Completed PAC:** Partially accrued coupon debits from finished periods.
 2. **Outstanding LAI:** Leverage accrued interest owed across all isolated accounts.
 3. **Estimated Fees:** A percentage of the broker's daily traded volume plus open order notional.
@@ -652,6 +671,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 Sample response:
+
 ```json
 {
   "data": {
@@ -660,11 +680,12 @@ Sample response:
     "required_usd": "18450.50",
     "satisfied": true,
     "breakdown": {
-      "pac_usd": "0.00",
-      "lai_usd": "450.50",
-      "estimated_fees_usd": "3000.00",
-      "borrowed_portion_usd": "15000.00",
-      "floor_usd": "1.00"
+      "completed_pac": "0.00",
+      "outstanding_lai": "450.50",
+      "estimated_fees": "3000.00",
+      "borrowed_portion": "15000.00",
+      "floor": "1.00",
+      "total": "18450.50"
     },
     "max_volume_usd": "1500000.00",
     "max_borrow_usd": "800000.00"
@@ -673,7 +694,7 @@ Sample response:
 ```
 
 > [!WARNING]
-> If `available_usd < required_usd` (`satisfied: false`), DORA will **reject all new orders** across both global and isolated accounts. Bridge engines must monitor `required_usd` and alert broker treasury teams to maintain a comfortable capital cushion.
+> When reserve enforcement is active (`enforced: true`), `satisfied: false` means `available_usd - committed_usd < required_usd` and reserve-restricted orders are rejected. Sells funded from the Global Account remain exempt so they can restore the reserve. Bridge engines should monitor `satisfied`, `committed_usd`, and `required_usd`, and alert broker treasury teams before the reserve becomes insufficient.
 
 ### Short Selling & Virtual Borrowing
 
@@ -704,15 +725,14 @@ curl -L -X POST \
 
 When a position is closed or stopped out, an isolated account may occasionally hold a residual USD debt balance (`borrowed > 0`). Until this debt is cleared, the account remains constrained.
 
-To repay residual debt from the broker's global balance:
+To clear residual principal, first ensure the isolated account's available USD covers its borrowed USD. If needed, transfer the shortfall from Global using `POST /v2/accounts/transfer_balances` while preserving the Global Account cash reserve. Once the bond leg has no available, locked, or borrowed balance, call the endpoint with only `position_id`; it repays `min(available, borrowed)` from the isolated account:
 
 ```bash
 curl -L -X POST \
   -H "Authorization: ApiKey $DORA_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "position_id": "019ee120-7b00-7111-9a2e-440055112233",
-    "amount": "250.75"
+    "position_id": "019ee120-7b00-7111-9a2e-440055112233"
   }' \
   https://api.dora.co/v1/positions/repay_usd
 ```
@@ -728,6 +748,7 @@ Bridge engines must maintain perfect ledger synchronization between the broker s
 Subscribe to real-time order and fill notifications over the multiplexed socket:
 
 **Subscribe Request:**
+
 ```json
 {
   "id": "019ee189-87d7-7c69-802a-8070f3779b98",
@@ -740,6 +761,7 @@ Subscribe to real-time order and fill notifications over the multiplexed socket:
 ```
 
 **Fill Notification Payload:**
+
 ```json
 {
   "kind": "notification",
@@ -753,8 +775,8 @@ Subscribe to real-time order and fill notifications over the multiplexed socket:
           "order_id": "019ee189-87c6-7a67-b5bf-7c85856b3e34",
           "order_book_id": "019c3420-5cd7-7a88-8fe6-a5a622e01ad9",
           "client_order_id": "BRIDGE-MT5-TICKET-884920",
-          "kind": "market",
-          "side": "buy",
+          "kind": "MARKET",
+          "side": "BUY",
           "status": "FILLED",
           "original_price": "98.5000",
           "avg_fill_price": "98.4980",
@@ -781,7 +803,7 @@ Stream account balance adjustments and unrealized PnL continuously:
   "id": "019ee189-87d7-7c69-802a-8070f3779b99",
   "path": "/accounts/balance",
   "data": {
-    "users": ["019c4d37-311e-7a2f-8d58-f17c39170865"]
+    "subscribe": ["019c4d37-311e-7a2f-8d58-f17c39170865"]
   }
 }
 ```
@@ -796,6 +818,7 @@ curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
 ```
 
 Returns each account (global and isolated) with per-asset breakdowns of:
+
 - `available`: Funds free for trading.
 - `locked`: Capital committed to open orders.
 - `supplied`: Capital supplied to the lending pool.
@@ -814,18 +837,18 @@ Returns each account (global and isolated) with per-asset breakdowns of:
 
 Bridge software should intercept and handle DORA HTTP error responses gracefully:
 
-| HTTP Status | Error / Rejection Message | Root Cause | Recommended Bridge Action |
-| :--- | :--- | :--- | :--- |
-| **400** | `quantity precision exceeds asset specification` | Order quantity has too many decimal places | Round lot sizes using `quantity_precision` |
-| **400** | `limit orders not supported for omnibus account` | Sent order with `kind: "limit"` | Dispatch STP hedge orders as `kind: "market"` |
-| **400** | `inverse_leverage must be between 0.0 and 1.0` | Value outside valid range | Validate inverse leverage formula |
-| **400** | `leverage order placed using from_global_position = true` | Leverage (`inverse_leverage != 1.0`) or short position attempted on Global Account | Set `from_global_position: false` so leveraged/short orders execute in isolated accounts |
-| **400** | `insufficient available balance` | Account lacks USD margin or bond balance | Check available balance or initiate collateral transfer |
-| **400** | `cash reserve requirement not satisfied` | Global Account USD below required threshold | Refuse hedge, trigger broker treasury margin call |
-| **400** | `exceeds position leverage limit` | Order attempted higher leverage than initial trade | Close open position before increasing leverage |
-| **401** | `unauthorized` or `token is expired` | API key revoked or invalid | Rotate key or failover to secondary credentials |
-| **403** | `forbidden` | Missing `User-Agent` header on WebSocket upgrade | Include `User-Agent` string in client headers |
-| **429** | `too many requests` | Rate limit breached | Exponential backoff and jitter |
+| HTTP Status | Error / Rejection Message                                 | Root Cause                                                                           | Recommended Bridge Action                                                                |
+| :---------- | :-------------------------------------------------------- | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| **400**     | `quantity precision exceeds asset specification`          | Order quantity has too many decimal places                                           | Round lot sizes using `quantity_precision`                                               |
+| **400**     | `limit orders not supported for omnibus account`          | Sent order with `kind: "limit"`                                                      | Dispatch STP hedge orders as `kind: "market"`                                            |
+| **400**     | `inverse_leverage must be between 0.0 and 1.0`            | Value outside valid range                                                            | Validate inverse leverage formula                                                        |
+| **400**     | `leverage order placed using from_global_position = true` | Leverage (`inverse_leverage != 1.0`) or short position attempted on Global Account   | Set `from_global_position: false` so leveraged/short orders execute in isolated accounts |
+| **400**     | `insufficient available balance`                          | Account lacks USD margin or bond balance                                             | Check available balance or initiate collateral transfer                                  |
+| **403**     | `cash reserve requirement not satisfied`                  | Global Account USD, after subtracting committed USD, is below the required threshold | Refuse reserve-restricted hedges and trigger a broker treasury margin call               |
+| **400**     | `exceeds position leverage limit`                         | Order attempted higher leverage than initial trade                                   | Close open position before increasing leverage                                           |
+| **401**     | `unauthorized` or `token is expired`                      | API key revoked or invalid                                                           | Rotate key or failover to secondary credentials                                          |
+| **403**     | `forbidden`                                               | Missing `User-Agent` header on WebSocket upgrade                                     | Include `User-Agent` string in client headers                                            |
+| **429**     | `too many requests`                                       | Rate limit breached                                                                  | Exponential backoff and jitter                                                           |
 
 ### Connection Lifecycle & State Resynchronization
 
@@ -839,6 +862,7 @@ Bridge software should intercept and handle DORA HTTP error responses gracefully
 ### Emergency Kill Switches & Flushes
 
 Bridge operators must implement emergency procedures:
+
 - **Pause STP Inflow:** If DORA disconnects or returns consecutive errors, immediately switch the MT5/cTrader bridge risk profile to internal B-Book (or refuse retail trades) to prevent unhedged risk exposure.
 - **Cancel All Orders:** Execute `DELETE /v1/orders` to clear all resting hedge limit orders.
 - **Emergency Liquidation:** Iterate over active isolated positions and trigger `POST /v2/accounts/close`.
