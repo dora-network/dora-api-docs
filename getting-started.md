@@ -391,12 +391,17 @@ For assets that are bonds, you can retrieve information about the coupons associ
 
 ### Order books
 
-On DORA, each order book is a market for trading a specific pair of assets, such as a bond and a currency.
-The order book is matched with an underlying liquidity pool, which provides pricing and liquidity for the order book.
-The pricing for the liquidity is driven by DORA's internal pricing algorithm.
+The DORA algorithm operates as a hybrid pool + order book structure. Each order book is a market for trading a specific
+pair of assets, such as a bond and a currency. The order book is matched with an underlying liquidity pool, that provides
+pricing and liquidity for the order book. The pricing for the liquidity is driven by DORA's internal pricing algorithm.
 
-Market orders are automatically executed against the pool, while limit orders are added to the order book and
-matched with other orders when the price conditions are met.
+The pool is the underlying mechanism that guarantees 24/7 liquidity, i.e. it always guarantees that the bonds and a best
+price for those bonds is available, even if there are no other market makers making a book. The order book ensures there
+are orders above and below the pool price.
+
+All orders are executed against the pool. Market orders are automatically executed against the pool to ensure the best
+price for the bonds. Limit orders are added to the order book and matched against the pool when the pool price hits the
+best bid or offer.
 
 To retrieve a list of all order books available on the DORA platform, you can use the endpoint:
 

@@ -17,6 +17,7 @@
     - [Key Rotation Strategy](#key-rotation-strategy)
   - [4. Asset \& Symbol Mapping](#4-asset--symbol-mapping)
     - [DORA Asset Model: Fractionalized Bonds](#dora-asset-model-fractionalized-bonds)
+    - [Understanding DORA's hybrid order book model](#understanding-doras-hybrid-order-book-model)
     - [Querying Available Assets \& Order Books](#querying-available-assets--order-books)
     - [Translating to MT5 / cTrader Symbol Specifications](#translating-to-mt5--ctrader-symbol-specifications)
     - [Handling Bond Coupons](#handling-bond-coupons)
@@ -238,6 +239,30 @@ Each market on DORA consists of:
 - **Base Asset:** The fractionalized bond (identified by a UUIDv7 string).
 - **Quote Asset:** The settlement currency (USD).
 - **Order Book ID:** The UUIDv7 market identifier.
+
+### Understanding DORA's hybrid order book model
+
+DORA's algorithm operates as a hybrid pool + orderbook structure. Each order book on DORA has an accompanying pool that completes
+the hybrid structure.
+
+The pool is what guarantees 24/7 liquidity - there are always bonds and a price available, regardless if there are any additional
+limit orders on the order book from other traders and market makers. The order book is what ensures there will be resting limit
+orders above and below the pool price.
+
+All orders are executed against the pool:
+
+- Market orders are filled automatically by the pool at the pool price if there is sufficient liquidity.
+- Limit orders are resting orders that provide additional liquidity.
+- As the pool price moves towards the best bid/offer of those resting limit orders, those limit orders will cross with the pool once the pool price matches the BBO.
+- The limit orders are what makes up the L2 order book, but there's additional liquidity in the underlying pool.
+- Limit orders that are placed with the limit price equal or better than the pool price will be executed immediately against the pool.
+
+> NOTE: The term pool refers to the DORA liquidity pool that provides the pricing algorithm for the bonds. It should not be confused
+> with dark pools or any similar structures that are commonly found in traditional financial markets
+
+Bridge provider integrators are advised to simply redistribute the L2 order book the receive over the wire, which the end users will
+apply their spreads to. When they trade however, due to the matching engine crossing through the DORA liquidity pool, all users are
+guaranteed to receive the best price available on DORA.
 
 ### Querying Available Assets & Order Books
 
