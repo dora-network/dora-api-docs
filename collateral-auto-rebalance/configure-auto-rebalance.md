@@ -1,139 +1,86 @@
-# Configure collateral auto-rebalance for your accounts
+# Configure collateral auto-rebalance
 
-This guide shows how to enable, tune, monitor, and disable collateral auto-rebalance on your isolated margin accounts through the DORA API. It assumes you have a DORA API key and are comfortable making authenticated REST calls. For what the service does once enabled, see [How auto-rebalance works](./how-auto-rebalance-works.md); for full endpoint details, see the [API reference](./auto-rebalance-api.md).
+An Admin or Integrator configures auto-rebalance for a CFD user. The client reads its own settings and status; it does not change configuration itself. See [how it works](./how-auto-rebalance-works.md) and the [API reference](./auto-rebalance-api.md).
 
 ## Prerequisites
 
-- A DORA API key for the user whose accounts you are managing. Authenticate every request with:
+- A DORA Admin has assigned the institutional user the `CFD` tag through the existing user-tag route.
+- The operator has an Admin or Integrator API key. An Integrator can configure users in its own tenant; an Admin can configure authorized CFD users across tenants.
+- The user has existing isolated accounts to select. A first order still uses the existing isolated-account creation flow.
+- Resting LIMIT orders have been cancelled before enabling automatic funding and returns. CFD users submit ordinary MARKET orders with explicit quantities; LIMIT and Max Buy requests are rejected.
+- DORA has activated the paired feature in the environment. Account settings do not override that rollout gate.
 
-  ```bash
-  curl -L -H "Authorization: ApiKey $DORA_API_KEY" "$DORA_BASE_URL/..."
-  ```
+All decimal values are JSON strings.
 
-- One or more **isolated margin accounts** for that user. Auto-rebalance applies to isolated accounts only; global cash accounts participate automatically as a last-resort funding source and are never configured directly.
-- Threshold values in mind per account: `min_utilization` and `max_utilization` as decimal strings satisfying `0 < min_utilization < max_utilization <= 1` (for example `"0.60"` and `"0.80"`).
+## Find the isolated accounts
 
-> NOTE: All decimal values in auto-rebalance requests and responses are JSON **strings**, not numbers.
-
-## Step 1 — Find your isolated account IDs
-
-List the user's accounts:
+The CFD client can list its own accounts using its own key:
 
 ```bash
-curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+curl -L -H "Authorization: ApiKey $DORA_CLIENT_API_KEY" \
   "$DORA_BASE_URL/v2/user/self/accounts"
 ```
 
-From the response, note the `account_id` of each **isolated** account you want to manage.
+Give the operator the user ID and the isolated account IDs to configure.
 
-**Check:** you have one or more isolated account IDs.
+## Enable risk rebalancing, order funding and returns
 
-## Step 2 — Enable auto-rebalance with thresholds
-
-Upsert configurations for one or more accounts in a single batch request:
+The operator sends a batch with the target `user_id`:
 
 ```bash
-curl -L -X PUT -H "Authorization: ApiKey $DORA_API_KEY" \
+curl -L -X PUT -H "Authorization: ApiKey $DORA_OPERATOR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-        "configs": [
-          {
-            "account_id": "6f1d2b66-....-....-....-............",
-            "enabled": true,
-            "min_utilization": "0.60",
-            "max_utilization": "0.80"
-          },
-          {
-            "account_id": "8a3c94d1-....-....-....-............",
-            "enabled": true,
-            "min_utilization": "0.50",
-            "max_utilization": "0.75"
-          }
-        ]
-      }' \
+    "user_id": "11111111-1111-4111-8111-111111111111",
+    "configs": [{
+      "account_id": "22222222-2222-4222-8222-222222222222",
+      "enabled": true,
+      "order_rebalance_enabled": true,
+      "lowest_threshold": "0.30",
+      "min_utilization": "0.60",
+      "max_utilization": "0.80"
+    }]
+  }' \
   "$DORA_BASE_URL/v2/accounts/auto_rebalance/config"
 ```
 
-The same route creates missing configurations and updates existing ones. Each item in `configs` must set all four fields. The request is rejected (`400`) if:
+Replace the example IDs with the selected user's IDs. Omitting `user_id` defaults to the authenticated operator, not a selected customer.
 
-- any `min_utilization` is not greater than 0, or not less than that account's `max_utilization`
-- any `max_utilization` is greater than 1
-- `enabled` is missing, an `account_id` is missing or duplicated, or `configs` is empty
+`enabled` controls existing risk rebalancing. `order_rebalance_enabled` is one shared opt-in for order funding and auto-return: enabling it enables both; disabling it disables both. There is no separate return switch. An active shared opt-in requires:
 
-and with `404` if any account does not exist, does not belong to you, or is not an isolated account.
-
-**Check:** the response echoes each account's persisted configuration:
-
-```json
-{
-  "data": {
-    "configs": [
-      {
-        "account_id": "6f1d2b66-....-....-....-............",
-        "enabled": true,
-        "min_utilization": "0.6",
-        "max_utilization": "0.8"
-      }
-    ]
-  },
-  "metadata": { "status_code": 200 }
-}
+```text
+0 < lowest_threshold < min_utilization < max_utilization <= 1
 ```
 
-From this point the service is live for these accounts: as soon as an account's utilization rises above its `max_utilization`, DORA's daemon evaluates and executes a rebalance. No restart or further action is needed — configuration changes take effect immediately, including for accounts enabled later.
+`lowest_threshold` triggers returns; `max_utilization` triggers risk funding toward `min_utilization`. With zero effective debt, all free USD returns instead of targeting a positive utilization. Effective debt includes interest and applicable coupon liabilities.
 
-## Step 3 — Verify status
+The batch is atomic. Invalid thresholds or resting limits reject activation with `400`; unauthorized writers or enabling a non-CFD user receive `403`. A missing/out-of-tenant target, foreign account or non-isolated account receives `404`.
 
-Check configuration plus live utilization for all managed accounts (including disabled ones):
+## Read status
+
+Using the CFD user's own key:
 
 ```bash
-curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
+curl -L -H "Authorization: ApiKey $DORA_CLIENT_API_KEY" \
   "$DORA_BASE_URL/v2/accounts/auto_rebalance/status"
 ```
 
-or for a single account:
+For one account, use `/v2/accounts/auto_rebalance/config/{account_id}`. GET routes remain self-scoped even though the operator can target a customer on PUT.
 
-```bash
-curl -L -H "Authorization: ApiKey $DORA_API_KEY" \
-  "$DORA_BASE_URL/v2/accounts/auto_rebalance/config/6f1d2b66-....-....-....-............"
-```
+When present, `order_funding_capacity_usd` is an upper estimate of safe donor funding. It reserves nothing and cannot include a particular future order's additional reserve requirement. Submission always recalculates. `last_rebalance_outcome` reports risk rebalancing only, excluding order-funding and return audit entries.
 
-**Check:** each entry shows `current_utilization` and `above_max`, so you can confirm whether an account is currently in breach. After the first rebalance attempt, `last_rebalance_outcome` shows `completed`, `partial`, or `unsuccessful`.
+## Update or disable
 
-## Step 4 — Tune thresholds or disable an account
+Every item still requires `account_id`, `enabled`, `min_utilization` and `max_utilization`. A missing shared opt-in defaults to false on insert; omitted updates retain its stored value. Omitting `lowest_threshold` retains a stored threshold. An existing enabled shared opt-in cannot be updated into an invalid threshold configuration.
 
-To change thresholds or turn auto-rebalance off for specific accounts, PUT a new batch — the upsert overwrites the previous settings for every `account_id` included:
+- Set `order_rebalance_enabled` to false to stop both order funding and returns while keeping risk rebalancing enabled. The client then manages its isolated balances itself.
+- Set `enabled` to false to disable the account's participation in risk rebalancing and the new funding/return behaviors. Authorized operators can disable existing configuration after tag removal.
+- Accounts omitted from the batch keep their settings.
 
-```bash
-curl -L -X PUT -H "Authorization: ApiKey $DORA_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-        "configs": [
-          {
-            "account_id": "8a3c94d1-....-....-....-............",
-            "enabled": false,
-            "min_utilization": "0.50",
-            "max_utilization": "0.75"
-          }
-        ]
-      }' \
-  "$DORA_BASE_URL/v2/accounts/auto_rebalance/config"
-```
+## What the client should expect
 
-Setting `enabled` to `false` disables the account immediately for both roles — it stops being a rebalance target *and* stops donating to other accounts. Thresholds must remain valid even for disabled accounts. Accounts not included in the request keep their existing configuration.
+An explicit-quantity MARKET order on an existing opted-in USD-quoted isolated account can receive funding from eligible isolated donors and then Global. Existing cash-reserve, leverage, borrowing and position checks still apply. Transfers and order insertion commit together or roll back together. Successful single and per-order bulk responses include optional `funding` amount/source details; unfunded results omit them.
 
-## Expected result
+Returns retain locked and conditional commitments and defer while accepted MARKET orders remain unsettled, liquidation is active, or debt cannot be priced safely. Incoming USD can replenish Global even when it is below its reserve. Returning all free USD keeps the isolated account ID and settings, so a later explicit-amount order can refill the same account.
 
-Once enabled, no further calls are required to keep the feature running:
-
-- every account above its `max_utilization` is automatically rebalanced back toward its `min_utilization` using your other opted-in accounts and — last — your global cash account
-- every attempt (completed, partial, or unsuccessful) triggers an email notification with the transfer details
-- accounts still above their maximum after the daily sweep receive a daily risk report email
-
-> **IMPORTANT:** Auto-rebalance is a best-effort risk-management assist, not a guarantee against liquidation. Keep enough transferable USD across your opted-in and global accounts, and treat `partial`/`unsuccessful` outcomes and daily risk reports as signals to add funds.
-
-## Choosing thresholds
-
-- `max_utilization` is how much utilization you tolerate before wanting automatic intervention — set it low enough that a rebalance can complete before the account approaches liquidation territory.
-- `min_utilization` is both the restore target and the floor protecting donor accounts — an account at or above its own min never donates.
-- A common starting point is `min_utilization = "0.60"` / `max_utilization = "0.80"`; tighten the gap for more frequent, smaller transfers or widen it for fewer, larger ones.
+Funding and routine returns add no emails. Existing risk-attempt notifications and daily reports keep their delivery settings. Risk rebalancing remains best effort; maintain sufficient safe USD and monitor unresolved risk outcomes.
