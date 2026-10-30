@@ -8890,7 +8890,7 @@
             }
           },
           "404": {
-            "description": "One or more accounts were not found or are not isolated accounts",
+            "description": "Target user is missing or outside the Integrator tenant (both return 'target user not found'), or one or more accounts are missing, not owned by the target user, or not isolated",
             "content": {
               "application/json": {
                 "schema": {
@@ -8908,8 +8908,19 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Caller lacks Admin/Integrator access, or enabling requires the CFD tag",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseEnvelope"
+                }
+              }
+            }
           }
-        }
+        },
+        "description": "Admin and Integrator only. Target user must have the CFD tag to enable rebalancing; Integrator must belong to the target user's tenant. Every account must be isolated and owned by that user; a mismatched batch rolls back completely. Authorized operators can disable existing configuration after tag removal. Self-scoped configuration and status reads are unchanged."
       }
     },
     "/v2/accounts/auto_rebalance/config/{account_id}": {
@@ -15802,7 +15813,7 @@
             "type": "object",
             "properties": {
               "data": {
-                "$ref": "#/components/schemas/OrderId"
+                "$ref": "#/components/schemas/CreateOrderData"
               }
             }
           }
@@ -15858,6 +15869,10 @@
           "error": {
             "type": "string",
             "description": "Present when the order was rejected"
+          },
+          "funding": {
+            "$ref": "#/components/schemas/OrderFundingResult",
+            "description": "Present only when this committed order received automatic USD funding."
           }
         }
       },
@@ -19612,6 +19627,15 @@
             "type": "string",
             "format": "decimal",
             "description": "Upper utilization threshold, greater than min_utilization and less than or equal to 1."
+          },
+          "order_rebalance_enabled": {
+            "type": "boolean",
+            "description": "Shared opt-in for CFD order funding and automatic USD return. Defaults to false on insert; omission preserves the stored value on update. Both capabilities must be deployed before enabling."
+          },
+          "lowest_threshold": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Return trigger threshold, greater than 0 and below min_utilization. Required in the effective enabled configuration when order_rebalance_enabled is true; omission preserves a stored threshold."
           }
         },
         "required": [
@@ -19630,6 +19654,11 @@
             "items": {
               "$ref": "#/components/schemas/AutoRebalanceConfigUpsert"
             }
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Target user to configure. Defaults to the authenticated operator when omitted. Enabling requires CFD; Integrator is restricted to its own tenant."
           }
         },
         "required": [
@@ -19682,14 +19711,29 @@
           },
           "last_rebalance_outcome": {
             "type": "string",
-            "description": "Most recent persisted auto-rebalance attempt status for this account, when available."
+            "description": "Most recent risk-rebalance outcome; order funding and return audit entries are excluded."
+          },
+          "order_rebalance_enabled": {
+            "type": "boolean",
+            "description": "Shared order-funding and auto-return opt-in."
+          },
+          "order_funding_capacity_usd": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Read-only upper estimate of USD currently fundable into this opted-in CFD account, including conditional/global reserve caps. Omitted while disabled or ineligible. Does not reserve funds or include a specific new order reserve increase; submission replans atomically."
+          },
+          "lowest_threshold": {
+            "type": "string",
+            "format": "decimal",
+            "description": "Return trigger threshold, when configured. Zero effective debt returns all free USD rather than targeting a positive utilization."
           }
         },
         "required": [
           "account_id",
           "enabled",
           "min_utilization",
-          "max_utilization"
+          "max_utilization",
+          "order_rebalance_enabled"
         ]
       },
       "AutoRebalanceConfigsData": {
@@ -21855,6 +21899,58 @@
                 }
               }
             }
+          }
+        }
+      },
+      "OrderFundingSource": {
+        "type": "object",
+        "required": [
+          "account_id",
+          "amount_usd"
+        ],
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount_usd": {
+            "type": "string",
+            "format": "decimal"
+          }
+        }
+      },
+      "OrderFundingResult": {
+        "type": "object",
+        "required": [
+          "amount_usd",
+          "sources"
+        ],
+        "properties": {
+          "amount_usd": {
+            "type": "string",
+            "format": "decimal"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderFundingSource"
+            }
+          }
+        }
+      },
+      "CreateOrderData": {
+        "type": "object",
+        "required": [
+          "order_id"
+        ],
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "funding": {
+            "$ref": "#/components/schemas/OrderFundingResult",
+            "description": "Present only when automatic USD funding committed with this order."
           }
         }
       }

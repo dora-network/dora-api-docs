@@ -4480,6 +4480,8 @@ Set or clear a user&#39;s KYC completion timestamp
 
 Create or update auto-rebalance configuration for one or more isolated accounts
 
+    Admin and Integrator only. Target user must have the CFD tag to enable rebalancing; Integrator must belong to the target user&#39;s tenant. Every account must be isolated and owned by that user; a mismatched batch rolls back completely. Authorized operators can disable existing configuration after tag removal. Self-scoped configuration and status reads are unchanged.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
