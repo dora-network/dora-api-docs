@@ -30,6 +30,10 @@ make gen
 
 Follow the getting started guide in the [Getting started guide](getting-started.md).
 
+## Bridge Provider Integration
+
+For providers of bridging software connecting retail trading platforms (MetaTrader 4/5, cTrader) to DORA for CFD liquidity, order book spread markup, and Straight-Through Processing (STP) hedging, see the [Bridge Provider Integration Guide](./bridge-provider-integration-guide.md).
+
 
 ## Multiplexed WebSocket Streams
 
