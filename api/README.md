@@ -169,7 +169,7 @@ All URIs are relative to *https://staging.dora.co*
 *DefaultApi* | [**updateUserConfig**](Apis/DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 *DefaultApi* | [**updateUserConfigSelf**](Apis/DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
 *DefaultApi* | [**updateUserKYC**](Apis/DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user's KYC completion timestamp |
-*DefaultApi* | [**upsertAutoRebalanceConfigsV2**](Apis/DefaultApi.md#upsertAutoRebalanceConfigsV2) | **PUT** /v2/accounts/auto_rebalance/config | Create or update auto-rebalance configuration for one or more isolated accounts |
+*DefaultApi* | [**upsertAutoRebalanceConfigsV2**](Apis/DefaultApi.md#upsertAutoRebalanceConfigsV2) | **PUT** /v2/accounts/auto_rebalance/config | Create or update CFD auto-rebalance configuration by Admin or Integrator |
 *DefaultApi* | [**validateSubmitOrder**](Apis/DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 *DefaultApi* | [**verifyUser**](Apis/DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 

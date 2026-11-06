@@ -7,7 +7,7 @@ An Admin or Integrator configures auto-rebalance for a CFD user. The client read
 - A DORA Admin has assigned the institutional user the `CFD` tag through the existing user-tag route.
 - The operator has an Admin or Integrator API key. An Integrator can configure users in its own tenant; an Admin can configure authorized CFD users across tenants.
 - The user has existing isolated accounts to select. A first order still uses the existing isolated-account creation flow.
-- Resting LIMIT orders have been cancelled before enabling automatic funding and returns. CFD users submit ordinary MARKET orders with explicit quantities; LIMIT and Max Buy requests are rejected.
+- Existing LIMIT and conditional orders have been cleared before enabling automatic funding and returns. CFD users submit plain MARKET orders with explicit quantities; LIMIT, Max Buy, attached stop loss/take profit, and requests to the dedicated conditional-order endpoint are rejected. Accepted older orders are not cancelled automatically.
 - DORA has activated the paired feature in the environment. Account settings do not override that rollout gate.
 
 All decimal values are JSON strings.
@@ -54,7 +54,7 @@ Replace the example IDs with the selected user's IDs. Omitting `user_id` default
 
 `lowest_threshold` triggers returns; `max_utilization` triggers risk funding toward `min_utilization`. With zero effective debt, all free USD returns instead of targeting a positive utilization. Effective debt includes interest and applicable coupon liabilities.
 
-The batch is atomic. Invalid thresholds or resting limits reject activation with `400`; unauthorized writers or enabling a non-CFD user receive `403`. A missing/out-of-tenant target, foreign account or non-isolated account receives `404`.
+The batch is atomic. Invalid thresholds or existing limit/conditional orders reject activation with `400`; unauthorized writers or enabling a non-CFD user receive `403`. A missing/out-of-tenant target, foreign account or non-isolated account receives `404`.
 
 ## Read status
 
@@ -79,8 +79,10 @@ Every item still requires `account_id`, `enabled`, `min_utilization` and `max_ut
 
 ## What the client should expect
 
-An explicit-quantity MARKET order on an existing opted-in USD-quoted isolated account can receive funding from eligible isolated donors and then Global. Existing cash-reserve, leverage, borrowing and position checks still apply. Transfers and order insertion commit together or roll back together. Successful single and per-order bulk responses include optional `funding` amount/source details; unfunded results omit them.
+An explicit-quantity MARKET order on an existing opted-in USD-quoted isolated account can receive funding from eligible isolated donors and then Global. Existing cash-reserve, leverage, borrowing and position checks still apply. Transfers and order insertion commit together or roll back together. Successful single and per-order bulk responses include optional `funding` amount/source details; unfunded results omit them. Default bulk submission retains per-order outcomes. With `atomic: true`, every order and funding transfer commits together, or the entire batch rolls back on any failure.
 
-Returns retain locked and conditional commitments and defer while accepted MARKET orders remain unsettled, liquidation is active, or debt cannot be priced safely. Incoming USD can replenish Global even when it is below its reserve. Returning all free USD keeps the isolated account ID and settings, so a later explicit-amount order can refill the same account.
+Historical LIMIT or conditional orders pause funding and returns. Returns also retain locked cash and defer while accepted MARKET orders remain unsettled, liquidation is active, or debt cannot be priced safely. Incoming USD can replenish Global even when it is below its reserve. Returning all free USD keeps the isolated account ID and settings, so a later explicit-amount order can refill the same account.
 
 Funding and routine returns add no emails. Existing risk-attempt notifications and daily reports keep their delivery settings. Risk rebalancing remains best effort; maintain sufficient safe USD and monitor unresolved risk outcomes.
+
+CFD status is loaded during authentication. Tag changes apply on the next authenticated request; an in-flight request and every item in its bulk batch use the same snapshot. Daemon eligibility checks the current persisted tag. `/v1/orders/validate` is an advisory simulation using client-supplied balances and positions; it does not check CFD tags or authorize submission.

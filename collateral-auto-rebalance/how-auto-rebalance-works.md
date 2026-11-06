@@ -76,7 +76,7 @@ donor_borrow_limit_floor = donor_borrowed_value / donor_min_utilization
 removable_usd            = (donor_borrow_limit - donor_borrow_limit_floor) / usd_collateral_weight
 ```
 
-capped by available USD and conditional-order free cash. Existing zero-borrow donor donations retain their `available_usd * min_utilization` cap; zero-debt auto-return instead returns all free USD.
+capped by available USD. Transfers remain subject to the existing ledger guards. Existing zero-borrow donor donations retain their `available_usd * min_utilization` cap; zero-debt auto-return instead returns all free USD.
 
 ### Global account restrictions
 
@@ -175,10 +175,12 @@ Transfer emails include, for every transfer in the attempt: source and destinati
 
 ## Order funding and returning unused USD
 
-For a currently CFD-tagged user, selected isolated accounts can opt into funding and auto-return together. An operator supplies `lowest_threshold`, and DORA activates the paired feature in the environment. Without the shared opt-in, the client manages isolated balances. Resting LIMIT orders prevent activation and pause the new behavior if they exist later. CFD clients submit ordinary MARKET orders with explicit quantities; LIMIT and Max Buy submissions are rejected.
+For a currently CFD-tagged user, selected isolated accounts can opt into funding and auto-return together. An operator supplies `lowest_threshold`, and DORA activates the paired feature in the environment. Without the shared opt-in, the client manages isolated balances. Existing LIMIT or conditional orders prevent activation and pause the new behavior until cleared. CFD clients submit ordinary MARKET orders with explicit quantities; LIMIT, Max Buy, attached SL/TP and dedicated conditional-order requests are rejected.
 
 When an existing opted-in USD-quoted account lacks cash for an order, DORA calculates the shortage from quantity, leverage, applicable position limits and pool price. Eligible isolated donors are used first, then reserve-aware Global USD. Existing validations remain authoritative. The entire shortage must be covered; transfers, funding audit and order insertion share one transaction. A failed order leaves no partial funding. Single and per-order bulk results include funding amount/source details when money moved.
 
 Returns run on account updates and the daily sweep. Positive-debt accounts below `lowest_threshold` return free USD toward that utilization, never above `min_utilization`. Zero effective debt returns all free USD, including when there are no positions. Effective debt includes interest and applicable coupon liabilities. Locked/conditional commitments are retained. Accepted unsettled MARKET orders, active liquidation or unpriced borrowing defer returns. Incoming returns may replenish an empty or below-reserve Global account.
 
 The isolated account ID and settings remain after a full return. Later explicit-quantity orders can refill it if safe sources are available. Capacity reporting is advisory and reserves nothing. Risk status, daily reports and risk-sweep resume continue using risk-rebalance audit entries only.
+
+Default bulk submission preserves per-order outcomes. With `atomic: true`, the entire batch, its funding transfers and audit records commit or roll back together. Older LIMIT or conditional orders pause funding and returns until cleared. Existing risk donor selection, utilization and risk-transfer behavior are unchanged.

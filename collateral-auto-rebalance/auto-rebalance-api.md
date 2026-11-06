@@ -33,13 +33,13 @@ Create or update a batch of isolated-account settings atomically. Example:
 | `configs[].min_utilization` | Yes | Risk restore target/donor floor; positive and below `max_utilization`. |
 | `configs[].max_utilization` | Yes | Risk trigger threshold; at most 1. |
 
-There is no independent return toggle. With the shared opt-in off, the client manages its isolated balances. Both funding and returns also require DORA's environment rollout gate. Resting LIMIT orders prevent activation.
+There is no independent return toggle. With the shared opt-in off, the client manages its isolated balances. Both funding and returns also require DORA's environment rollout gate. Existing LIMIT or conditional orders prevent activation and pause new-feature eligibility until cleared.
 
 `200` returns `data.configs` with persisted settings. Errors use the normal `error` and `metadata.status_code` envelope:
 
 | Status | Meaning |
 |---|---|
-| `400` | Invalid body, missing required fields, duplicate IDs, invalid thresholds, missing return threshold for an enabled shared opt-in, or resting limits preventing activation. |
+| `400` | Invalid body, missing required fields, duplicate IDs, invalid thresholds, missing return threshold for an enabled shared opt-in, or existing limit/conditional orders preventing activation. |
 | `401` | Missing or invalid authentication. |
 | `403` | Writer lacks Admin/Integrator access, or enabling configuration for a non-CFD user. |
 | `404` | Missing/out-of-tenant target, or an account not found, not owned by that target, or not isolated. |
@@ -73,7 +73,7 @@ Return settings and status for all of the authenticated user's configured isolat
 
 ## Order submission
 
-CFD users submit ordinary MARKET orders with explicit quantities. LIMIT and Max Buy requests are rejected in both single and bulk submission. Automatic funding applies to existing selected USD-quoted isolated accounts; global/new-account funding retains its existing behavior.
+CFD users submit ordinary MARKET orders with explicit quantities. LIMIT and Max Buy requests, attached stop loss/take profit, and requests to the dedicated conditional-order endpoint are rejected. The authenticated CFD snapshot applies to every item of a request. Automatic funding applies to existing selected USD-quoted isolated accounts; global/new-account funding retains its existing behavior.
 
 A funded `POST /v1/orders` response includes optional `data.funding`. Bulk responses include the same object on each funded result:
 
@@ -87,6 +87,8 @@ A funded `POST /v1/orders` response includes optional `data.funding`. Bulk respo
 }
 ```
 
-Unfunded results omit `funding`. Each bulk item keeps its own transaction/outcome. Funding, audit rows and order insertion commit together or roll back together; failed orders leave no partial funding. Funding and routine returns send no new emails. Existing risk alerts keep their delivery settings.
+Unfunded results omit `funding`. By default each bulk item keeps its own transaction/outcome. With `atomic: true`, all items share one transaction and any failure rolls back the whole batch, including all funding. Funding, audit rows and order insertion commit together or roll back together; failed orders leave no partial funding. Funding and routine returns send no new emails. Existing risk alerts keep their delivery settings.
 
-An empty opted-in account keeps its ID and configuration. Later explicit-quantity orders can refill it if safe sources cover the shortage. Unsettled orders, liquidation, invalid debt prices and reserved/conditional cash prevent unsafe returns.
+An empty opted-in account keeps its ID and configuration. Later explicit-quantity orders can refill it if safe sources cover the shortage. Historical LIMIT/conditional orders pause the feature. Unsettled MARKET orders, liquidation, invalid debt prices and locked cash prevent unsafe returns.
+
+`POST /v1/orders/validate` remains an advisory simulation based on client-supplied balances/positions and does not check CFD tags; successful validation does not guarantee acceptance. Optional/zero `user_id` on configuration still targets the operator. Customer configuration/status GET routes remain self-scoped.

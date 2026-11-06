@@ -17,6 +17,7 @@
     - [Key Rotation Strategy](#key-rotation-strategy)
   - [4. Asset \& Symbol Mapping](#4-asset--symbol-mapping)
     - [DORA Asset Model: Fractionalized Bonds](#dora-asset-model-fractionalized-bonds)
+    - [Understanding DORA's hybrid order book model](#understanding-doras-hybrid-order-book-model)
     - [Querying Available Assets \& Order Books](#querying-available-assets--order-books)
     - [Translating to MT5 / cTrader Symbol Specifications](#translating-to-mt5--ctrader-symbol-specifications)
     - [Handling Bond Coupons](#handling-bond-coupons)
@@ -142,7 +143,7 @@ Integrating as a bridge provider differs fundamentally from a direct retail trad
 - **Set `from_global_position = false`:** STP hedge orders use the appropriate isolated margin account. New-account funding follows the existing creation flow. Funding later orders on an existing account requires the shared opt-in below.
 - **Automatic Isolated Margin Account Creation:** Isolated margin accounts are created per order book automatically the first time an order is placed on that order book. Leverage is strictly permitted only from isolated margin accounts, with the omnibus user's maximum leverage determined by DORA upon account setup.
 - **Automatic Funding & Returns:** Admin/Integrator configures selected CFD isolated accounts with `order_rebalance_enabled` and `lowest_threshold`. Once DORA activates the pair, order shortfalls can be funded atomically from safe isolated donors and then Global USD, and unused USD returns automatically. Without this shared opt-in, the bridge manages existing isolated balances itself. See [configuration](./collateral-auto-rebalance/configure-auto-rebalance.md) and [API details](./collateral-auto-rebalance/auto-rebalance-api.md).
-- **CFD Order Rule:** A DORA Admin assigns the institutional user the `CFD` tag. CFD clients submit ordinary **MARKET orders with explicit quantities**; LIMIT and Max Buy requests are rejected in single and bulk submission. Do not block a hedge solely because an opted-in isolated account has zero local USD: submission evaluates funding, and capacity reporting is advisory. Funding and routine returns add no emails; risk alerts retain their settings.
+- **CFD Order Rule:** A DORA Admin assigns the institutional user the `CFD` tag. CFD clients submit ordinary **MARKET orders with explicit quantities**; LIMIT, Max Buy, attached SL/TP, and dedicated conditional-order requests are rejected. Default bulk requests retain per-order outcomes; `atomic: true` makes the whole batch and its funding transfers commit or roll back together. Do not block a hedge solely because an opted-in isolated account has zero local USD: submission evaluates funding, and capacity reporting is advisory. Funding and routine returns add no emails; risk alerts retain their settings.
 
 ### Matching Engine Nuances: Liquidity Pools vs. Order Books
 
@@ -238,6 +239,30 @@ Each market on DORA consists of:
 - **Base Asset:** The fractionalized bond (identified by a UUIDv7 string).
 - **Quote Asset:** The settlement currency (USD).
 - **Order Book ID:** The UUIDv7 market identifier.
+
+### Understanding DORA's hybrid order book model
+
+DORA's algorithm operates as a hybrid pool + orderbook structure. Each order book on DORA has an accompanying pool that completes
+the hybrid structure.
+
+The pool is what guarantees 24/7 liquidity - there are always bonds and a price available, regardless if there are any additional
+limit orders on the order book from other traders and market makers. The order book is what ensures there will be resting limit
+orders above and below the pool price.
+
+All orders are executed against the pool:
+
+- Market orders are filled automatically by the pool at the pool price if there is sufficient liquidity.
+- Limit orders are resting orders that provide additional liquidity.
+- As the pool price moves towards the best bid/offer of those resting limit orders, those limit orders will cross with the pool once the pool price matches the BBO.
+- The limit orders are what makes up the L2 order book, but there's additional liquidity in the underlying pool.
+- Limit orders that are placed with the limit price equal or better than the pool price will be executed immediately against the pool.
+
+> NOTE: The term pool refers to the DORA liquidity pool that provides the pricing algorithm for the bonds. It should not be confused
+> with dark pools or any similar structures that are commonly found in traditional financial markets
+
+Bridge provider integrators are advised to simply redistribute the L2 order book the receive over the wire, which the end users will
+apply their spreads to. When they trade however, due to the matching engine crossing through the DORA liquidity pool, all users are
+guaranteed to receive the best price available on DORA.
 
 ### Querying Available Assets & Order Books
 
