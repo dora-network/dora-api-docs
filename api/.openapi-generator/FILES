@@ -82,6 +82,7 @@ Models/CreateConditionalOrderResponseData.md
 Models/CreateConditionalOrderResponseEnvelope.md
 Models/CreateIntegratorUserRequest.md
 Models/CreateOrUpdateUserResponse.md
+Models/CreateOrderData.md
 Models/CreateOrderRequest.md
 Models/CreateOrderResponseEnvelope.md
 Models/CreateOrdersBulkRequest.md
@@ -176,6 +177,8 @@ Models/OrderBookSummary.md
 Models/OrderBookSummaryResponseEnvelope.md
 Models/OrderBookTerminateResponseEnvelope.md
 Models/OrderBookTop.md
+Models/OrderFundingResult.md
+Models/OrderFundingSource.md
 Models/OrderId.md
 Models/OrderKind.md
 Models/OrderModifierKind.md

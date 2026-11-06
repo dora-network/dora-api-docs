@@ -166,7 +166,7 @@ All URIs are relative to *https://staging.dora.co*
 | [**updateUserConfig**](DefaultApi.md#updateUserConfig) | **PUT** /v1/user/{user_id}/config | Update user configuration by ID |
 | [**updateUserConfigSelf**](DefaultApi.md#updateUserConfigSelf) | **PUT** /v1/user/config/self | Update user configuration for the authenticated user |
 | [**updateUserKYC**](DefaultApi.md#updateUserKYC) | **POST** /v1/integrators/user/{user_id}/kyc | Set or clear a user&#39;s KYC completion timestamp |
-| [**upsertAutoRebalanceConfigsV2**](DefaultApi.md#upsertAutoRebalanceConfigsV2) | **PUT** /v2/accounts/auto_rebalance/config | Create or update auto-rebalance configuration for one or more isolated accounts |
+| [**upsertAutoRebalanceConfigsV2**](DefaultApi.md#upsertAutoRebalanceConfigsV2) | **PUT** /v2/accounts/auto_rebalance/config | Create or update CFD auto-rebalance configuration by Admin or Integrator |
 | [**validateSubmitOrder**](DefaultApi.md#validateSubmitOrder) | **POST** /v1/orders/validate | Validate submit order request data |
 | [**verifyUser**](DefaultApi.md#verifyUser) | **PUT** /v1/user/{user_id}/verify | Verify a user by ID |
 
@@ -625,6 +625,8 @@ Create an affiliate program
 
 Create a new conditional orders
 
+    Creates stop-loss and/or take-profit orders. CFD-tagged users cannot submit conditional orders and receive HTTP 400 before order writes.
+
 ### Parameters
 
 |Name | Type | Description  | Notes |
@@ -649,6 +651,8 @@ Create a new conditional orders
 > CreateOrderResponseEnvelope createOrder(CreateOrderRequest)
 
 Create a new order
+
+    CFD-tagged users may submit plain MARKET orders with explicit quantities only; Max Buy is rejected. LIMIT orders and orders carrying stop_loss_price or take_profit_price are rejected before order writes; non-atomic bulk requests preserve per-order outcomes. Opted-in CFD isolated accounts can receive automatic USD funding. Funding and order insertion share the same transaction, including the whole batch when atomic is true; committed results include optional funding details.
 
 ### Parameters
 
@@ -675,7 +679,7 @@ Create a new order
 
 Create many orders at once
 
-    Submits up to &#x60;matching.bulk_order_max_orders&#x60; orders (default 20) on a single order book for the logged in user. Every order must have the same &#x60;order_book_id&#x60;. By default each order is validated, locked and inserted independently, so a rejected order does not affect the others; &#x60;results&#x60; reports the outcome of every order in request order. Atomic submission (&#x60;atomic: true&#x60;) is not currently supported and is rejected with 400. Global-position orders and isolated orders are each processed sequentially in request order. &#x60;client_order_id&#x60; must be unique within a request.
+    Submits up to &#x60;matching.bulk_order_max_orders&#x60; orders (default 20) on a single order book for the logged in user. Every order must have the same &#x60;order_book_id&#x60;. By default each order is validated, locked and inserted independently, so a rejected order does not affect the others; &#x60;results&#x60; reports the outcome of every order in request order. With &#x60;atomic: true&#x60;, all orders are submitted in one transaction and either all are created or none are: each order is validated against the balances left by the orders before it, so a batch that does not fit the user&#39;s balances as a whole is rejected even when every order fits on its own. Global-position orders and isolated orders are each processed sequentially in request order. &#x60;client_order_id&#x60; must be unique within a request. CFD-tagged users may submit plain MARKET orders with explicit quantities only; Max Buy is rejected. LIMIT orders and orders carrying stop_loss_price or take_profit_price are rejected before order writes. Non-atomic requests preserve per-order outcomes; atomic requests reject the whole batch if any order fails. Opted-in CFD isolated accounts can receive automatic USD funding. Funding and order insertion share the same transaction, including the whole batch when atomic is true; committed results include optional funding details.
 
 ### Parameters
 
@@ -4478,7 +4482,9 @@ Set or clear a user&#39;s KYC completion timestamp
 # **upsertAutoRebalanceConfigsV2**
 > UpsertAutoRebalanceConfigsResponseEnvelope upsertAutoRebalanceConfigsV2(UpsertAutoRebalanceConfigsRequest)
 
-Create or update auto-rebalance configuration for one or more isolated accounts
+Create or update CFD auto-rebalance configuration by Admin or Integrator
+
+    Admin and Integrator only. Target user must have the CFD tag to enable rebalancing; Integrator must belong to the target user&#39;s tenant. Every account must be isolated and owned by that user; a mismatched batch rolls back completely. Authorized operators can disable existing configuration after tag removal. Self-scoped configuration and status reads are unchanged. The shared order_rebalance_enabled opt-in defaults false and preserves its stored value when omitted. Existing LIMIT or conditional orders prevent activating that opt-in.
 
 ### Parameters
 
@@ -4504,6 +4510,8 @@ Create or update auto-rebalance configuration for one or more isolated accounts
 > ValidateSubmitOrderResponse validateSubmitOrder(ValidateSubmitOrderRequest)
 
 Validate submit order request data
+
+    Advisory validation of request fields and a simulation using client-supplied balances and positions. It does not reserve funds, query current account balances, or enforce CFD user-tag restrictions. HTTP 200 does not guarantee submission will succeed. POST /v1/orders and POST /v1/orders/bulk perform the authoritative checks and reject LIMIT orders or attached stop-loss/take-profit instructions for CFD users.
 
 ### Parameters
 
